@@ -147,6 +147,12 @@ class BotMgr
         uint8 GetBotAttackRangeMode() const { return _attackRangeMode; }
         void SetBotAttackRangeMode(uint8 mode, uint8 exactRange = 0) { _attackRangeMode = mode; _setBotExactAttackRange(exactRange); }
 
+        uint32 GetEngageDelayDPS() const { return _npcBotEngageDelayDPS; }
+        uint32 GetEngageDelayHeal() const { return _npcBotEngageDelayHeal; }
+        void SetEngageDelayDPS(uint32 delay) { _npcBotEngageDelayDPS = delay; }
+        void SetEngageDelayHeal(uint32 delay) { _npcBotEngageDelayHeal = delay; }
+        void PropagateEngageTimers() const;
+
         void SetBotsHidden(bool hidden) { _botsHidden = hidden; }
 
         void SetBotsShouldUpdateStats();
@@ -180,6 +186,8 @@ class BotMgr
         uint8 _followdist;
         uint8 _exactAttackRange;
         uint8 _attackRangeMode;
+        uint32 _npcBotEngageDelayDPS;
+        uint32 _npcBotEngageDelayHeal;
 
         bool _botsHidden;
 

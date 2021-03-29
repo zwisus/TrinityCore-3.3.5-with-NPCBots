@@ -1280,6 +1280,8 @@ Unit* bot_pet_ai::_getTarget(bool &reset) const
 {
     if (petOwner->GetBotAI()->HasBotCommandState(BOT_COMMAND_FULLSTOP))
         return nullptr;
+    if (petOwner->GetBotAI()->GetEngageTimer() > lastdiff)
+        return nullptr;
 
     Unit* mytar = me->GetVictim();
     Unit* u = petOwner->GetVictim();

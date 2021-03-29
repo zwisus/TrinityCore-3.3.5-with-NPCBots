@@ -23,7 +23,7 @@
 #include "TemporarySummon.h"
 /*
 NpcBot System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
-Version 4.9.41a
+Version 4.10.1a
 Original idea: https://bitbucket.org/lordpsyan/trinitycore-patches/src/3b8b9072280e/Individual/11185-BOTS-NPCBots.patch
 TODO:
 Bot commands to RBAC permissions
@@ -142,6 +142,7 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
     _reviveTimer = 0;
     _powersTimer = 0;
     _chaseTimer = 0;
+    _engageTimer = 0;
 
     _jumpCount = 0;
     _evadeCount = 0;
@@ -1964,6 +1965,9 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_DIED_) << uint32(_deathsCount) << LocalizedNpcText(player, BOT_TEXT__TIMES);
 
         //debug
+        //botstring << "\ncurrent Engage timer: " << GetEngageTimer();
+
+        //debug
         //for (uint32 i = 0; i != 148; ++i)
         //{
         //    float val = me->GetFloatValue(i);
@@ -3276,6 +3280,8 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell) const
         return false;
     if (HasBotCommandState(BOT_COMMAND_FULLSTOP))
         return false;
+    if (target->CanHaveThreatList() && GetEngageTimer() > lastdiff)
+        return false;
     if (!BotMgr::IsPvPEnabled() && !IAmFree() && target->IsControlledByPlayer())
         return false;
     if (me->GetFaction() == 35 && IAmFree() && target->GetTypeId() == TYPEID_UNIT && target->GetVictim() != me)
@@ -3776,7 +3782,9 @@ bool bot_ai::CheckAttackTarget()
     }
 
     //boss engage phase // CanHaveThreatList checks for typeid == UNIT
-    if (!IsTank() && opponent != me->GetVictim() && opponent->GetVictim() && opponent->CanHaveThreatList() &&
+    if (GetEngageTimer() > lastdiff)
+        return false;
+    else if (!IsTank() && opponent != me->GetVictim() && opponent->GetVictim() && opponent->CanHaveThreatList() &&
         opponent->ToCreature()->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS && me->GetMap()->IsRaid())
     {
         uint32 threat = uint32(opponent->ToCreature()->GetThreatManager().GetThreat(opponent->GetVictim()));
@@ -5917,32 +5925,6 @@ bool bot_ai::OnGossipHello(Player* player, uint32 /*option*/)
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_HOLD_POSITION), GOSSIP_SENDER_HOLDPOSITION, GOSSIP_ACTION_INFO_DEF + 1);
             if (!HasBotCommandState(BOT_COMMAND_FULLSTOP))
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_STAY_HERE), GOSSIP_SENDER_DONOTHING, GOSSIP_ACTION_INFO_DEF + 1);
-
-            ////Vehicles
-            //if (me->GetVehicle())
-            //    AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_EXIT_VEHICLE), GOSSIP_SENDER_EXIT_VEHICLE, GOSSIP_ACTION_INFO_DEF + 1);
-            //else
-            //{
-            //    Unit const* myveh = player->GetVehicle() ? player->GetVehicle()->GetBase() : nullptr;
-            //    if (myveh && myveh->GetTypeId() == TYPEID_UNIT && player->GetVehicle()->GetAvailableSeatCount() > 0)
-            //    {
-            //        std::string vehName = myveh->GetName();
-            //        _LocalizeCreature(player, vehName, myveh->GetEntry());
-            //        std::string veh_msg = LocalizedNpcText(player, BOT_TEXT_GRAB_ON_) + LocalizedNpcText(player, BOT_TEXT_MY_) + vehName;
-            //        AddGossipItemFor(player, GOSSIP_ICON_CHAT, veh_msg, GOSSIP_SENDER_ENTER_VEHICLE_MY, GOSSIP_ACTION_INFO_DEF + 1);
-            //    }
-
-            //    Unit* veh = nullptr;
-            //    NearestVehicleWithEmptySeatInRangeCheck check(player, 10.f, myveh);
-            //    Trinity::UnitLastSearcher<NearestVehicleWithEmptySeatInRangeCheck> searcher(player, veh, check);
-            //    player->VisitNearbyObject(10.f, searcher);
-            //    if (veh)
-            //    {
-            //        std::string vehName = veh->GetName();
-            //        _LocalizeCreature(player, vehName, veh->GetEntry());
-            //        AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_GRAB_ON_) + vehName, GOSSIP_SENDER_ENTER_VEHICLE, GOSSIP_ACTION_INFO_DEF + 1);
-            //    }
-            //}
         }
         if (player == master || (gr && gr->IsMember(master->GetGUID())))
         {
@@ -8023,50 +8005,6 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             //BotWhisper("Following");
             break;
         }
-        //case GOSSIP_SENDER_EXIT_VEHICLE:
-        //{
-        //    if (me->GetVehicle())
-        //    {
-        //        if (VehicleSeatEntry const* seat = me->GetVehicle()->GetSeatForPassenger(me))
-        //        {
-        //            if (seat->CanEnterOrExit())
-        //            {
-        //                me->ExitVehicle();
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    TC_LOG_ERROR("scripts", "bot_ai Exit Vehicle: no vehicle or no seat for bot %s!", me->GetName().c_str());
-        //    break;
-        //}
-        //case GOSSIP_SENDER_ENTER_VEHICLE:
-        //{
-        //    if (!me->GetVehicle())
-        //    {
-        //        Unit* veh = nullptr;
-        //        NearestVehicleWithEmptySeatInRangeCheck check(player, 10.f, player->GetVehicleBase());
-        //        Trinity::UnitLastSearcher<NearestVehicleWithEmptySeatInRangeCheck> searcher(player, veh, check);
-        //        player->VisitNearbyObject(10.f, searcher);
-        //        if (veh)
-        //        {
-        //            veh->HandleSpellClick(me);
-        //            break;
-        //        }
-        //    }
-        //    TC_LOG_ERROR("scripts", "bot_ai Enter Vehicle: in vehicle or no veh found for bot %s!", me->GetName().c_str());
-        //    break;
-        //}
-        //case GOSSIP_SENDER_ENTER_VEHICLE_MY:
-        //{
-        //    Unit* myveh = player->GetVehicle() ? player->GetVehicle()->GetBase() : nullptr;
-        //    if (!me->GetVehicle() && myveh && myveh->GetTypeId() == TYPEID_UNIT && myveh->GetVehicleKit()->GetAvailableSeatCount() > 0)
-        //    {
-        //        myveh->HandleSpellClick(me);
-        //        break;
-        //    }
-        //    TC_LOG_ERROR("scripts", "bot_ai Enter Vehicle MY: in vehicle or no veh or no seat found for bot %s!", me->GetName().c_str());
-        //    break;
-        //}
         case GOSSIP_SENDER_FORMATION:
         {
             subMenu = true;
@@ -8078,7 +8016,10 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             if (HasRole(BOT_ROLE_RANGED))
                 AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ATTACK_DISTANCE) + "...", GOSSIP_SENDER_FORMATION_ATTACK, GOSSIP_ACTION_INFO_DEF + 2);
 
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), 1, GOSSIP_ACTION_INFO_DEF + 3);
+            if (!HasRole(BOT_ROLE_TANK) && HasRole(BOT_ROLE_DPS | BOT_ROLE_HEAL))
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ENGAGE_BEHAVIOR) + "...", GOSSIP_SENDER_ENGAGE_BEHAVIOR, GOSSIP_ACTION_INFO_DEF + 3);
+
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), 1, GOSSIP_ACTION_INFO_DEF + 4);
             break;
         }
         case GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE_SET:
@@ -8113,6 +8054,32 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 diststr.str(), GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE_SET, GOSSIP_ACTION_INFO_DEF + 3, "", 0, true);
 
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), 1, GOSSIP_ACTION_INFO_DEF + 4);
+            break;
+        }
+        case GOSSIP_SENDER_ENGAGE_BEHAVIOR:
+        {
+            subMenu = true;
+
+            if (HasRole(BOT_ROLE_DPS))
+            {
+                std::ostringstream delaystr;
+                delaystr.setf(std::ios_base::fixed);
+                delaystr.precision(2);
+                delaystr << LocalizedNpcText(player, BOT_TEXT_DELAY_ATTACK_BY) << ": " << float(player->GetBotMgr()->GetEngageDelayDPS() / 1000.f) << LocalizedNpcText(player, BOT_TEXT_SECOND_SHORT);
+                player->PlayerTalkClass->GetGossipMenu().AddMenuItem(-1, GOSSIP_ICON_CHAT, delaystr.str(),
+                    GOSSIP_SENDER_ENGAGE_DELAY_SET_ATTACK, GOSSIP_ACTION_INFO_DEF + 1, "", 0, true);
+            }
+            if (HasRole(BOT_ROLE_HEAL))
+            {
+                std::ostringstream delaystr;
+                delaystr.setf(std::ios_base::fixed);
+                delaystr.precision(2);
+                delaystr << LocalizedNpcText(player, BOT_TEXT_DELAY_HEALING_BY) << ": " << float(player->GetBotMgr()->GetEngageDelayHeal() / 1000.f) << LocalizedNpcText(player, BOT_TEXT_SECOND_SHORT);
+                player->PlayerTalkClass->GetGossipMenu().AddMenuItem(-1, GOSSIP_ICON_CHAT, delaystr.str(),
+                    GOSSIP_SENDER_ENGAGE_DELAY_SET_HEALING, GOSSIP_ACTION_INFO_DEF + 2, "", 0, true);
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), 1, GOSSIP_ACTION_INFO_DEF + 3);
             break;
         }
         case GOSSIP_SENDER_TROUBLESHOOTING_AURA:
@@ -8497,6 +8464,26 @@ bool bot_ai::OnGossipSelectCode(Player* player, Creature* creature/* == me*/, ui
 
             player->PlayerTalkClass->SendCloseGossip();
             return OnGossipSelect(player, creature, GOSSIP_SENDER_FORMATION_ATTACK, action);
+        }
+        case GOSSIP_SENDER_ENGAGE_DELAY_SET_ATTACK:
+        {
+            char* dist = strtok((char*)code, "");
+            float delay = std::min<float>(std::max<float>(atof(dist), 0.f), 10.f);
+
+            player->GetBotMgr()->SetEngageDelayDPS(uint32(delay * 1000));
+
+            player->PlayerTalkClass->SendCloseGossip();
+            return OnGossipSelect(player, creature, GOSSIP_SENDER_ENGAGE_BEHAVIOR, action);
+        }
+        case GOSSIP_SENDER_ENGAGE_DELAY_SET_HEALING:
+        {
+            char* dist = strtok((char*)code, "");
+            float delay = std::min<float>(std::max<float>(atof(dist), 0.f), 10.f);
+
+            player->GetBotMgr()->SetEngageDelayHeal(uint32(delay * 1000));
+
+            player->PlayerTalkClass->SendCloseGossip();
+            return OnGossipSelect(player, creature, GOSSIP_SENDER_ENGAGE_BEHAVIOR, action);
         }
         default:
             break;
@@ -12388,6 +12375,11 @@ void bot_ai::ResetChase(Position const* pos)
     _jumpCount = 0;
 }
 
+void bot_ai::ResetEngageTimer(uint32 delay)
+{
+    _engageTimer = delay;
+}
+
 void bot_ai::OnStartAttack(Unit const* u)
 {
     AdjustTankingPosition();
@@ -12418,7 +12410,12 @@ void bot_ai::JustEnteredCombat(Unit* u)
         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
     if (!IAmFree())
+    {
+        if (u->CanHaveThreatList())
+            master->GetBotMgr()->PropagateEngageTimers();
+
         return;
+    }
 
     _evadeMode = false;
     AbortTeleport();
@@ -14386,6 +14383,7 @@ void bot_ai::CommonTimers(uint32 diff)
 
     if (_powersTimer > diff)        _powersTimer -= diff;
     if (_chaseTimer > diff)         _chaseTimer -= diff;
+    if (_engageTimer > diff)        _engageTimer -= diff;
 
     if (_potionTimer > diff && (_potionTimer < POTION_CD || !me->IsInCombat())) _potionTimer -= diff;
 

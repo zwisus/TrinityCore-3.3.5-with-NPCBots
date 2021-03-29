@@ -4233,9 +4233,10 @@ NpcBot.Enable.DungeonFinder = 1
 NpcBot.Limit.Dungeon = 1
 NpcBot.Limit.Raid    = 1
 
+#
 #    NpcBot.Cost
 #        Description: Bot recruitment cost (in copper).
-#        Note:        This value is for level 80 characters, for lower levels cost is reduced greatly.
+#        Note:        This value is for level 80 characters, for lower levels cost is reduced.
 #        Default:     1000000 (100 gold)
 
 NpcBot.Cost = 1000000
@@ -4243,12 +4244,25 @@ NpcBot.Cost = 1000000
 #
 #    NpcBot.UpdateDelay.Base
 #        Description: Base delay between bot AI update cycles (in milliseconds).
-#        Note:        This parameter allows you to increase reaction time and slow down bots in general.
-#                     This may be useful if you want to balance bots in PvP.
+#        Note:        This parameter allows you to increase reaction time and slow down bots
+#                     in general. This may be useful if you want to balance bots in PvP.
 #        Note2:       This value is added on top of existing semi-randomized delay.
 #        Default:     0 (No additional delay)
 
 NpcBot.UpdateDelay.Base = 0
+
+#
+#    NpcBot.EngageDelay.DPS
+#    NpcBot.EngageDelay.Heal
+#        Description: Delay for first healing / non-tank damage after target was engaged
+#                     by tank (in milliseconds).
+#        Note:        This does not affect only bosses - all combat except PvP will be affected.
+#        Note2:       This value affects all owned bots and is set for every player at login.
+#        Default:     0 - (No delay)
+#                     1000 - (1 second)
+
+NpcBot.EngageDelay.DPS  = 0
+NpcBot.EngageDelay.Heal = 0
 
 #
 #    NpcBot.PvP
@@ -4306,7 +4320,7 @@ NpcBot.Gossip.ShowEquipmentListItems = 0
 #
 #    NpcBot.NewClasses.<Class>.Enable
 #        Description: Allow players to hire bots of non-standard classes.
-#        Note:        Some bot abilities may be unbalanced or game breaking under certain circumstances.
+#        Note:        Some bot abilities may be unbalanced or game breaking.
 #        Default:     1 - (NpcBot.NewClasses.Blademaster.Enable)
 #                     1 - (NpcBot.NewClasses.ObsidianDestroyer.Enable)
 #                     1 - (NpcBot.NewClasses.Archmage.Enable)
@@ -4328,6 +4342,7 @@ NpcBot.NewClasses.DarkRanger.Enable        = 1
 
 NpcBot.Stats.Limits.Enable = 0
 
+#
 #    NpcBot.Stats.Limits.<Stat>
 #        Description: Set dodge, parry, block and crit chance percentage limit for bots.
 #        Note:        Some bot classes may ignore some of these values.
@@ -4339,6 +4354,7 @@ NpcBot.Stats.Limits.Parry = 95.0
 NpcBot.Stats.Limits.Block = 95.0
 NpcBot.Stats.Limits.Crit  = 95.0
 
+#
 #    NpcBot.InfoPacketsLimit
 #        Description: This is a workaround for known issue #5.
 #                     If more than 100 bots are spawned in a single spot players trying

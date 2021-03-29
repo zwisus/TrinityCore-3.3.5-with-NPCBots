@@ -190,6 +190,9 @@ class bot_ai : public CreatureAI
         void SetReviveTimer(uint32 newtime) { _reviveTimer = newtime; }
         void UpdateReviveTimer(uint32 diff);
 
+        uint32 GetEngageTimer() const { return _engageTimer; }
+        void ResetEngageTimer(uint32 delay);
+
         bool HasSpell(uint32 basespell) const;
         uint32 GetSpellCooldown(uint32 basespell) const;
         bool IsSpellReady(uint32 basespell, uint32 diff, bool checkGCD = true) const;
@@ -531,7 +534,7 @@ class bot_ai : public CreatureAI
         int32 haste, resistbonus[6];
 
         //timers
-        uint32 _reviveTimer, _powersTimer, _chaseTimer, _potionTimer;
+        uint32 _reviveTimer, _powersTimer, _chaseTimer, _engageTimer, _potionTimer;
         uint32 lastdiff, checkAurasTimer, checkMasterTimer, roleTimer, ordersTimer, waitTimer, regenTimer, _updateTimerMedium, _updateTimerEx1;
         //save timers
         uint32 _saveDisabledSpellsTimer;

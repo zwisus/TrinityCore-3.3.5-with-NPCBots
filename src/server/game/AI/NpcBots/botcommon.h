@@ -186,9 +186,9 @@ enum BotCommonValues
     GOSSIP_SENDER_HOLDPOSITION,
     GOSSIP_SENDER_DONOTHING,
     GOSSIP_SENDER_FOLLOWME,
-    GOSSIP_SENDER_EXIT_VEHICLE,
-    GOSSIP_SENDER_ENTER_VEHICLE,
-    GOSSIP_SENDER_ENTER_VEHICLE_MY,
+    GOSSIP_SENDER_ENGAGE_BEHAVIOR,
+    GOSSIP_SENDER_ENGAGE_DELAY_SET_ATTACK,
+    GOSSIP_SENDER_ENGAGE_DELAY_SET_HEALING,
     GOSSIP_SENDER_TROUBLESHOOTING,
     GOSSIP_SENDER_TROUBLESHOOTING_FIX,
     GOSSIP_SENDER_TROUBLESHOOTING_AURA,
@@ -539,10 +539,11 @@ enum BotCommonValues
     BOT_TEXT_RARE                       = 70638, //"Rare"
     BOT_TEXT_EPIC                       = 70639, //"Epic"
     BOT_TEXT_LEGENDARY                  = 70640, //"Legendary"
-    //BOT_TEXT_GRAB_ON_                   = 70641, //"Grab on "
-    //BOT_TEXT_MY_                        = 70642, //"my "
-    //BOT_TEXT_EXIT_VEHICLE               = 70643, //"<Exit Vehicle>"
-    //70641-70799 reserved for custom localization strings
+    BOT_TEXT_ENGAGE_BEHAVIOR            = 70641, //"Engage behavior"
+    BOT_TEXT_DELAY_ATTACK_BY            = 70642, //"Delay attack by"
+    BOT_TEXT_DELAY_HEALING_BY           = 70643, //"Delay healing by"
+    BOT_TEXT_SECOND_SHORT               = 70644, //"s"
+    //70645-70799 reserved for custom localization strings
 //VEHICLE CREATURES
     CREATURE_NEXUS_SKYTALON_1           = 32535, // [Q] Aces High
     CREATURE_EOE_SKYTALON_N             = 30161, // Eye of Eternity

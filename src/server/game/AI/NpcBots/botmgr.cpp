@@ -35,6 +35,8 @@ uint8 _dpsTargetIconFlags;
 int32 _botInfoPacketsLimit;
 uint32 _npcBotsCost;
 uint32 _npcBotUpdateDelayBase;
+uint32 _npcBotEngageDelayDPS_default;
+uint32 _npcBotEngageDelayHeal_default;
 uint32 _npcBotOwnerExpireTime;
 bool _enableNpcBots;
 bool _enableNpcBotsDungeons;
@@ -134,6 +136,9 @@ BotMgr::BotMgr(Player* const master) : _owner(master), _dpstracker(new DPSTracke
     _followdist = _basefollowdist;
     _exactAttackRange = 0;
     _attackRangeMode = BOT_ATTACK_RANGE_SHORT;
+    _npcBotEngageDelayDPS = _npcBotEngageDelayDPS_default;
+    _npcBotEngageDelayHeal = _npcBotEngageDelayHeal_default;
+
     _botsHidden = false;
 
     _dpstracker->SetOwner(master->GetGUID().GetCounter());
@@ -188,6 +193,8 @@ void BotMgr::LoadConfig(bool reload)
     _botInfoPacketsLimit    = sConfigMgr->GetIntDefault("NpcBot.InfoPacketsLimit", -1);
     _npcBotsCost            = sConfigMgr->GetIntDefault("NpcBot.Cost", 1000000);
     _npcBotUpdateDelayBase  = sConfigMgr->GetIntDefault("NpcBot.UpdateDelay.Base", 0);
+    _npcBotEngageDelayDPS_default = sConfigMgr->GetIntDefault("NpcBot.EngageDelay.DPS", 0);
+    _npcBotEngageDelayHeal_default = sConfigMgr->GetIntDefault("NpcBot.EngageDelay.Heal", 0);
     _npcBotOwnerExpireTime  = sConfigMgr->GetIntDefault("NpcBot.OwnershipExpireTime", 0);
     _botPvP                 = sConfigMgr->GetBoolDefault("NpcBot.PvP", true);
     _botMovementFoodInterrupt=sConfigMgr->GetBoolDefault("NpcBot.Movements.InterruptFood", false);
@@ -1174,6 +1181,21 @@ void BotMgr::UpdatePvPForBots()
         itr->second->SetByteValue(UNIT_FIELD_BYTES_2, 1, _owner->GetByteValue(UNIT_FIELD_BYTES_2, 1));
         if (itr->second->GetBotsPet())
             itr->second->GetBotsPet()->SetByteValue(UNIT_FIELD_BYTES_2, 1, _owner->GetByteValue(UNIT_FIELD_BYTES_2, 1));
+    }
+}
+
+void BotMgr::PropagateEngageTimers() const
+{
+    uint32 delay;
+    for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
+    {
+        if (itr->second->GetBotAI()->IsTank())
+            continue;
+
+        delay = itr->second->GetBotAI()->HasRole(BOT_ROLE_HEAL) ? GetEngageDelayHeal() :
+            itr->second->GetBotAI()->HasRole(BOT_ROLE_DPS) ? GetEngageDelayDPS() : 0;
+
+        itr->second->GetBotAI()->ResetEngageTimer(delay);
     }
 }
 
