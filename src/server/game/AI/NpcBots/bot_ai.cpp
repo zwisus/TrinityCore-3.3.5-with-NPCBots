@@ -914,7 +914,7 @@ void bot_ai::_calculatePos(Position& pos) const
 
     if ((movFlags & MOVEMENTFLAG_FORWARD) && !(movFlags & MOVEMENTFLAG_FALLING_FAR))
     {
-        float const aheadDist = std::max<float>(followdist * 0.08, 6.f);
+        float const aheadDist = std::max<float>(followdist * 0.08f, 6.f);
         float tx = mpos.m_positionX + aheadDist * std::cos(mmover->GetOrientation());
         float ty = mpos.m_positionY + aheadDist * std::sin(mmover->GetOrientation());
         float tz = mpos.m_positionZ;
@@ -5682,7 +5682,7 @@ void bot_ai::ApplyBotDamageMultiplierMelee(uint32& damage, CalcDamageInfo& damag
 void bot_ai::ApplyBotDamageMultiplierMelee(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool crit) const
 {
     //MELEE ABILITIES damage bonus (DMG_CLASS != DMG_CLASS_MAGIC)
-    ApplyClassDamageMultiplierMelee(damage, damageinfo, spellInfo, attackType, crit);
+    ApplyClassDamageMultiplierMeleeSpell(damage, damageinfo, spellInfo, attackType, crit);
 }
 void bot_ai::ApplyBotDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool crit) const
 {
@@ -5754,7 +5754,7 @@ void bot_ai::ApplyBotEffectMods(SpellInfo const* spellInfo, uint8 effIndex, floa
 void bot_ai::ApplyBotEffectMods(Unit const* target, SpellInfo const* spellInfo, uint8 effIndex, float& value) const
 {
     //ALL SPELLS SPELLMOD_EFFECT_X bonus (target-specific)
-    ApplyClassEffectMods(target, spellInfo, effIndex, value);
+    ApplyClassEffectModsTarget(target, spellInfo, effIndex, value);
 }
 //Spell Mod Utilities
 float bot_ai::CalcSpellMaxRange(uint32 spellId, bool enemy) const
@@ -12820,7 +12820,7 @@ bool bot_ai::AddOrder(BotOrder const* order)
 {
     if (_orders.size() >= MAX_BOT_ORDERS_QUEUE_SIZE)
     {
-        TC_LOG_ERROR("scripts", "bot_ai::AddOrder: orders limit reached for %s (%u)!", me->GetName().c_str(), _orders.size());
+        TC_LOG_ERROR("scripts", "bot_ai::AddOrder: orders limit reached for %s (%u)!", me->GetName().c_str(), uint32(_orders.size()));
         return false;
     }
 

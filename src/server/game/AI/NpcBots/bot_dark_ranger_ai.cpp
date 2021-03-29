@@ -261,7 +261,7 @@ public:
         {
         }
 
-        void ApplyClassDamageMultiplierMelee(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool /*crit*/) const override
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool /*crit*/) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             float flat_mod = 0.f;
@@ -315,7 +315,7 @@ public:
             value = value * pctbonus;
         }
 
-        void ApplyClassEffectMods(Unit const* /*target*/, SpellInfo const* /*spellInfo*/, uint8 /*effIndex*/, float& value) const
+        void ApplyClassEffectModsTarget(Unit const* /*target*/, SpellInfo const* /*spellInfo*/, uint8 /*effIndex*/, float& value) const
         {
             //uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             float pctbonus = 1.0f;

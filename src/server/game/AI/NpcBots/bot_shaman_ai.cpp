@@ -1415,7 +1415,7 @@ public:
                         crit_chance += 20.f * eff->GetBase()->GetStackAmount();
         }
 
-        void ApplyClassDamageMultiplierMelee(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
         {
             uint32 spellId = spellInfo->Id;
             uint8 lvl = me->GetLevel();

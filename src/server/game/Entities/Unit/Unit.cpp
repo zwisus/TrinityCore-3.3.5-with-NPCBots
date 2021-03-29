@@ -6471,11 +6471,6 @@ Unit* Unit::GetNextRandomRaidMemberOrPet(float radius)
             if (Target != this && IsWithinDistInMap(Target, radius) && Target->IsAlive() && !IsHostileTo(Target))
                 nearMembers.push_back(Target);
 
-        // Push player's pet to vector
-        if (Unit* pet = Target->GetGuardianPet())
-            if (pet != this && IsWithinDistInMap(pet, radius) && pet->IsAlive() && !IsHostileTo(pet))
-                nearMembers.push_back(pet);
-
             //npcbot: push bots and bot pets
             if (Target->HaveBot())
             {
@@ -6494,6 +6489,11 @@ Unit* Unit::GetNextRandomRaidMemberOrPet(float radius)
                 }
             }
             //end npcbot
+
+        // Push player's pet to vector
+        if (Unit* pet = Target->GetGuardianPet())
+            if (pet != this && IsWithinDistInMap(pet, radius) && pet->IsAlive() && !IsHostileTo(pet))
+                nearMembers.push_back(pet);
         }
 
     if (nearMembers.empty())

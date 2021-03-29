@@ -15,6 +15,15 @@
 #include "SpellMgr.h"
 #include "Vehicle.h"
 #include "World.h"
+
+#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
+# pragma warning (push)
+# pragma warning (disable : 4996)
+#endif
+
 /*
 Name: script_bot_commands
 %Complete: ???
@@ -842,7 +851,7 @@ public:
         if (guidlow)
             found = sCharacterCache->GetCharacterNameByGuid(ObjectGuid(HighGuid::Player, 0, guidlow), characterName);
         else
-            guidlow = sCharacterCache->GetCharacterGuidByName(characterName);
+            guidlow = sCharacterCache->GetCharacterGuidByName(characterName).GetCounter();
 
         if (!guidlow || !found)
         {
@@ -1578,3 +1587,9 @@ void AddSC_script_bot_commands()
 {
     new script_bot_commands();
 }
+
+#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
+# pragma GCC diagnostic pop
+#elif TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
+# pragma warning (pop)
+#endif

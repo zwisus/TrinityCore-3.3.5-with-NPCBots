@@ -365,7 +365,7 @@ public:
             damage = int32(fdamage * pctbonus);
         }
 
-        //void ApplyClassEffectMods(Unit const* target, SpellInfo const* spellInfo, uint8 effIndex, float& value) const
+        //void ApplyClassEffectModsTarget(Unit const* target, SpellInfo const* spellInfo, uint8 effIndex, float& value) const
         //{
         //    uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
         //    uint8 lvl = me->getLevel();
