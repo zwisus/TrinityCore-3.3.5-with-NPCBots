@@ -790,7 +790,7 @@ public:
                 spellInfo = app->GetBase()->GetSpellInfo();
                 if (spellInfo->Attributes & SPELL_ATTR0_HIDDEN_CLIENTSIDE) continue;
                 //if (spellInfo->AttributesEx & SPELL_ATTR1_DONT_DISPLAY_IN_AURA_BAR) continue;
-                if (spellInfo->GetAllEffectsMechanicMask() &
+                if (spellInfo->GetSpellMechanicMaskByEffectMask(app->GetEffectMask()) &
                     ((1<<MECHANIC_SNARE) | (1<<MECHANIC_ROOT) | (me->GetLevel() < 35 ? 0 : (1<<MECHANIC_STUN))))
                 {
                     uint32 dispel = spellInfo->Dispel;
