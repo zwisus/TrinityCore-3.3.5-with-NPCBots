@@ -663,8 +663,15 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
             return;
         }
 
-        Creature const* bot = unit->ToCreature();
         //npcbot minion without a record in outfits table
+        //OR
+        //npcbot's mirror image
+        Creature const* bot = unit->ToCreature();
+        if (!bot->IsNPCBot() && unit->HasAuraType(SPELL_AURA_CLONE_CASTER))
+            if (Unit const* creator = unit->GetAuraEffectsByType(SPELL_AURA_CLONE_CASTER).front()->GetCaster())
+                if (creator->GetTypeId() == TYPEID_UNIT && creator->ToCreature()->IsNPCBot())
+                    bot = creator->ToCreature();
+
         if (bot->IsNPCBot())
         {
             NpcBotAppearanceData const* appearData = BotDataMgr::SelectNpcBotAppearance(unit->GetEntry());
