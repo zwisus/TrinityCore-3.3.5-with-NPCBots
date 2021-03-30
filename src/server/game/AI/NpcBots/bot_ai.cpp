@@ -4054,17 +4054,22 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
 
     AoeSpotsVec const& aoespots = IAmFree() ? AoeSpotsVec() : GetAoeSpots();
 
-    ppos.Relocate(me);
-    bool toofaraway = master->GetDistance(ppos) > (followdist > 38 ? 38.f : followdist < 20 ? 20.f : float(followdist));
-    bool outoflos = !target->IsWithinLOS(ppos.m_positionX, ppos.m_positionY, ppos.m_positionZ);
-    bool isinaoe = IsWithinAoERadius(ppos);
-    if (!toofaraway && !outoflos && !isinaoe)
-    {
-        //if (!aoespots.empty())
-        //    TC_LOG_ERROR("scripts", "CalculateAttackPos %s spot is still safe", me->GetName().c_str());
+    bool toofaraway;
 
-        pos.Relocate(ppos);
-        return;
+    if (!aoespots.empty())
+    {
+        ppos.Relocate(me);
+        toofaraway = master->GetDistance(ppos) > (followdist > 38 ? 38.f : followdist < 20 ? 20.f : float(followdist));
+        bool outoflos = !target->IsWithinLOS(ppos.m_positionX, ppos.m_positionY, ppos.m_positionZ);
+        bool isinaoe = IsWithinAoERadius(ppos);
+        if (!toofaraway && !outoflos && !isinaoe)
+        {
+            //if (!aoespots.empty())
+            //    TC_LOG_ERROR("scripts", "CalculateAttackPos %s spot is still safe", me->GetName().c_str());
+
+            pos.Relocate(ppos);
+            return;
+        }
     }
 
     AoeSafeSpotsVec safespots;
@@ -4073,7 +4078,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     for (uint8 i = 0; i < 5; ++i)
     {
         ppos = target->GetFirstCollisionPosition(dist, Position::NormalizeOrientation(angle - target->GetOrientation()));
-        toofaraway = master->GetDistance(/*x,y,z*/ppos) > (followdist > 38 ? 38.f : followdist < 20 ? 20.f : float(followdist));
+        toofaraway = master->GetDistance(ppos) > (followdist > 38 ? 38.f : followdist < 20 ? 20.f : float(followdist));
         if (!toofaraway)
             break;
 
@@ -4161,10 +4166,7 @@ void bot_ai::GetInPosition(bool force, Unit* newtarget, Position* mypos)
             return;
 
         if (!mypos)
-        {
-            force = false;
             CalculateAttackPos(newtarget, attackpos, force);
-        }
         else
         {
             attackpos.m_positionX = mypos->m_positionX;
@@ -14270,10 +14272,15 @@ bool bot_ai::GlobalUpdate(uint32 diff)
             }
             else
             {
+                //TC_LOG_ERROR("scripts", "%s calculates attack pos to attack %s", me->GetName().c_str(), victim->GetName().c_str());
                 bool force = false;
                 CalculateAttackPos(victim, attackpos, force);
                 if (force || mover->GetExactDist2d(&attackpos) > 4.f)
+                {
+                    //TC_LOG_ERROR("scripts", "%s moving to x %.2f y %.2f z %.2f to attack %s",
+                    //    me->GetName().c_str(), attackpos.m_positionX, attackpos.m_positionY, attackpos.m_positionZ, victim->GetName().c_str());
                     GetInPosition(true, victim, &attackpos);
+                }
             }
         }
         if (shouldUpdateStats && me->GetPhaseMask() == master->GetPhaseMask())
