@@ -4390,7 +4390,6 @@ class spell_gen_vehicle_control_link : public AuraScript
     }
 };
 
-// 34779 - Freezing Circle
 enum FreezingCircleSpells
 {
     SPELL_FREEZING_CIRCLE_PIT_OF_SARON_NORMAL = 69574,
@@ -4398,6 +4397,7 @@ enum FreezingCircleSpells
     SPELL_FREEZING_CIRCLE                     = 34787,
 };
 
+// 34779 - Freezing Circle
 class spell_freezing_circle : public SpellScript
 {
     PrepareSpellScript(spell_freezing_circle);
