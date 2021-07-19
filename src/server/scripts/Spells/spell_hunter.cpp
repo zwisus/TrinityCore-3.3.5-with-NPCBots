@@ -1193,6 +1193,12 @@ class spell_hun_tame_beast : public SpellScript
 
             if (caster->GetCharmedGUID())
                 return SPELL_FAILED_ALREADY_HAVE_CHARM;
+
+            if (target->GetOwnerGUID())
+            {
+                caster->SendTameFailure(PETTAME_CREATUREALREADYOWNED);
+                return SPELL_FAILED_DONT_REPORT;
+            }
         }
         else
             return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
