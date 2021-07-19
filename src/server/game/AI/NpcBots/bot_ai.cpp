@@ -2068,7 +2068,6 @@ void bot_ai::SetStats(bool force)
         InitPowers();
         InitSpells(); //this must stay before class passives
         ApplyClassPassives();
-        InitHeals();
     }
 
     //INIT STATS
@@ -3045,6 +3044,7 @@ void bot_ai::SetStats(bool force)
     //if init or levelup
     if (force)
     {
+        InitHeals();
         me->SetFullHealth();
         if (_botclass != BOT_CLASS_SPHYNX)
             me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
