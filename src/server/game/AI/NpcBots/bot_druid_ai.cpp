@@ -858,7 +858,7 @@ public:
             if (IsSpellReady(MANGLE_BEAR_1, diff) && rage >= acost(MANGLE_BEAR_1) + 200*isRegenActive)
             {
                 if (me->GetAuraEffect(SPELL_AURA_MECHANIC_IMMUNITY, SPELLFAMILY_DRUID, 0x0, 0x0, 0x40) ||
-                    (Rand() < 30 && !opponent->GetAuraEffect(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, SPELLFAMILY_DRUID, 2312, 1)))
+                    (Rand() < 30 && !opponent->GetAuraEffect(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, SPELLFAMILY_DRUID, 0x0, 0x40, 0x0)))
                 {
                     if (doCast(opponent, GetSpell(MANGLE_BEAR_1)))
                         return;
@@ -1070,7 +1070,7 @@ public:
             }
             //Mangle (Cat)
             if (IsSpellReady(MANGLE_CAT_1, diff) && comboPoints < 5 && energy >= acost(MANGLE_CAT_1) &&
-                (Rand() < 35 || !opponent->GetAuraEffect(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, SPELLFAMILY_DRUID, 2312, 1)))
+                (Rand() < 20 || !opponent->GetAuraEffect(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, SPELLFAMILY_DRUID, 0x0, 0x400, 0x0)))
             {
                 if (doCast(opponent, GetSpell(MANGLE_CAT_1)))
                     return;
