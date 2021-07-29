@@ -179,7 +179,7 @@ enum PaladinSpecial
     JUDGEMENTS_OF_THE_JUST_AURA         = 68055, //melee attack speed reduce
 
     //JUDGEMENT_OF_LIGHT_AURA             = 20185,
-    //JUDGEMENT_OF_WISDOM_AURA            = 20186,
+    JUDGEMENT_OF_WISDOM_AURA            = 20186,
     //JUDGEMENT_OF_JUSTICE_AURA           = 20184,
 
     GREATER_BLESSING_OF_MIGHT_1         = 25782,
@@ -1581,8 +1581,8 @@ public:
                 if (!JUDGEMENT && GetSpell(JUDGEMENT_OF_WISDOM_1) && dist < CalcSpellMaxRange(JUDGEMENT_OF_WISDOM_1))
                 {
                     //from 35% to 50% mana
-                    //opponent->GetAuraEffect(JUDGEMENT_OF_WISDOM_AURA, 0, me->GetGUID()
-                    AuraEffect const* wisd = opponent->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3014, 0);
+                    AuraEffect const* wisd = opponent->GetAuraEffect(JUDGEMENT_OF_WISDOM_AURA, 0);
+                    //AuraEffect const* wisd = opponent->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3014, 0);
                     uint8 myManaPct = GetManaPCT(me);
                     if ((!wisd && myManaPct < 35) || (wisd && wisd->GetCasterGUID() == me->GetGUID() && myManaPct < 50))
                         JUDGEMENT = JUDGEMENT_OF_WISDOM_1;
