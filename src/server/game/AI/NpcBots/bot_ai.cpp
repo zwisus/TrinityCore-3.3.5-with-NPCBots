@@ -5066,19 +5066,18 @@ void bot_ai::InitSpellMap(uint32 basespell, bool forceadd, bool forwardRank)
     if (!newSpell)
     {
         newSpell = new BotSpell();
-
-        NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
-        if (npcBotData->disabled_spells.find(basespell) != npcBotData->disabled_spells.end())
-        {
-            newSpell->enabled = false;
-            //TC_LOG_ERROR("entities.player", "bot_ai::InitSpellMap(): %s (%u -> %u) is disabled for %s!",
-            //    sSpellMgr->GetSpellInfo(basespell)->SpellName[0], basespell, spellId, me->GetName().c_str());
-        }
-
         _spells[basespell] = newSpell;
     }
 
     newSpell->spellId = spellId;
+
+    NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
+    if (npcBotData->disabled_spells.find(basespell) != npcBotData->disabled_spells.end())
+    {
+        newSpell->enabled = false;
+        //TC_LOG_ERROR("entities.player", "bot_ai::InitSpellMap(): %s (%u -> %u) is disabled for %s!",
+        //    sSpellMgr->GetSpellInfo(basespell)->SpellName[0], basespell, spellId, me->GetName().c_str());
+    }
 }
 //Using first-rank spell as source, return true if spell is inited
 bool bot_ai::HasSpell(uint32 basespell) const
