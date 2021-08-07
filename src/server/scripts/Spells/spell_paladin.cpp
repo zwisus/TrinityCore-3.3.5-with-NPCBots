@@ -508,7 +508,7 @@ class spell_pal_divine_sacrifice : public AuraScript
                 if (owner->GetGroup())
                     groupSize = owner->GetGroup()->GetMembersCount();
                 else
-                    groupSize = 1;
+                    groupSize = 1 + owner->GetNpcBotsCount();
 
                 remainingAmount = (caster->CountPctFromMaxHealth(GetSpellInfo()->Effects[EFFECT_2].CalcValue(caster)) * groupSize);
                 minHpPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster);

@@ -322,7 +322,7 @@ public:
         void CheckSacrifice(uint32 diff)
         {
             if (!IsSpellReady(DIVINE_SACRIFICE_1, diff) || IAmFree() || me->IsMounted() ||
-                IsTank() || Feasting() || !CanBlock() || IsCasting() || Rand() > 25 || GetHealthPCT(me) < 50)
+                IsTank() || Feasting() || !CanBlock() || IsCasting() || Rand() > 25 || GetHealthPCT(me) < 60)
                 return;
 
             Group const* gr = master->GetGroup();
@@ -2070,6 +2070,11 @@ public:
                 else if (infu && infu->IsAffectedOnSpell(spellInfo))
                     me->RemoveAurasDueToSpell(INFUSION_OF_LIGHT_BUFF);
             }
+
+            if (baseId == DIVINE_SACRIFICE_1)
+            {
+                _sacDamage = 0;
+            }
         }
 
         void SpellHitTarget(WorldObject* wtarget, SpellInfo const* spell) override
@@ -2296,6 +2301,32 @@ public:
             OnSpellHit(caster, spell);
         }
 
+        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType) override
+        {
+            bot_ai::DamageDealt(victim, damage, damageType);
+        }
+
+        void OnBotDamageTaken(Unit* /*attacker*/, uint32 damage, CleanDamage const* /*cleanDamage*/, DamageEffectType /*damagetype*/, SpellInfo const* spellInfo) override
+        {
+            // Divine Sacrifice helper - calculate remaining damage amount and find if we can be one-shot'ed
+            if (damage && _sacDamage < int32(me->GetMaxHealth() / 4))
+            {
+                if (spellInfo && spellInfo->Id == DIVINE_SACRIFICE_1)
+                    _sacDamage -= int32(damage);
+                else
+                    _sacDamage += int32(damage);
+
+                if (me->GetHealth() - _sacDamage < me->GetMaxHealth() / 5)
+                {
+                    if (me->GetAuraEffect(SPELL_AURA_SPLIT_DAMAGE_PCT, SPELLFAMILY_PALADIN, 0x0, 0x0, 0x4, me->GetGUID()))
+                    {
+                        _sacDamage = me->GetMaxHealth();
+                        me->RemoveAurasDueToSpell(DIVINE_SACRIFICE_1, me->GetGUID());
+                    }
+                }
+            }
+        }
+
         void DamageTaken(Unit* u, uint32& /*damage*/) override
         {
             if (!u)
@@ -2303,11 +2334,6 @@ public:
             if (!u->IsInCombat() && !me->IsInCombat())
                 return;
             OnOwnerDamagedBy(u);
-        }
-
-        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType) override
-        {
-            bot_ai::DamageDealt(victim, damage, damageType);
         }
 
         //healer may be nullptr
@@ -2348,6 +2374,7 @@ public:
             avDelayTimer = 0;
             shieldDelayTimer = 0;
             _aura = NOAURA;
+            _sacDamage = 0;
 
             CLEANSE = 0;
 
@@ -2627,6 +2654,7 @@ public:
 /*misc*/uint32 checkAuraTimer, checkSealTimer, checkShieldTimer, checkBeaconTimer, avDelayTimer, shieldDelayTimer;
         //Special
 /*misc*/uint8 _aura;
+/*misc*/int32 _sacDamage;
 
         typedef std::unordered_map<uint32 /*baseId*/, int32 /*amount*/> HealMap;
         HealMap _heals;

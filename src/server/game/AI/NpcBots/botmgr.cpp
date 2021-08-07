@@ -1402,6 +1402,11 @@ void BotMgr::OnBotDamageDealt(Unit* attacker, Unit* victim, uint32 damage, Clean
     attacker->ToCreature()->GetBotAI()->OnBotDamageDealt(victim, damage, cleanDamage, damagetype, spellInfo);
 }
 
+void BotMgr::OnBotDamageTaken(Unit* attacker, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellInfo const* spellInfo)
+{
+    victim->ToCreature()->GetBotAI()->OnBotDamageTaken(attacker, damage, cleanDamage, damagetype, spellInfo);
+}
+
 void BotMgr::OnBotDispelDealt(Unit* dispeller, Unit* dispelled, uint8 num)
 {
     dispeller->ToCreature()->GetBotAI()->OnBotDispelDealt(dispelled, num);

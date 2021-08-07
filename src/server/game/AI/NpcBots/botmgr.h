@@ -88,6 +88,7 @@ class BotMgr
         static void OnVehicleSpellGo(Unit const* caster, Spell const* spell, bool ok = true);
         static void OnVehicleAttackedBy(Unit* attacker, Unit const* victim);
         static void OnBotDamageDealt(Unit* attacker, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellInfo const* spellInfo);
+        static void OnBotDamageTaken(Unit* attacker, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellInfo const* spellInfo);
         static void OnBotDispelDealt(Unit* dispeller, Unit* dispelled, uint8 num);
         static void OnBotEnterVehicle(Creature const* passenger, Vehicle const* vehicle);
         static void OnBotExitVehicle(Creature const* passenger, Vehicle const* vehicle);
