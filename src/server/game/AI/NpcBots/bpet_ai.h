@@ -141,7 +141,8 @@ class bot_pet_ai : public CreatureAI
         uint8 m_botCommandState;
 
         //timers
-        uint32 lastdiff, checkAurasTimer, waitTimer, regenTimer, _updateTimerMedium, _updateTimerEx1;
+        uint32 lastdiff, checkAurasTimer, regenTimer, _updateTimerMedium, _updateTimerEx1;
+        mutable uint32 waitTimer;
 
         float _energyFraction;
 

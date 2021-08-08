@@ -4318,7 +4318,7 @@ void bot_ai::MoveBehind(Unit const* target) const
 
         BotMovement(BOT_MOVE_POINT, &position);
         //me->GetMotionMaster()->MovePoint(me->GetMapId(), x, y, z);
-        const_cast<bot_ai*>(this)->waitTimer = 500;
+        waitTimer = 500;
     }
 }
 //MOUNT SUPPORT

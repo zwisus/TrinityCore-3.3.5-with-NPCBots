@@ -1000,7 +1000,7 @@ public:
             //Molten Core part 2.2: 15% additional critical chance for Soul Fire
             if (lvl >= 35 && baseId == SOUL_FIRE_1)
             {
-                const_cast<warlock_botAI*>(this)->moltencore = me->HasAura(MOLTEN_CORE_BUFF);
+                moltencore = me->HasAura(MOLTEN_CORE_BUFF);
                 if (moltencore)
                     crit_chance += 15.f;
             }
@@ -1227,8 +1227,8 @@ public:
             //Backlash: -100% cast time for Shadow Bolt or Incinerate
             if (lvl >= 15 && (baseId == SHADOW_BOLT_1 || baseId == INCINERATE_1))
             {
-                const_cast<warlock_botAI*>(this)->backlash = me->HasAura(BACKLASH_BUFF);
-                const_cast<warlock_botAI*>(this)->shadowtrance = (baseId == SHADOW_BOLT_1 && me->HasAura(SHADOW_TRANCE_BUFF));
+                backlash = me->HasAura(BACKLASH_BUFF);
+                shadowtrance = (baseId == SHADOW_BOLT_1 && me->HasAura(SHADOW_TRANCE_BUFF));
                 if (backlash || shadowtrance)
                     timebonus += casttime;
             }
@@ -1238,7 +1238,7 @@ public:
             //Chaotic Mind (custom)
             if (baseId == SOUL_FIRE_1)
             {
-                const_cast<warlock_botAI*>(this)->chaoticmind = me->HasAura(CHAOTIC_MIND_BUFF);
+                chaoticmind = me->HasAura(CHAOTIC_MIND_BUFF);
                 if (chaoticmind)
                     timebonus += casttime;
             }
@@ -1249,14 +1249,14 @@ public:
                 ((spellInfo->SpellFamilyFlags[0] & 0x165) || (spellInfo->SpellFamilyFlags[1] & 0x310C0)))
             {
                 //skip soul fire insta cast
-                const_cast<warlock_botAI*>(this)->backdraft = me->HasAura(BACKDRAFT_BUFF) && !(chaoticmind && baseId == SOUL_FIRE_1);
+                backdraft = me->HasAura(BACKDRAFT_BUFF) && !(chaoticmind && baseId == SOUL_FIRE_1);
                 if (backdraft)
                     pctbonus += 0.3f;
             }
             //Molten Core part 2.1: -30% cast time for Incinerate
             if (lvl >= 35 && baseId == INCINERATE_1)
             {
-                const_cast<warlock_botAI*>(this)->moltencore = me->HasAura(MOLTEN_CORE_BUFF);
+                moltencore = me->HasAura(MOLTEN_CORE_BUFF);
                 if (moltencore)
                     pctbonus += 0.3f;
             }
@@ -1285,7 +1285,7 @@ public:
 
             casttime = std::max<int32>((float(casttime) * (1.0f - pctbonus)) - timebonus, 0);
 
-            const_cast<warlock_botAI*>(this)->instaCast = (casttime <= 500); //triggered GCD is too long
+            instaCast = (casttime <= 500); //triggered GCD is too long
         }
 
         void ApplyClassSpellCooldownMods(SpellInfo const* /*spellInfo*/, uint32& cooldown) const override
@@ -2028,9 +2028,10 @@ public:
         uint32 myPetType;
         uint32 petSummonTimer;
         //Special
-        bool backlash, shadowtrance, backdraft, moltencore, chaoticmind;
+        mutable bool backlash, shadowtrance, backdraft, moltencore, chaoticmind;
         bool canShadowWard;
-        bool longCasted, instaCast; //some sort of rotation thing
+        bool longCasted; //some sort of rotation thing
+        mutable bool instaCast;
         bool hasHealthstone, hasSoulstone;
 
         uint32 _getCursesMask(Unit const* unit) const

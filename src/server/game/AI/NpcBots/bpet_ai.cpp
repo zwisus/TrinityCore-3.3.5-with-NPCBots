@@ -1470,7 +1470,7 @@ void bot_pet_ai::MoveBehind(Unit const* target) const
         float x,y,z;
         target->GetNearPoint(me, x, y, z, me->GetCombatReach(), me->GetAbsoluteAngle(target));
         me->GetMotionMaster()->MovePoint(me->GetMapId(), x, y, z);
-        const_cast<bot_pet_ai*>(this)->waitTimer = 500;
+        waitTimer = 500;
     }
 }
 bool bot_pet_ai::_canRegenerate() const

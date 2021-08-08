@@ -1756,7 +1756,7 @@ public:
             if (_form == DRUID_CAT_FORM &&
                 (baseId == CLAW_1 || baseId == MANGLE_CAT_1 || baseId == POUNCE_1 ||
                 baseId == RAKE_1 || baseId == RAVAGE_1 || baseId == SHRED_1))
-                const_cast<bot_druid_ai*>(this)->primalFuryProc = crit && lvl >= 25;
+                primalFuryProc = crit && lvl >= 25;
 
             damage = int32(fdamage * (1.0f + pctbonus));
         }
@@ -2897,7 +2897,7 @@ public:
         ObjectGuid _treants[MAX_TREANTS];
         //Timers/other
 /*Form*/BotStances _form;
-/*Misc*/bool primalFuryProc;
+/*Misc*/mutable bool primalFuryProc;
 /*Misc*/uint8 comboPoints;
 /*Misc*/uint32 ragetimer;
         bool hibery;
