@@ -391,6 +391,8 @@ public:
 
             StartAttack(opponent, IsMelee());
 
+            MoveBehind(opponent);
+
             //mage
             if (me->HasInvisibilityAura()) return;
             if (!HasRole(BOT_ROLE_DPS)) return;

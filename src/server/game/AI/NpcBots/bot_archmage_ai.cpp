@@ -166,6 +166,8 @@ public:
         {
             StartAttack(opponent, IsMelee());
 
+            MoveBehind(opponent);
+
             if (!HasRole(BOT_ROLE_DPS))
                 return;
 

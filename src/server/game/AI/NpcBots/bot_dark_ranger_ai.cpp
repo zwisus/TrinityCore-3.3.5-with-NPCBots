@@ -198,6 +198,8 @@ public:
 
             CheckBlackArrow(diff);
 
+            MoveBehind(opponent);
+
             float dist = me->GetDistance(opponent);
             float maxRangeLong = 30.f;
 

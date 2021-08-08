@@ -720,6 +720,8 @@ public:
         {
             StartAttack(opponent, IsMelee());
 
+            MoveBehind(opponent);
+
             if (GC_Timer > diff)
                 return;
 

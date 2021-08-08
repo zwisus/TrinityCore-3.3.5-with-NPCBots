@@ -1097,6 +1097,8 @@ public:
             if (me->GetPowerType() != POWER_MANA)
                 return;
 
+            MoveBehind(opponent);
+
             if (HasRole(BOT_ROLE_HEAL) && GetManaPCT(me) < 25)
                 return;
 
