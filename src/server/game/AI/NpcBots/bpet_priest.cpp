@@ -126,7 +126,7 @@ public:
             bot_pet_ai::DamageDealt(victim, damage, damageType);
         }
 
-        void DamageTaken(Unit* u, uint32& damage) override
+        void DamageTaken(Unit* u, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo*/) override
         {
             if (damage >= me->GetHealth())
                 petOwner->CastSpell(petOwner, GLYPH_SHADOWFIEND_PROC, true);

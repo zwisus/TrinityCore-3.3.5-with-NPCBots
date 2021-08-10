@@ -705,10 +705,6 @@ bool Unit::HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel) cons
     if (attacker && attacker->GetTypeId() == TYPEID_UNIT && attacker->ToCreature()->IsNPCBot())
         BotMgr::OnBotDamageDealt(attacker, victim, damage, cleanDamage, damagetype, spellProto);
     //end npcbot
-    //npcbot: damage taken hook for crits and spells
-    if (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->IsNPCBot())
-        BotMgr::OnBotDamageTaken(attacker, victim, damage, cleanDamage, damagetype, spellProto);
-    //end npcbot
 
     //npcbot: damage tracker hook
     if (damage > 0 && damage < victim->GetHealth())
