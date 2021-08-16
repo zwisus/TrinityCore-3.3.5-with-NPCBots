@@ -344,22 +344,26 @@ private:
         return ValidateSpellInfo({ SPELL_DK_ANTI_MAGIC_SHELL_TALENT });
     }
 
-    void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+    void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
     {
         SpellInfo const* talentSpell = sSpellMgr->AssertSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT);
-        amount = talentSpell->Effects[EFFECT_0].CalcValue(GetCaster());
+        Unit* owner = GetCaster()->GetOwner();
+        if (!owner)
+            return;
+
+        amount = talentSpell->Effects[EFFECT_0].CalcValue(owner);
         //npcbot: take bot attack power into account
-        if (Creature const* bot = GetCaster()->ToCreature())
+        if (Creature const* bot = owner->ToCreature())
         {
             if (bot->IsNPCBot())
-            amount += int32(2 * bot->GetTotalAttackPowerValue(BASE_ATTACK));
+                amount += int32(2 * bot->GetTotalAttackPowerValue(BASE_ATTACK));
         }
         //end npcbot
-        if (Player* player = GetCaster()->ToPlayer())
+        if (Player* player = owner->ToPlayer())
             amount += int32(2 * player->GetTotalAttackPowerValue(BASE_ATTACK));
     }
 
-    void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+    void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32 &absorbAmount)
     {
         absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
     }
