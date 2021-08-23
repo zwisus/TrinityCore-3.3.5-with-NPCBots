@@ -43,8 +43,8 @@ class bot_ai : public CreatureAI
         bool OnGossipSelect(Player* player, uint32 menuId, uint32 gossipListId) override;
         bool OnGossipSelectCode(Player* player, uint32 menuId, uint32 gossipListId, char const* code) override;
 
-        virtual void OnBotEnterVehicle(Vehicle const* vehicle);
-        virtual void OnBotExitVehicle(Vehicle const* vehicle);
+        virtual void OnBotEnterVehicle(Vehicle const* /*vehicle*/);
+        virtual void OnBotExitVehicle(Vehicle const* /*vehicle*/);
         virtual void AfterBotOwnerEnterVehicle();
         virtual void OnBotOwnerEnterVehicle(Vehicle const* /*vehicle*/);
         virtual void OnBotOwnerExitVehicle(Vehicle const* /*vehicle*/);
@@ -536,7 +536,7 @@ class bot_ai : public CreatureAI
         //timers
         uint32 _reviveTimer, _powersTimer, _chaseTimer, _engageTimer, _potionTimer;
         uint32 lastdiff, checkAurasTimer, checkMasterTimer, roleTimer, ordersTimer, regenTimer, _updateTimerMedium, _updateTimerEx1;
-        mutable uint32 waitTimer;
+        uint32 waitTimer;
         //save timers
         uint32 _saveDisabledSpellsTimer;
 
@@ -567,12 +567,14 @@ class bot_ai : public CreatureAI
 
         struct BotSpell
         {
-            explicit BotSpell() : cooldown(0), enabled(true) {}
+            BotSpell() : cooldown(0), enabled(true) {}
+            BotSpell(BotSpell const&) = delete;
+            BotSpell(BotSpell&&) = delete;
+            BotSpell& operator=(BotSpell const&) = delete;
+            BotSpell& operator=(BotSpell&&) = delete;
             uint32 spellId;
             uint32 cooldown;
             bool enabled;
-        private:
-            BotSpell(BotSpell const&);
         };
 
         typedef int32 ItemStatBonus[MAX_BOT_ITEM_MOD];
@@ -591,7 +593,7 @@ class bot_ai : public CreatureAI
         struct BotOrder
         {
             friend class bot_ai;
-        public:
+
             enum { ORDERS_PARAMS_MAX_SIZE = sizeof(uint64) + sizeof(uint32) };
             union
             {
@@ -612,8 +614,6 @@ class bot_ai : public CreatureAI
             BotOrderTypes _type;
         };
 
-        typedef std::queue<BotOrder const*> OrdersQueue;
-
         bool HasOrders() const { return !_orders.empty(); }
         bool AddOrder(BotOrder const* order);
         void CancelOrder(BotOrder const* order);
@@ -623,6 +623,7 @@ class bot_ai : public CreatureAI
     private:
         void _ProcessOrders();
 
+        typedef std::queue<BotOrder const*> OrdersQueue;
         OrdersQueue _orders;
 };
 

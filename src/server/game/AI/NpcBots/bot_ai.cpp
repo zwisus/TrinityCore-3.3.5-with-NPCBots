@@ -23,7 +23,7 @@
 #include "TemporarySummon.h"
 /*
 NpcBot System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
-Version 4.10.1a
+Version 4.10.15a
 Original idea: https://bitbucket.org/lordpsyan/trinitycore-patches/src/3b8b9072280e/Individual/11185-BOTS-NPCBots.patch
 TODO:
 Bot commands to RBAC permissions
@@ -3293,6 +3293,16 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell) const
 
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
+    float spelldist;
+    if (!IAmFree() && (HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED)))
+    {
+        uint8 rangeMode = master->GetBotMgr()->GetBotAttackRangeMode();
+        if (rangeMode == BOT_ATTACK_RANGE_EXACT)
+            spelldist = master->GetBotMgr()->GetBotExactAttackRange();
+        else
+            spelldist = GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG);
+        foldist = std::max<float>(foldist, spelldist + 4.f);
+    }
 
     SpellSchoolMask mainMask;
     if (!byspell)
@@ -3319,8 +3329,7 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell) const
         (target->IsAlive() && target->IsVisible() && me->IsValidAttackTarget(target) &&
         target->isTargetableForAttack(false) && !IsInBotParty(target) &&
         ((me->CanSeeOrDetect(target) && target->InSamePhase(me)) || CanSeeEveryone()) &&
-        (!master->IsAlive() || target->IsControlledByPlayer() ||
-        (target->GetDistance(master) < foldist && me->GetDistance(master) < followdist)) &&//if master is killed pursue to the end
+        (!master->IsAlive() || target->IsControlledByPlayer() || master->GetDistance(target) <= foldist) &&//if master is killed pursue to the end
         (target->IsHostileTo(master) || target->IsHostileTo(me) ||//if master is controlled
         (target->GetReactionTo(me) < REP_FRIENDLY && (master->IsInCombat() || target->IsInCombat()))) &&
         (byspell == -1 || !target->IsTotem()) &&
@@ -3576,14 +3585,30 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
         return u;//forced
     }
     //Follow if...
-    uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
+    uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() / 2 : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
-    if ((!u || IAmFree()) && master->IsAlive() && (me->GetDistance(master) > foldist ||
-        (IAmFree() && mytar && me->GetDistance(mytar) > followdist) ||
-        (mytar && master->GetDistance(mytar) > followdist / 2 && !mytar->IsWithinLOSInMap(me)) ||
-        (mytar && master->GetDistance(mytar) > foldist && me->GetDistance(master) > foldist)))
+    float spelldist;
+    if (!IAmFree() && (HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED)))
     {
-        //TC_LOG_ERROR("entities.player", "bot %s cannot attack target %s, too far away or not in LoS", me->GetName().c_str(), mytar ? mytar->GetName().c_str() : "");
+        uint8 rangeMode = master->GetBotMgr()->GetBotAttackRangeMode();
+        if (rangeMode == BOT_ATTACK_RANGE_EXACT)
+            spelldist = master->GetBotMgr()->GetBotExactAttackRange();
+        else
+            spelldist = GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG);
+        foldist = std::max<float>(foldist, spelldist + 4.f);
+
+        //TC_LOG_ERROR("entities.player", "bot %s ranged foldist %.2f spelldist %.2f", me->GetName().c_str(), foldist, spelldist);
+    }
+    bool dropTarget = false;
+    if ((!u || IAmFree()) && master->IsAlive() && mytar)
+    {
+        dropTarget = IAmFree() ?
+            me->GetDistance(mytar) > foldist :
+            (master->GetDistance(mytar) > foldist || (master->GetDistance(mytar) > foldist * 0.75f && !mytar->IsWithinLOSInMap(me)));
+    }
+    if (dropTarget)
+    {
+        //TC_LOG_ERROR("entities.player", "bot %s cannot attack target %s, too far away or not in LoS", me->GetName().c_str(), mytar ? mytar->GetName().c_str() : "unk");
         return nullptr;
     }
 
@@ -3990,7 +4015,8 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
 
     //if ranged try to acquire a position in the back (will be ignored if too far away from master)
     static const float rangedAngleDelta = float(M_PI) * 0.62f;
-    if (HasRole(BOT_ROLE_RANGED) && !IAmFree() && target->GetTypeId() != TYPEID_PLAYER && target->HasInArc(float(M_PI), me))
+    if (HasRole(BOT_ROLE_RANGED) && !IAmFree() && !target->IsControlledByPlayer() && target->HasInArc(float(M_PI), me) &&
+        (IsTank(master) || master->GetDistance(target) < 2.5f || !target->HasInArc(float(M_PI), master)))
         angle += (target->GetRelativeAngle(master) > 0.f) ? rangedAngleDelta : -rangedAngleDelta;
 
     float clockwise = (me->GetEntry() % 2) ? 1.f : -1.f;
@@ -4080,6 +4106,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     AoeSafeSpotsVec safespots;
     CalculateAoeSafeSpots(target, float(followdist), safespots);
 
+    bool toofaraway1 = false;
     for (uint8 i = 0; i < 5; ++i)
     {
         ppos = target->GetFirstCollisionPosition(dist, Position::NormalizeOrientation(angle - target->GetOrientation()));
@@ -4087,14 +4114,16 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
         if (!toofaraway)
             break;
 
-        if (toofaraway)
+        if (!toofaraway1)
         {
+            toofaraway1 = true;
             angle = target->GetAbsoluteAngle(master);
-            if (i >= 3)
-                angle += angleDelta1 * (i - 3 + 1);
-            if (i >= 1 && i <= 3)
-                dist = std::max<float>(0.f, dist - 5.f);
         }
+        else
+            angle += angleDelta1;
+
+        if (i >= 1 && i <= 3)
+            dist = std::max<float>(0.f, dist - 5.f);
     }
 
     if (!safespots.empty())
@@ -4318,7 +4347,7 @@ void bot_ai::MoveBehind(Unit const* target) const
 
         BotMovement(BOT_MOVE_POINT, &position);
         //me->GetMotionMaster()->MovePoint(me->GetMapId(), x, y, z);
-        waitTimer = 500;
+        const_cast<bot_ai*>(this)->waitTimer = 500;
     }
 }
 //MOUNT SUPPORT

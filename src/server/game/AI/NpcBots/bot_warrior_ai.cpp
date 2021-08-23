@@ -925,8 +925,8 @@ public:
             if (IAmFree())
             {
                 if (GetSpell(BATTLE_SHOUT_1) &&
-                    !me->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_ATTACK_POWER, SPELLFAMILY_WARRIOR, 0x10000)
-                    /*!HasAuraName(me, BATTLE_SHOUT_1, me->GetGUID())*/)
+                    !me->GetAuraEffect(SPELL_AURA_MOD_RANGED_ATTACK_POWER, SPELLFAMILY_WARRIOR, 0x10000, 0x0, 0x0) &&
+                    !me->GetAuraEffect(SPELL_AURA_MOD_RANGED_ATTACK_POWER, SPELLFAMILY_PALADIN, 0x2, 0x0, 0x0))
                 {
                     if (rage < rcost(BATTLE_SHOUT_1))
                     {
@@ -950,16 +950,19 @@ public:
             if (me->GetDistance(master) > 30)
                 return;
 
-            AuraApplication const* bs = me->GetAuraApplicationOfRankedSpell(BATTLE_SHOUT_1);
-            AuraApplication const* cs = me->GetAuraApplicationOfRankedSpell(COMMANDING_SHOUT_1);
+            //ignore Blood Pact
+            AuraEffect const* bs = me->GetAuraEffect(SPELL_AURA_MOD_RANGED_ATTACK_POWER, SPELLFAMILY_WARRIOR, 0x10000, 0x0, 0x0);
+            AuraEffect const* cs = me->GetAuraEffect(SPELL_AURA_230, SPELLFAMILY_WARRIOR, 0x0, 0x80, 0x0);
+            AuraEffect const* bm = me->GetAuraEffect(SPELL_AURA_MOD_RANGED_ATTACK_POWER, SPELLFAMILY_PALADIN, 0x2, 0x0, 0x0);
 
-            bool hasBS = bs && bs->GetBase()->GetDuration() >= 30000 && bs->GetBase()->GetId() >= GetSpell(BATTLE_SHOUT_1);
-            bool hasCS = cs && cs->GetBase()->GetDuration() >= 30000 && cs->GetBase()->GetId() >= GetSpell(COMMANDING_SHOUT_1);
+            bool hasBS = bs && (bs->GetBase()->GetDuration() >= 30000 || bs->GetBase()->GetCasterGUID() != me->GetGUID()) && bs->GetBase()->GetId() >= GetSpell(BATTLE_SHOUT_1);
+            bool hasCS = cs && (cs->GetBase()->GetDuration() >= 30000 || cs->GetBase()->GetCasterGUID() != me->GetGUID()) && cs->GetBase()->GetId() >= GetSpell(COMMANDING_SHOUT_1);
+            bool hasBM = bm != nullptr;
 
-            if (hasCS && hasBS)
+            if (hasCS && (hasBS || hasBM))
                 return;
 
-            bool battleshout = !hasBS && (!cs || cs->GetBase()->GetCasterGUID() != me->GetGUID()) &&
+            bool battleshout = !hasBM && !hasBS && (!cs || cs->GetBase()->GetCasterGUID() != me->GetGUID()) &&
                 (!IsTank(me) || !GetSpell(COMMANDING_SHOUT_1)) && GetSpell(BATTLE_SHOUT_1);
             bool commandingshout = !hasCS && (!bs || bs->GetBase()->GetCasterGUID() != me->GetGUID()) &&
                 GetSpell(COMMANDING_SHOUT_1);

@@ -561,6 +561,9 @@ public:
                             }
                             newAura->SetLoadedState(aura->GetMaxDuration(), dur, aura->GetCharges(), aura->GetStackAmount(), recalculateMask, aura->GetCritChance(), aura->CanApplyResilience(), &damage[0]);
                             newAura->ApplyForTargets();
+
+                            if (newAura->GetDuration() > int32(5 * IN_MILLISECONDS))
+                                TC_LOG_WARN("scripts", "bot_spellbreaker_ai::TransferAura(): created aura %u duration is over the limit (%i)!", spellId, newAura->GetDuration());
                         }
                     }
 
