@@ -539,7 +539,7 @@ public:
                             oldAura->ModCharges(aura->GetCharges());
                         else
                             oldAura->ModStackAmount(aura->GetStackAmount());
-                        oldAura->SetDuration(std::max<int32>(dur, oldAura->GetDuration()));
+                        oldAura->SetDuration(dur);
                     }
                     else
                     {
@@ -550,6 +550,9 @@ public:
                         AuraCreateInfo createInfo(aura->GetSpellInfo(), effMask, newTarget);
                         createInfo.SetCasterGUID(aura->GetCasterGUID());
                         createInfo.SetBaseAmount(baseDamage);
+                        //Auras created by scripts may have no caster, prevent crash in Aura::TryRefreshStackOrCreate()
+                        if (!createInfo.CasterGUID)
+                            createInfo.SetCasterGUID(me->GetGUID());
                         if (Aura* newAura = Aura::TryRefreshStackOrCreate(createInfo))
                         {
                             // created aura must not be single target aura,, so stealer won't loose it on recast
@@ -561,9 +564,6 @@ public:
                             }
                             newAura->SetLoadedState(aura->GetMaxDuration(), dur, aura->GetCharges(), aura->GetStackAmount(), recalculateMask, aura->GetCritChance(), aura->CanApplyResilience(), &damage[0]);
                             newAura->ApplyForTargets();
-
-                            if (newAura->GetDuration() > int32(5 * IN_MILLISECONDS))
-                                TC_LOG_WARN("scripts", "bot_spellbreaker_ai::TransferAura(): created aura %u duration is over the limit (%i)!", spellId, newAura->GetDuration());
                         }
                     }
 
