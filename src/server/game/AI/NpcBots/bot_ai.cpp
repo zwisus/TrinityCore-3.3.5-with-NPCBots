@@ -671,13 +671,37 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
 
     //select aura level
     if (victim->isType(TYPEMASK_UNIT))
+    {
         if (SpellInfo const* actualSpellInfo = m_botSpellInfo->GetAuraRankForLevel(victim->GetLevel()))
             m_botSpellInfo = actualSpellInfo;
 
-    if (victim->isType(TYPEMASK_UNIT) && (flags & TRIGGERED_FULL_MASK) != TRIGGERED_FULL_MASK &&
-        !(m_botSpellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) &&
-        !IsInBotParty(victim) && !me->IsWithinLOSInMap(victim))
-        return false;
+        if (!m_botSpellInfo->IsTargetingArea())
+        {
+            uint8 approximateAuraEffectMask = 0;
+            uint8 nonAuraEffectMask = 0;
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            {
+                if (m_botSpellInfo->Effects[i].IsAura())
+                    approximateAuraEffectMask |= 1 << i;
+                else if (m_botSpellInfo->Effects[i].IsEffect())
+                    nonAuraEffectMask |= 1 << i;
+            }
+
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            {
+                // check if target already has the same type, but more powerful aura
+                if (!nonAuraEffectMask && (approximateAuraEffectMask & (1 << i)))
+                    if (!victim->IsHighestExclusiveAuraEffect(m_botSpellInfo, AuraType(m_botSpellInfo->Effects[i].ApplyAuraName),
+                        m_botSpellInfo->Effects[i].CalcValue(me, &m_botSpellInfo->Effects[i].BasePoints), approximateAuraEffectMask, false))
+                        return false;
+            }
+        }
+
+        if ((flags & TRIGGERED_FULL_MASK) != TRIGGERED_FULL_MASK &&
+            !(m_botSpellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) &&
+            !IsInBotParty(victim) && !me->IsWithinLOSInMap(victim))
+            return false;
+    }
 
     //check wrong spell interruption attempts
     if (/*victim->isType(TYPEMASK_UNIT) && */!HasBotCommandState(BOT_COMMAND_ISSUED_ORDER) &&
