@@ -39,6 +39,7 @@ class bot_pet_ai : public CreatureAI
         uint8 GetBotCommandState() const { return m_botCommandState; }
         bool IsInBotParty(Unit const* unit) const;
         bool IsTank(Unit const* unit) const;
+        bool IsOffTank(Unit const* unit) const;
         bool IAmFree() const;
 
         static bool CCed(Unit const* target, bool root = false);

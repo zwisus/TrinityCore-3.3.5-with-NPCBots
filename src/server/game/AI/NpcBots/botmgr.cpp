@@ -178,7 +178,7 @@ void BotMgr::LoadConfig(bool reload)
     _basefollowdist         = sConfigMgr->GetIntDefault("NpcBot.BaseFollowDistance", 30);
     _xpReductionNpcBots     = sConfigMgr->GetIntDefault("NpcBot.XpReduction", 0);
     _healTargetIconFlags    = sConfigMgr->GetIntDefault("NpcBot.HealTargetIconsMask", 0);
-    _tankingTargetIconFlags = sConfigMgr->GetIntDefault("NpcBot.TankTargetIconMask", 0);
+    _tankingTargetIconFlags = sConfigMgr->GetIntDefault("NpcBot.OffTankTargetIconMask", 0);
     _dpsTargetIconFlags     = sConfigMgr->GetIntDefault("NpcBot.DPSTargetIconMask", 0);
     _mult_dmg_physical      = sConfigMgr->GetFloatDefault("NpcBot.Mult.Damage.Physical", 1.0f);
     _mult_dmg_spell         = sConfigMgr->GetFloatDefault("NpcBot.Mult.Damage.Spell", 1.0f);
@@ -355,7 +355,7 @@ uint8 BotMgr::GetHealTargetIconFlags()
 {
     return _healTargetIconFlags;
 }
-uint8 BotMgr::GetTankTargetIconFlags()
+uint8 BotMgr::GetOffTankTargetIconFlags()
 {
     return _tankingTargetIconFlags;
 }

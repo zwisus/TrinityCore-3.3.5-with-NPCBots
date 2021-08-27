@@ -1210,7 +1210,7 @@ bool bot_pet_ai::IsInBotParty(Unit const* unit) const
         //pointed target case
         for (uint8 i = 0; i != TARGETICONCOUNT; ++i)
             if (BotMgr::GetHealTargetIconFlags() & GroupIconsFlags[i] &&
-                !((BotMgr::GetTankTargetIconFlags() | BotMgr::GetDPSTargetIconFlags()) & GroupIconsFlags[i]))
+                !((BotMgr::GetOffTankTargetIconFlags() | BotMgr::GetDPSTargetIconFlags()) & GroupIconsFlags[i]))
                 if (ObjectGuid guid = gr->GetTargetIcons()[i])
                     if (guid == unit->GetGUID())
                         return true;
@@ -1946,6 +1946,27 @@ bool bot_pet_ai::IsTank(Unit const* unit) const
                 for (Group::member_citerator itr = slots.begin(); itr != slots.end(); ++itr)
                     if (itr->guid == unit->GetGUID())
                         return itr->flags & MEMBER_FLAG_MAINTANK;
+            }
+        }
+    }
+
+    return false;
+}
+//Unused
+bool bot_pet_ai::IsOffTank(Unit const* unit) const
+{
+    if (Creature const* bot = unit->ToCreature())
+        return bot->GetBotAI() && bot->GetBotAI()->HasRole(BOT_ROLE_TANK_OFF);
+    else if (Player const* player = unit->ToPlayer())
+    {
+        if (Group const* gr = player->GetGroup())
+        {
+            if (gr->isRaidGroup())
+            {
+                Group::MemberSlotList const& slots = gr->GetMemberSlots();
+                for (Group::member_citerator itr = slots.begin(); itr != slots.end(); ++itr)
+                    if (itr->guid == unit->GetGUID())
+                        return itr->flags & MEMBER_FLAG_MAINASSIST;
             }
         }
     }

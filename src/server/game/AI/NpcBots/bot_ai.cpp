@@ -1087,7 +1087,7 @@ bool bot_ai::IsPointedHealTarget(Unit const* target) const
 bool bot_ai::IsPointedTankingTarget(Unit const* target) const
 {
     if (Group const* gr = (IAmFree() ? nullptr : master->GetGroup()))
-        if (uint8 tankFlags = BotMgr::GetTankTargetIconFlags())
+        if (uint8 tankFlags = BotMgr::GetOffTankTargetIconFlags())
             for (uint8 i = 0; i != TARGETICONCOUNT; ++i)
                 if (tankFlags & GroupIconsFlags[i])
                     if (target->GetGUID() == gr->GetTargetIcons()[i])
@@ -3174,7 +3174,7 @@ bool bot_ai::IsInBotParty(Unit const* unit) const
         //pointed target case
         for (uint8 i = 0; i != TARGETICONCOUNT; ++i)
             if ((BotMgr::GetHealTargetIconFlags() & GroupIconsFlags[i]) &&
-                !((BotMgr::GetTankTargetIconFlags() | BotMgr::GetDPSTargetIconFlags()) & GroupIconsFlags[i]))
+                !((BotMgr::GetOffTankTargetIconFlags() | BotMgr::GetDPSTargetIconFlags()) & GroupIconsFlags[i]))
                 if (ObjectGuid guid = gr->GetTargetIcons()[i])
                     if (guid == unit->GetGUID())
                         return true;
@@ -3230,7 +3230,7 @@ bool bot_ai::IsInBotParty(ObjectGuid guid) const
         //pointed target case
         for (uint8 i = 0; i != TARGETICONCOUNT; ++i)
             if ((BotMgr::GetHealTargetIconFlags() & GroupIconsFlags[i]) &&
-                !((BotMgr::GetTankTargetIconFlags() | BotMgr::GetDPSTargetIconFlags()) & GroupIconsFlags[i]))
+                !((BotMgr::GetOffTankTargetIconFlags() | BotMgr::GetDPSTargetIconFlags()) & GroupIconsFlags[i]))
                 if (ObjectGuid gguid = gr->GetTargetIcons()[i])
                     if (gguid == guid)
                         return true;
@@ -3386,12 +3386,12 @@ Unit* bot_ai::_getVehicleTarget(BotVehicleStrats /*strat*/) const
 
     Group const* gr = !IAmFree() ? master->GetGroup() : nullptr;
 
-    if (gr && IsTank())
+    if (gr && IsOffTank())
     {
         Unit* tankTar = nullptr;
         for (int8 i = TARGETICONCOUNT - 1; i >= 0; --i)
         {
-            if (BotMgr::GetTankTargetIconFlags() & GroupIconsFlags[i])
+            if (BotMgr::GetOffTankTargetIconFlags() & GroupIconsFlags[i])
             {
                 if (ObjectGuid guid = gr->GetTargetIcons()[i])
                 {
@@ -3499,12 +3499,12 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
 
     Group const* gr = !IAmFree() ? master->GetGroup() : nullptr;
 
-    if (gr && IsTank())
+    if (gr && IsOffTank())
     {
         Unit* tankTar = nullptr;
         for (int8 i = TARGETICONCOUNT - 1; i >= 0; --i)
         {
-            if (BotMgr::GetTankTargetIconFlags() & GroupIconsFlags[i])
+            if (BotMgr::GetOffTankTargetIconFlags() & GroupIconsFlags[i])
             {
                 if (ObjectGuid guid = gr->GetTargetIcons()[i])
                 {
@@ -8313,6 +8313,9 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                                 case BOT_ROLE_TANK:
                                     ch.SendSysMessage("BOT_ROLE_TANK");
                                     break;
+                                case BOT_ROLE_TANK_OFF:
+                                    ch.SendSysMessage("BOT_ROLE_TANK_OFF");
+                                    break;
                                 case BOT_ROLE_DPS:
                                     ch.SendSysMessage("BOT_ROLE_DPS");
                                     break;
@@ -11421,6 +11424,7 @@ uint32 bot_ai::GetRoleString(uint32 role)
     switch (role)
     {
         case BOT_ROLE_TANK:                 return BOT_TEXT_TANK;
+        case BOT_ROLE_TANK_OFF:             return BOT_TEXT_TANK_OFF;
         case BOT_ROLE_DPS:                  return BOT_TEXT_DPS;
         case BOT_ROLE_HEAL:                 return BOT_TEXT_HEAL;
         case BOT_ROLE_RANGED:               return BOT_TEXT_RANGED;
@@ -11446,7 +11450,22 @@ void bot_ai::ToggleRole(uint32 role, bool force)
 
     roleTimer = 350; //delay next attempt (prevent abuse)
 
-    HasRole(role) ? _roleMask &= ~role : _roleMask |= role;
+    if (HasRole(role))
+    {
+        //linked roles
+        if (role & BOT_ROLE_TANK)
+            role |= BOT_ROLE_TANK_OFF;
+
+        _roleMask &= ~role;
+    }
+    else
+    {
+        //linked roles
+        if (role & BOT_ROLE_TANK_OFF)
+            role |= BOT_ROLE_TANK;
+
+        _roleMask |= role;
+    }
 
     BotDataMgr::UpdateNpcBotData(me->GetEntry(), NPCBOT_UPDATE_ROLES, &_roleMask);
 
@@ -11474,24 +11493,42 @@ bool bot_ai::IsTank(Unit const* unit) const
     if (Creature const* bot = unit->ToCreature())
         return bot->GetBotAI() && bot->GetBotAI()->HasRole(BOT_ROLE_TANK);
 
-    //Maybe use highest hp? TODO: a way to find multiple tanks
     if (Player const* player = unit->ToPlayer())
     {
         if (Group const* gr = player->GetGroup())
         {
-            /*//player role in lfg group
-            if (gr->isLFGGroup())
-            {
-                if (sLFGMgr->GetRoles(unit->GetGUID()) & lfg::PLAYER_ROLE_TANK)
-                    return true;
-            }
-            //raid group Main Tank (/mt)
-            else */if (gr->isRaidGroup())
+            if (gr->isRaidGroup())
             {
                 Group::MemberSlotList const& slots = gr->GetMemberSlots();
                 for (Group::member_citerator itr = slots.begin(); itr != slots.end(); ++itr)
                     if (itr->guid == unit->GetGUID())
                         return itr->flags & MEMBER_FLAG_MAINTANK;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool bot_ai::IsOffTank(Unit const* unit) const
+{
+    if (!unit || unit == me)
+        return HasRole(BOT_ROLE_TANK_OFF);
+
+    if (Creature const* bot = unit->ToCreature())
+        return bot->GetBotAI() && bot->GetBotAI()->HasRole(BOT_ROLE_TANK_OFF);
+
+    //Unused part
+    if (Player const* player = unit->ToPlayer())
+    {
+        if (Group const* gr = player->GetGroup())
+        {
+            if (gr->isRaidGroup())
+            {
+                Group::MemberSlotList const& slots = gr->GetMemberSlots();
+                for (Group::member_citerator itr = slots.begin(); itr != slots.end(); ++itr)
+                    if (itr->guid == unit->GetGUID())
+                        return itr->flags & MEMBER_FLAG_MAINASSIST;
             }
         }
     }

@@ -543,7 +543,8 @@ enum BotCommonValues
     BOT_TEXT_DELAY_ATTACK_BY            = 70642, //"Delay attack by"
     BOT_TEXT_DELAY_HEALING_BY           = 70643, //"Delay healing by"
     BOT_TEXT_SECOND_SHORT               = 70644, //"s"
-    //70645-70799 reserved for custom localization strings
+    BOT_TEXT_TANK_OFF                   = 70645, //"Off-Tank"
+    //70646-70799 reserved for custom localization strings
 //VEHICLE CREATURES
     CREATURE_NEXUS_SKYTALON_1           = 32535, // [Q] Aces High
     CREATURE_EOE_SKYTALON_N             = 30161, // Eye of Eternity
@@ -759,28 +760,29 @@ enum BotRoles : uint32
 {
     BOT_ROLE_NONE                       = 0x00000,
     BOT_ROLE_TANK                       = 0x00001,
-    BOT_ROLE_DPS                        = 0x00002,
-    BOT_ROLE_HEAL                       = 0x00004,
-    BOT_ROLE_RANGED                     = 0x00008,
+    BOT_ROLE_TANK_OFF                   = 0x00002,
+    BOT_ROLE_DPS                        = 0x00004,
+    BOT_ROLE_HEAL                       = 0x00008,
+    BOT_ROLE_RANGED                     = 0x00010,
 
-    BOT_ROLE_PARTY                      = 0x00010, //hidden
+    BOT_ROLE_PARTY                      = 0x00020, //hidden
 
-    BOT_ROLE_GATHERING_MINING           = 0x00020,
-    BOT_ROLE_GATHERING_HERBALISM        = 0x00040,
-    BOT_ROLE_GATHERING_SKINNING         = 0x00080,
-    BOT_ROLE_GATHERING_ENGINEERING      = 0x00100,
+    BOT_ROLE_GATHERING_MINING           = 0x00040,
+    BOT_ROLE_GATHERING_HERBALISM        = 0x00080,
+    BOT_ROLE_GATHERING_SKINNING         = 0x00100,
+    BOT_ROLE_GATHERING_ENGINEERING      = 0x00200,
 
-    BOT_ROLE_AUTOLOOT                   = 0x00200, //not in mask
-    BOT_ROLE_AUTOLOOT_POOR              = 0x00400,
-    BOT_ROLE_AUTOLOOT_COMMON            = 0x00800,
-    BOT_ROLE_AUTOLOOT_UNCOMMON          = 0x01000,
-    BOT_ROLE_AUTOLOOT_RARE              = 0x02000,
-    BOT_ROLE_AUTOLOOT_EPIC              = 0x04000,
-    BOT_ROLE_AUTOLOOT_LEGENDARY         = 0x08000,
+    BOT_ROLE_AUTOLOOT                   = 0x00400, //not in mask
+    BOT_ROLE_AUTOLOOT_POOR              = 0x00800,
+    BOT_ROLE_AUTOLOOT_COMMON            = 0x01000,
+    BOT_ROLE_AUTOLOOT_UNCOMMON          = 0x02000,
+    BOT_ROLE_AUTOLOOT_RARE              = 0x04000,
+    BOT_ROLE_AUTOLOOT_EPIC              = 0x08000,
+    BOT_ROLE_AUTOLOOT_LEGENDARY         = 0x10000,
 
-    BOT_MAX_ROLE                        = 0x10000,
+    BOT_MAX_ROLE                        = 0x20000,
 
-    BOT_ROLE_MASK_MAIN                  = (BOT_ROLE_TANK | BOT_ROLE_DPS | BOT_ROLE_HEAL | BOT_ROLE_RANGED),
+    BOT_ROLE_MASK_MAIN                  = (BOT_ROLE_TANK | BOT_ROLE_TANK_OFF | BOT_ROLE_DPS | BOT_ROLE_HEAL | BOT_ROLE_RANGED),
     //BOT_ROLE_MASK_MAIN_EX               = (BOT_ROLE_TANK | BOT_ROLE_DPS | BOT_ROLE_HEAL | BOT_ROLE_RANGED | BOT_ROLE_PARTY),
     BOT_ROLE_MASK_GATHERING             = (BOT_ROLE_GATHERING_MINING | BOT_ROLE_GATHERING_HERBALISM | BOT_ROLE_GATHERING_SKINNING | BOT_ROLE_GATHERING_ENGINEERING),
     BOT_ROLE_MASK_LOOTING               = (BOT_ROLE_AUTOLOOT_POOR | BOT_ROLE_AUTOLOOT_COMMON | BOT_ROLE_AUTOLOOT_UNCOMMON | BOT_ROLE_AUTOLOOT_RARE | BOT_ROLE_AUTOLOOT_EPIC | BOT_ROLE_AUTOLOOT_LEGENDARY),

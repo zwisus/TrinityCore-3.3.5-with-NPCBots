@@ -69,7 +69,7 @@ class BotMgr
         static bool IsFoodInterruptedByMovement();
         static uint8 GetMaxClassBots();
         static uint8 GetHealTargetIconFlags();
-        static uint8 GetTankTargetIconFlags();
+        static uint8 GetOffTankTargetIconFlags();
         static uint8 GetDPSTargetIconFlags();
         static uint32 GetBaseUpdateDelay();
         static uint32 GetOwnershipExpireTime();

@@ -699,14 +699,15 @@ public:
                     return;
             }
             //DARK COMMAND 2 (distant)
-            if (IsSpellReady(DARK_COMMAND_1, diff, false) && u == me && IsTank() && Rand() < 30 &&
+            if (IsSpellReady(DARK_COMMAND_1, diff, false) && !IAmFree() && u == me && Rand() < 30 && IsTank() &&
+                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK_OFF) == 0) &&
                 !(me->GetLevel() >= 40 && opponent->GetTypeId() == TYPEID_UNIT &&
                 (opponent->ToCreature()->IsDungeonBoss() || opponent->ToCreature()->isWorldBoss())))
             {
                 if (Unit* tUnit = FindDistantTauntTarget())
                 {
                     if (doCast(tUnit, GetSpell(DARK_COMMAND_1)))
-                    {}
+                        return;
                 }
             }
 

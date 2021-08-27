@@ -777,7 +777,8 @@ public:
                     return;
             }
             //GROWL 2 (distant)
-            if (IsSpellReady(GROWL_1, diff, false) && u == me && IsTank() && Rand() < 20 &&
+            if (IsSpellReady(GROWL_1, diff, false) && !IAmFree() && u == me &&  Rand() < 20 &&IsTank() &&
+                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK_OFF) == 0) &&
                 !(me->GetLevel() >= 40 && opponent->GetTypeId() == TYPEID_UNIT &&
                 (opponent->ToCreature()->IsDungeonBoss() || opponent->ToCreature()->isWorldBoss())))
             {

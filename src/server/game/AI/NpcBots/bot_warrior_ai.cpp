@@ -510,7 +510,8 @@ public:
                     return;
             }
             //TAUNT 2 (distant)
-            if (IsSpellReady(TAUNT_1, diff, false) && u == me && Rand() < 35 && IsTank() &&
+            if (IsSpellReady(TAUNT_1, diff, false) && !IAmFree() && u == me && Rand() < 35 && IsTank() &&
+                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK_OFF) == 0) &&
                 !(me->GetLevel() >= 40 && opponent->GetTypeId() == TYPEID_UNIT &&
                 (opponent->ToCreature()->IsDungeonBoss() || opponent->ToCreature()->isWorldBoss())) &&
                 (_inStance(2) || stancetimer <= diff))

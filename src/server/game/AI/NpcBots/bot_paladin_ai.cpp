@@ -1462,7 +1462,8 @@ public:
                     return;
             }
             //HAND OF RECKONING 2 (distant)
-            if (IsSpellReady(HAND_OF_RECKONING_1, diff, false) && u == me && IsTank() && HasRole(BOT_ROLE_DPS) && Rand() < 30 &&
+            if (IsSpellReady(HAND_OF_RECKONING_1, diff, false) && !IAmFree() && u == me && Rand() < 30 && IsTank() && HasRole(BOT_ROLE_DPS) &&
+                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK_OFF) == 0) &&
                 !(me->GetLevel() >= 40 && opponent->GetTypeId() == TYPEID_UNIT &&
                 (opponent->ToCreature()->IsDungeonBoss() || opponent->ToCreature()->isWorldBoss())))
             {
