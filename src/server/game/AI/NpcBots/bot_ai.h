@@ -231,6 +231,14 @@ class bot_ai : public CreatureAI
         Unit* HelpFindCastingTarget(float maxdist = 10, float mindist = 0, uint32 spellId = 0, uint8 minHpPct = 0) const { return FindCastingTarget(maxdist, mindist, spellId, minHpPct); }
         void HelpGetNearbyTargetsList(std::list<Unit*> &targets, float maxdist, uint8 CCoption, WorldObject const* source = nullptr) const { GetNearbyTargetsList(targets, maxdist, CCoption, source); }
 
+        bool IsPointedHealTarget(Unit const* target) const;
+        bool IsPointedTankingTarget(Unit const* target) const;
+        bool IsPointedDPSTarget(Unit const* target) const;
+        bool IsPointedRangedDPSTarget(Unit const* target) const;
+        bool IsPointedNoDPSTarget(Unit const* target) const;
+
+        static bool IsDamagingSpell(SpellInfo const* spellInfo);
+
     protected:
         explicit bot_ai(Creature* creature);
 
@@ -239,10 +247,6 @@ class bot_ai : public CreatureAI
 
         virtual bool HealTarget(Unit* /*target*/, uint32 /*diff*/) { return false; }
         virtual bool BuffTarget(Unit* /*target*/, uint32 /*diff*/) { return false; }
-
-        bool IsPointedHealTarget(Unit const* target) const;
-        bool IsPointedTankingTarget(Unit const* target) const;
-        bool IsPointedDPSTarget(Unit const* target) const;
 
         void BuffAndHealGroup(uint32 diff);
         void RezGroup(uint32 REZZ);

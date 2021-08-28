@@ -490,6 +490,9 @@ class UndeadCCUnitCheck
                 return false;
             if (u->IsImmunedToSpell(sSpellMgr->GetSpellInfo(m_spellId), me))
                 return false;
+            if (me->GetTypeId() == TYPEID_UNIT && me->ToCreature()->GetBotAI() && me->ToCreature()->GetBotAI()->IsPointedNoDPSTarget(u) &&
+                bot_ai::IsDamagingSpell(sSpellMgr->GetSpellInfo(m_spellId)))
+                return false;
 
             return true;
         }
@@ -539,6 +542,8 @@ class RootUnitCheck
                 u->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE)/*hex*/ ||
                 u->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STUN, SPELLFAMILY_PALADIN, 0x4)/*repentance*/ ||
                 u->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STUN, SPELLFAMILY_PRIEST, 0x40000000)/*shackle undead*/)
+                return false;
+            if (m_ai->IsPointedNoDPSTarget(u) && bot_ai::IsDamagingSpell(sSpellMgr->GetSpellInfo(m_spellId)))
                 return false;
             if (!u->IsImmunedToSpell(sSpellMgr->GetSpellInfo(m_spellId), me))
                 return true;
@@ -614,6 +619,10 @@ class CastingUnitCheck
 
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(m_spell);
                 if (u->IsImmunedToSpell(spellInfo, me))
+                    return false;
+
+                if (me->GetTypeId() == TYPEID_UNIT && me->ToCreature()->GetBotAI() && me->ToCreature()->GetBotAI()->IsPointedNoDPSTarget(u) &&
+                    bot_ai::IsDamagingSpell(spellInfo))
                     return false;
 
                 if (!CastInterruptionCheck(u, spellInfo))
@@ -738,7 +747,8 @@ class TranquilTargetCheck
                 ai->IsInBotParty(u->GetVictim()) &&
                 u->GetReactionTo(me) <= REP_NEUTRAL)
             {
-                if (u->IsImmunedToSpell(sSpellMgr->GetSpellInfo(19801), me)) return false;//immune to tranquilizing shot
+                if (u->IsImmunedToSpell(sSpellMgr->GetSpellInfo(19801), me))
+                    return false;//immune to tranquilizing shot
                 Unit::AuraMap const &Auras = u->GetOwnedAuras();
                 for (Unit::AuraMap::const_iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
                 {

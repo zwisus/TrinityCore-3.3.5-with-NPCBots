@@ -1107,6 +1107,29 @@ bool bot_ai::IsPointedDPSTarget(Unit const* target) const
 
     return false;
 }
+//unused
+bool bot_ai::IsPointedRangedDPSTarget(Unit const* target) const
+{
+    if (Group const* gr = (IAmFree() ? nullptr : master->GetGroup()))
+        if (uint8 dpsFlags = BotMgr::GetRangedDPSTargetIconFlags())
+            for (uint8 i = 0; i != TARGETICONCOUNT; ++i)
+                if (dpsFlags & GroupIconsFlags[i])
+                    if (target->GetGUID() == gr->GetTargetIcons()[i])
+                        return true;
+
+    return false;
+}
+bool bot_ai::IsPointedNoDPSTarget(Unit const* target) const
+{
+    if (Group const* gr = (IAmFree() ? nullptr : master->GetGroup()))
+        if (uint8 dpsFlags = BotMgr::GetNoDPSTargetIconFlags())
+            for (uint8 i = 0; i != TARGETICONCOUNT; ++i)
+                if (dpsFlags & GroupIconsFlags[i])
+                    if (target->GetGUID() == gr->GetTargetIcons()[i])
+                        return true;
+
+    return false;
+}
 // Buffs And Heal (really)
 // Priority as follows: 1) heal players 2) buff players 3) heal bots 4) buff bots
 // Priority adjustments to be considered
@@ -3314,6 +3337,8 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell) const
         return false;
     if (!CanBotAttackOnVehicle())
         return false;
+    if (IsPointedNoDPSTarget(target))
+        return false;
 
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
@@ -3642,9 +3667,9 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
     //Follow if...
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() / 2 : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
-    float spelldist;
     if (!IAmFree() && (HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED)))
     {
+        float spelldist;
         uint8 rangeMode = master->GetBotMgr()->GetBotAttackRangeMode();
         if (rangeMode == BOT_ATTACK_RANGE_EXACT)
             spelldist = master->GetBotMgr()->GetBotExactAttackRange();
@@ -15492,6 +15517,31 @@ bool bot_ai::OnGossipSelectCode(Player* player, uint32 /*menuId*/, uint32 gossip
     uint32 sender = player->PlayerTalkClass->GetGossipOptionSender(gossipListId);
     uint32 action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
     return OnGossipSelectCode(player, me, sender, action, code);
+}
+
+bool bot_ai::IsDamagingSpell(SpellInfo const* spellInfo)
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (spellInfo->Effects[i].IsEffect())
+        {
+            switch (spellInfo->Effects[i].Effect)
+            {
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+                case SPELL_EFFECT_HEALTH_LEECH:
+                    return true;
+                default:
+                    break;
+            }
+        }
+    }
+
+    return false;
 }
 
 bool bot_ai::IsBotCustomSpell(uint32 spellId)

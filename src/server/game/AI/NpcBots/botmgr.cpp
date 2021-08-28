@@ -33,6 +33,7 @@ uint8 _healTargetIconFlags;
 uint8 _offTankingTargetIconFlags;
 uint8 _dpsTargetIconFlags;
 uint8 _rangedDpsTargetIconFlags;
+uint8 _noDpsTargetIconFlags;
 int32 _botInfoPacketsLimit;
 uint32 _npcBotsCost;
 uint32 _npcBotUpdateDelayBase;
@@ -182,6 +183,7 @@ void BotMgr::LoadConfig(bool reload)
     _offTankingTargetIconFlags      = sConfigMgr->GetIntDefault("NpcBot.OffTankTargetIconMask", 0);
     _dpsTargetIconFlags             = sConfigMgr->GetIntDefault("NpcBot.DPSTargetIconMask", 0);
     _rangedDpsTargetIconFlags       = sConfigMgr->GetIntDefault("NpcBot.RangedDPSTargetIconMask", 0);
+    _noDpsTargetIconFlags           = sConfigMgr->GetIntDefault("NpcBot.NoDPSTargetIconMask", 0);
     _mult_dmg_physical              = sConfigMgr->GetFloatDefault("NpcBot.Mult.Damage.Physical", 1.0f);
     _mult_dmg_spell                 = sConfigMgr->GetFloatDefault("NpcBot.Mult.Damage.Spell", 1.0f);
     _mult_healing                   = sConfigMgr->GetFloatDefault("NpcBot.Mult.Healing", 1.0f);
@@ -223,6 +225,15 @@ void BotMgr::LoadConfig(bool reload)
     _mult_dmg_physical              = std::min<float>(_mult_dmg_physical, 10.f);
     _mult_dmg_spell                 = std::min<float>(_mult_dmg_spell, 10.f);
     _mult_healing                   = std::min<float>(_mult_healing,   10.f);
+
+    //exclusions
+    uint8 dpsFlags = /*_offTankingTargetIconFlags | */_dpsTargetIconFlags | _rangedDpsTargetIconFlags;
+    if (uint8 interFlags = (_noDpsTargetIconFlags & dpsFlags))
+    {
+        _noDpsTargetIconFlags &= ~interFlags;
+        TC_LOG_ERROR("scripts", "BotMgr::LoadConfig: _noDpsTargetIconFlags intersects with targets flags 0x%02X! Removed, new mask: 0x%02X",
+            uint32(interFlags), uint32(_noDpsTargetIconFlags));
+    }
 }
 
 uint8 BotMgr::GetNpcBotsCount() const
@@ -368,6 +379,10 @@ uint8 BotMgr::GetDPSTargetIconFlags()
 uint8 BotMgr::GetRangedDPSTargetIconFlags()
 {
     return _rangedDpsTargetIconFlags;
+}
+uint8 BotMgr::GetNoDPSTargetIconFlags()
+{
+    return _noDpsTargetIconFlags;
 }
 uint32 BotMgr::GetBaseUpdateDelay()
 {

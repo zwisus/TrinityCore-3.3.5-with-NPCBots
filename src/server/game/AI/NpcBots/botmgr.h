@@ -72,6 +72,7 @@ class BotMgr
         static uint8 GetOffTankTargetIconFlags();
         static uint8 GetDPSTargetIconFlags();
         static uint8 GetRangedDPSTargetIconFlags();
+        static uint8 GetNoDPSTargetIconFlags();
         static uint32 GetBaseUpdateDelay();
         static uint32 GetOwnershipExpireTime();
         static float GetBotStatLimitDodge();
