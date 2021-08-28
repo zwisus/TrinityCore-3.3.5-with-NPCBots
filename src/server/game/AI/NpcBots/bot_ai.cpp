@@ -720,6 +720,7 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
         //return false;
     }
 
+    //spells with cast time
     if (me->isMoving() && !HasBotCommandState(BOT_COMMAND_ISSUED_ORDER) &&
         ((m_botSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
         //autorepeat spells missing SPELL_INTERRUPT_FLAG_MOVEMENT
@@ -728,9 +729,11 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
         //Mind Flay (Rank 8)
         || spellId == 48155) &&
         !(m_botSpellInfo->Attributes & SPELL_ATTR0_ON_NEXT_SWING) && !m_botSpellInfo->IsAutoRepeatRangedSpell() &&
-        !(flags & TRIGGERED_FULL_MASK) && (m_botSpellInfo->IsChanneled() || m_botSpellInfo->CalcCastTime()))
+        !(flags & TRIGGERED_CAST_DIRECTLY) && (m_botSpellInfo->IsChanneled() || m_botSpellInfo->CalcCastTime()))
     {
         if (JumpingOrFalling())
+            return false;
+        if (!me->GetVictim() && me->IsInWorld() && (me->GetMap()->IsRaid() || me->GetMap()->IsHeroic()))
             return false;
         if (!m_botSpellInfo->HasEffect(SPELL_EFFECT_HEAL) && Rand() > (IAmFree() ? 80 : 50))
             return false;
