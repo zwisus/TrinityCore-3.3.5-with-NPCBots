@@ -4167,13 +4167,13 @@ NpcBot.XpReduction = 0
 #    NpcBot.HealTargetIconsMask
 #    NpcBot.OffTankTargetIconMask
 #    NpcBot.DPSTargetIconMask
+#    NpcBot.RangedDPSTargetIconMask
 #        Description: Icon number bitmask which bots use to search for primary attack
 #                     target, off-tanking target, or target to heal and protect (out of party).
 #        Note:        Many creatures cannot accept heal.
 #        Note2:       While icon is active NPCBot ddealers/tanks will ignore any other targets
 #                     and will not break from combat to follow you.
 #        Note3:       If you set multiple targets only one target at a time will be used.
-#        Note4:       Off-tanking bots will prioritize DPS targets.
 #        Example:     To check Star, Triangle and Square we need 1 + 8 + 32 = 41.
 #        Default:     0 (Disable)
 #                     1 - Star
@@ -4188,6 +4188,7 @@ NpcBot.XpReduction = 0
 NpcBot.HealTargetIconsMask = 0
 NpcBot.OffTankTargetIconMask = 0
 NpcBot.DPSTargetIconMask = 0
+NpcBot.RangedDPSTargetIconMask = 0
 
 #
 #    NpcBot.Mult.Damage.Physical

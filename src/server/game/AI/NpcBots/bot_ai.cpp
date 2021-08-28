@@ -3423,9 +3423,25 @@ Unit* bot_ai::_getVehicleTarget(BotVehicleStrats /*strat*/) const
     {
         for (int8 i = TARGETICONCOUNT - 1; i >= 0; --i)
         {
-            if (BotMgr::GetDPSTargetIconFlags() & GroupIconsFlags[i])
+            if (ObjectGuid guid = gr->GetTargetIcons()[i])
             {
-                if (ObjectGuid guid = gr->GetTargetIcons()[i])
+                if ((HasRole(BOT_ROLE_RANGED)|| HasVehicleRoleOverride(BOT_ROLE_RANGED)) &&
+                    (BotMgr::GetRangedDPSTargetIconFlags() & GroupIconsFlags[i]))
+                {
+                    if (mytar && mytar->GetGUID() == guid)
+                        return mytar;
+
+                    if (Unit* unit = ObjectAccessor::GetUnit(*me, guid))
+                    {
+                        if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
+                            unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
+                        {
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: found dps icon target %s", unit->GetName().c_str());
+                            return unit;
+                        }
+                    }
+                }
+                if (BotMgr::GetDPSTargetIconFlags() & GroupIconsFlags[i])
                 {
                     if (mytar && mytar->GetGUID() == guid)
                         return mytar;
@@ -3456,8 +3472,8 @@ Unit* bot_ai::_getVehicleTarget(BotVehicleStrats /*strat*/) const
 
     if (mmover->IsAlive())
     {
-        if (followdist == 0 || veh->GetDistance(mmover) > followdist ||
-            (mytar && mmover->GetDistance(mytar) > followdist / 2 && !mytar->IsWithinLOSInMap(veh)))
+        if (followdist == 0 || (mytar &&
+            (mmover->GetDistance(mytar) > followdist || (mmover->GetDistance(mytar) > followdist * 0.75f && !mytar->IsWithinLOSInMap(veh)))))
         {
             //if (mytar)
             //{
@@ -3544,9 +3560,24 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
     {
         for (int8 i = TARGETICONCOUNT - 1; i >= 0; --i)
         {
-            if (BotMgr::GetDPSTargetIconFlags() & GroupIconsFlags[i])
+            if (ObjectGuid guid = gr->GetTargetIcons()[i])
             {
-                if (ObjectGuid guid = gr->GetTargetIcons()[i])
+                if (HasRole(BOT_ROLE_RANGED) && (BotMgr::GetRangedDPSTargetIconFlags() & GroupIconsFlags[i]))
+                {
+                    if (mytar && mytar->GetGUID() == guid)
+                        return mytar;
+
+                    if (Unit* unit = ObjectAccessor::GetUnit(*me, guid))
+                    {
+                        if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
+                            unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
+                        {
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: found dps icon target %s", unit->GetName().c_str());
+                            return unit;
+                        }
+                    }
+                }
+                if (BotMgr::GetDPSTargetIconFlags() & GroupIconsFlags[i])
                 {
                     if (mytar && mytar->GetGUID() == guid)
                         return mytar;

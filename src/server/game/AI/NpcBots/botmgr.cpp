@@ -30,8 +30,9 @@ uint8 _maxNpcBots;
 uint8 _maxClassNpcBots;
 uint8 _xpReductionNpcBots;
 uint8 _healTargetIconFlags;
-uint8 _tankingTargetIconFlags;
+uint8 _offTankingTargetIconFlags;
 uint8 _dpsTargetIconFlags;
+uint8 _rangedDpsTargetIconFlags;
 int32 _botInfoPacketsLimit;
 uint32 _npcBotsCost;
 uint32 _npcBotUpdateDelayBase;
@@ -172,55 +173,56 @@ void BotMgr::LoadConfig(bool reload)
     else if (!reload)
         return;
 
-    _enableNpcBots          = sConfigMgr->GetBoolDefault("NpcBot.Enable", true);
-    _maxNpcBots             = sConfigMgr->GetIntDefault("NpcBot.MaxBots", 1);
-    _maxClassNpcBots        = sConfigMgr->GetIntDefault("NpcBot.MaxBotsPerClass", 1);
-    _basefollowdist         = sConfigMgr->GetIntDefault("NpcBot.BaseFollowDistance", 30);
-    _xpReductionNpcBots     = sConfigMgr->GetIntDefault("NpcBot.XpReduction", 0);
-    _healTargetIconFlags    = sConfigMgr->GetIntDefault("NpcBot.HealTargetIconsMask", 0);
-    _tankingTargetIconFlags = sConfigMgr->GetIntDefault("NpcBot.OffTankTargetIconMask", 0);
-    _dpsTargetIconFlags     = sConfigMgr->GetIntDefault("NpcBot.DPSTargetIconMask", 0);
-    _mult_dmg_physical      = sConfigMgr->GetFloatDefault("NpcBot.Mult.Damage.Physical", 1.0f);
-    _mult_dmg_spell         = sConfigMgr->GetFloatDefault("NpcBot.Mult.Damage.Spell", 1.0f);
-    _mult_healing           = sConfigMgr->GetFloatDefault("NpcBot.Mult.Healing", 1.0f);
-    _enableNpcBotsDungeons  = sConfigMgr->GetBoolDefault("NpcBot.Enable.Dungeon", true);
-    _enableNpcBotsRaids     = sConfigMgr->GetBoolDefault("NpcBot.Enable.Raid", false);
-    _enableNpcBotsBGs       = sConfigMgr->GetBoolDefault("NpcBot.Enable.BG", false);
-    _enableNpcBotsArenas    = sConfigMgr->GetBoolDefault("NpcBot.Enable.Arena", false);
-    _enableDungeonFinder    = sConfigMgr->GetBoolDefault("NpcBot.Enable.DungeonFinder", true);
-    _limitNpcBotsDungeons   = sConfigMgr->GetBoolDefault("NpcBot.Limit.Dungeon", true);
-    _limitNpcBotsRaids      = sConfigMgr->GetBoolDefault("NpcBot.Limit.Raid", true);
-    _botInfoPacketsLimit    = sConfigMgr->GetIntDefault("NpcBot.InfoPacketsLimit", -1);
-    _npcBotsCost            = sConfigMgr->GetIntDefault("NpcBot.Cost", 1000000);
-    _npcBotUpdateDelayBase  = sConfigMgr->GetIntDefault("NpcBot.UpdateDelay.Base", 0);
-    _npcBotEngageDelayDPS_default = sConfigMgr->GetIntDefault("NpcBot.EngageDelay.DPS", 0);
-    _npcBotEngageDelayHeal_default = sConfigMgr->GetIntDefault("NpcBot.EngageDelay.Heal", 0);
-    _npcBotOwnerExpireTime  = sConfigMgr->GetIntDefault("NpcBot.OwnershipExpireTime", 0);
-    _botPvP                 = sConfigMgr->GetBoolDefault("NpcBot.PvP", true);
-    _botMovementFoodInterrupt=sConfigMgr->GetBoolDefault("NpcBot.Movements.InterruptFood", false);
-    _displayEquipment       = sConfigMgr->GetBoolDefault("NpcBot.EquipmentDisplay.Enable", true);
-    _showCloak              = sConfigMgr->GetBoolDefault("NpcBot.EquipmentDisplay.ShowCloak", true);
-    _showHelm               = sConfigMgr->GetBoolDefault("NpcBot.EquipmentDisplay.ShowHelm", false);
-    _sendEquipListItems     = sConfigMgr->GetBoolDefault("NpcBot.Gossip.ShowEquipmentListItems", false);
-    _enableclass_blademaster= sConfigMgr->GetBoolDefault("NpcBot.NewClasses.Blademaster.Enable", true);
-    _enableclass_sphynx     = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.ObsidianDestroyer.Enable", true);
-    _enableclass_archmage   = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.Archmage.Enable", true);
-    _enableclass_dreadlord  = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.Dreadlord.Enable", true);
-    _enableclass_spellbreaker=sConfigMgr->GetBoolDefault("NpcBot.NewClasses.SpellBreaker.Enable", true);
-    _enableclass_darkranger = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.DarkRanger.Enable", true);
-    _botStatLimits          = sConfigMgr->GetBoolDefault("NpcBot.Stats.Limits.Enable", false);
-    _botStatLimits_dodge    = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Dodge", 95.0f);
-    _botStatLimits_parry    = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Parry", 95.0f);
-    _botStatLimits_block    = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Block", 95.0f);
-    _botStatLimits_crit     = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Crit", 95.0f);
+    _enableNpcBots                  = sConfigMgr->GetBoolDefault("NpcBot.Enable", true);
+    _maxNpcBots                     = sConfigMgr->GetIntDefault("NpcBot.MaxBots", 1);
+    _maxClassNpcBots                = sConfigMgr->GetIntDefault("NpcBot.MaxBotsPerClass", 1);
+    _basefollowdist                 = sConfigMgr->GetIntDefault("NpcBot.BaseFollowDistance", 30);
+    _xpReductionNpcBots             = sConfigMgr->GetIntDefault("NpcBot.XpReduction", 0);
+    _healTargetIconFlags            = sConfigMgr->GetIntDefault("NpcBot.HealTargetIconsMask", 0);
+    _offTankingTargetIconFlags      = sConfigMgr->GetIntDefault("NpcBot.OffTankTargetIconMask", 0);
+    _dpsTargetIconFlags             = sConfigMgr->GetIntDefault("NpcBot.DPSTargetIconMask", 0);
+    _rangedDpsTargetIconFlags       = sConfigMgr->GetIntDefault("NpcBot.RangedDPSTargetIconMask", 0);
+    _mult_dmg_physical              = sConfigMgr->GetFloatDefault("NpcBot.Mult.Damage.Physical", 1.0f);
+    _mult_dmg_spell                 = sConfigMgr->GetFloatDefault("NpcBot.Mult.Damage.Spell", 1.0f);
+    _mult_healing                   = sConfigMgr->GetFloatDefault("NpcBot.Mult.Healing", 1.0f);
+    _enableNpcBotsDungeons          = sConfigMgr->GetBoolDefault("NpcBot.Enable.Dungeon", true);
+    _enableNpcBotsRaids             = sConfigMgr->GetBoolDefault("NpcBot.Enable.Raid", false);
+    _enableNpcBotsBGs               = sConfigMgr->GetBoolDefault("NpcBot.Enable.BG", false);
+    _enableNpcBotsArenas            = sConfigMgr->GetBoolDefault("NpcBot.Enable.Arena", false);
+    _enableDungeonFinder            = sConfigMgr->GetBoolDefault("NpcBot.Enable.DungeonFinder", true);
+    _limitNpcBotsDungeons           = sConfigMgr->GetBoolDefault("NpcBot.Limit.Dungeon", true);
+    _limitNpcBotsRaids              = sConfigMgr->GetBoolDefault("NpcBot.Limit.Raid", true);
+    _botInfoPacketsLimit            = sConfigMgr->GetIntDefault("NpcBot.InfoPacketsLimit", -1);
+    _npcBotsCost                    = sConfigMgr->GetIntDefault("NpcBot.Cost", 1000000);
+    _npcBotUpdateDelayBase          = sConfigMgr->GetIntDefault("NpcBot.UpdateDelay.Base", 0);
+    _npcBotEngageDelayDPS_default   = sConfigMgr->GetIntDefault("NpcBot.EngageDelay.DPS", 0);
+    _npcBotEngageDelayHeal_default  = sConfigMgr->GetIntDefault("NpcBot.EngageDelay.Heal", 0);
+    _npcBotOwnerExpireTime          = sConfigMgr->GetIntDefault("NpcBot.OwnershipExpireTime", 0);
+    _botPvP                         = sConfigMgr->GetBoolDefault("NpcBot.PvP", true);
+    _botMovementFoodInterrupt       = sConfigMgr->GetBoolDefault("NpcBot.Movements.InterruptFood", false);
+    _displayEquipment               = sConfigMgr->GetBoolDefault("NpcBot.EquipmentDisplay.Enable", true);
+    _showCloak                      = sConfigMgr->GetBoolDefault("NpcBot.EquipmentDisplay.ShowCloak", true);
+    _showHelm                       = sConfigMgr->GetBoolDefault("NpcBot.EquipmentDisplay.ShowHelm", false);
+    _sendEquipListItems             = sConfigMgr->GetBoolDefault("NpcBot.Gossip.ShowEquipmentListItems", false);
+    _enableclass_blademaster        = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.Blademaster.Enable", true);
+    _enableclass_sphynx             = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.ObsidianDestroyer.Enable", true);
+    _enableclass_archmage           = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.Archmage.Enable", true);
+    _enableclass_dreadlord          = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.Dreadlord.Enable", true);
+    _enableclass_spellbreaker       = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.SpellBreaker.Enable", true);
+    _enableclass_darkranger         = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.DarkRanger.Enable", true);
+    _botStatLimits                  = sConfigMgr->GetBoolDefault("NpcBot.Stats.Limits.Enable", false);
+    _botStatLimits_dodge            = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Dodge", 95.0f);
+    _botStatLimits_parry            = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Parry", 95.0f);
+    _botStatLimits_block            = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Block", 95.0f);
+    _botStatLimits_crit             = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Crit", 95.0f);
 
     //limits
-    _mult_dmg_physical      = std::max<float>(_mult_dmg_physical, 0.1f);
-    _mult_dmg_spell         = std::max<float>(_mult_dmg_spell, 0.1f);
-    _mult_healing           = std::max<float>(_mult_healing,   0.1f);
-    _mult_dmg_physical      = std::min<float>(_mult_dmg_physical, 10.f);
-    _mult_dmg_spell         = std::min<float>(_mult_dmg_spell, 10.f);
-    _mult_healing           = std::min<float>(_mult_healing,   10.f);
+    _mult_dmg_physical              = std::max<float>(_mult_dmg_physical, 0.1f);
+    _mult_dmg_spell                 = std::max<float>(_mult_dmg_spell, 0.1f);
+    _mult_healing                   = std::max<float>(_mult_healing,   0.1f);
+    _mult_dmg_physical              = std::min<float>(_mult_dmg_physical, 10.f);
+    _mult_dmg_spell                 = std::min<float>(_mult_dmg_spell, 10.f);
+    _mult_healing                   = std::min<float>(_mult_healing,   10.f);
 }
 
 uint8 BotMgr::GetNpcBotsCount() const
@@ -357,11 +359,15 @@ uint8 BotMgr::GetHealTargetIconFlags()
 }
 uint8 BotMgr::GetOffTankTargetIconFlags()
 {
-    return _tankingTargetIconFlags;
+    return _offTankingTargetIconFlags;
 }
 uint8 BotMgr::GetDPSTargetIconFlags()
 {
     return _dpsTargetIconFlags;
+}
+uint8 BotMgr::GetRangedDPSTargetIconFlags()
+{
+    return _rangedDpsTargetIconFlags;
 }
 uint32 BotMgr::GetBaseUpdateDelay()
 {
