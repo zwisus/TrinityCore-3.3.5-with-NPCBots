@@ -770,12 +770,13 @@ public:
 
         bool HOFTarget(Unit* target, uint32 /*diff*/)
         {
+            bool canUnstun = me->GetLevel() >= 35 && _spec == BOT_SPEC_PALADIN_PROTECTION;
             if (target->HasAuraType(SPELL_AURA_MECHANIC_IMMUNITY))
             {
                 if (target->HasAuraTypeWithMiscvalue(SPELL_AURA_MECHANIC_IMMUNITY, 11) &&
                     target->HasAuraTypeWithMiscvalue(SPELL_AURA_MECHANIC_IMMUNITY, 7))
                     return false; //immune to root and snares
-                if (me->GetLevel() >= 35 && target->HasAuraTypeWithMiscvalue(SPELL_AURA_MECHANIC_IMMUNITY, 12))
+                if (canUnstun && target->HasAuraTypeWithMiscvalue(SPELL_AURA_MECHANIC_IMMUNITY, 12))
                     return false; //immune to stuns
             }
 
@@ -791,7 +792,7 @@ public:
                 if (spellInfo->Attributes & SPELL_ATTR0_HIDDEN_CLIENTSIDE) continue;
                 //if (spellInfo->AttributesEx & SPELL_ATTR1_DONT_DISPLAY_IN_AURA_BAR) continue;
                 if (spellInfo->GetSpellMechanicMaskByEffectMask(app->GetEffectMask()) &
-                    ((1<<MECHANIC_SNARE) | (1<<MECHANIC_ROOT) | (me->GetLevel() < 35 ? 0 : (1<<MECHANIC_STUN))))
+                    ((1<<MECHANIC_SNARE) | (1<<MECHANIC_ROOT) | (!canUnstun ? 0 : (1<<MECHANIC_STUN))))
                 {
                     uint32 dispel = spellInfo->Dispel;
                     uint32 spell;
