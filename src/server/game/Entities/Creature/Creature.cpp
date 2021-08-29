@@ -3801,10 +3801,10 @@ MeleeHitOutcome Creature::BotRollMeleeOutcomeAgainst(Unit const* victim, WeaponA
     return bot_AI ? bot_AI->BotRollCustomMeleeOutcomeAgainst(victim, attType) : RollMeleeOutcomeAgainst(victim, attType);
 }
 
-void Creature::CastCreatureItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx)
+void Creature::CastCreatureItemCombatSpell(DamageInfo const& damageInfo)
 {
     if (bot_AI)
-        bot_AI->CastBotItemCombatSpell(target, attType, procVictim, procEx);
+        bot_AI->CastBotItemCombatSpell(damageInfo);
 }
 
 bool Creature::HasSpellCooldown(uint32 spell_id) const

@@ -2599,7 +2599,7 @@ void Spell::TargetInfo::DoDamageAndTriggers(Spell* spell)
             if (caster->GetTypeId() == TYPEID_UNIT && caster->ToCreature()->IsNPCBot() && (procSpellType & (PROC_SPELL_TYPE_DAMAGE | PROC_SPELL_TYPE_NO_DMG_HEAL)) &&
                 !(spell->m_spellInfo->Attributes & SPELL_ATTR0_STOP_ATTACK_TARGET) && !spell->m_spellInfo->HasAttribute(SPELL_ATTR4_CANT_TRIGGER_ITEM_SPELLS) &&
                 (spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE || spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED))
-                caster->ToCreature()->CastCreatureItemCombatSpell(spell->unitTarget, spell->m_attackType, procVictim, hitMask);
+                caster->ToCreature()->CastCreatureItemCombatSpell(*spellDamageInfo);
             //end npcbot
         }
 

@@ -433,7 +433,7 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
 
         MeleeHitOutcome BotRollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackType attType) const;
 
-        void CastCreatureItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx);
+        void CastCreatureItemCombatSpell(DamageInfo const& damageInfo);
 
         bool HasSpellCooldown(uint32 spellId) const;
         void AddBotSpellCooldown(uint32 spellId, uint32 cooldown);

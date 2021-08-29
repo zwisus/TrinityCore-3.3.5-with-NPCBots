@@ -176,8 +176,8 @@ class bot_ai : public CreatureAI
         bool UnEquipAll(ObjectGuid::LowType receiver);
         float GetAverageItemLevel() const;
 
-        void CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx);
-        void CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item* item, ItemTemplate const* proto);
+        void CastBotItemCombatSpell(DamageInfo const& damageInfo);
+        void CastBotItemCombatSpell(DamageInfo const& damageInfo, Item* item, ItemTemplate const* proto);
         void OnBotSpellInterrupted(SpellSchoolMask schoolMask, uint32 unTimeMs);
         void OnBotSpellGo(Spell const* spell, bool ok = true);
         void OnBotOwnerSpellGo(Spell const* spell, bool ok = true);

@@ -12800,12 +12800,13 @@ void bot_ai::OnBotSpellInterrupted(SpellSchoolMask schoolMask, uint32 unTimeMs)
     GC_Timer = 0; //reset global cooldown since cast is canceled
 }
 
-void bot_ai::CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx)
+void bot_ai::CastBotItemCombatSpell(DamageInfo const& damageInfo)
 {
+    Unit* target = damageInfo.GetVictim();
     if (!target || !target->IsAlive() || target == me)
         return;
 
-    if (!me->CanUseAttackType(attType))
+    if (!me->CanUseAttackType(damageInfo.GetAttackType()))
         return;
 
     Item* item;
@@ -12832,7 +12833,7 @@ void bot_ai::CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint
         if (proto->Class == ITEM_CLASS_WEAPON)
         {
             // offhand item cannot proc from main hand hit etc
-            switch (attType)
+            switch (damageInfo.GetAttackType())
             {
                 case BASE_ATTACK:   slot = BOT_SLOT_MAINHAND;   break;
                 case OFF_ATTACK:    slot = BOT_SLOT_OFFHAND;    break;
@@ -12843,16 +12844,17 @@ void bot_ai::CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint
                 continue;
         }
 
-        CastBotItemCombatSpell(target, attType, procVictim, procEx, item, proto);
+        CastBotItemCombatSpell(damageInfo, item, proto);
     }
 }
 
-void bot_ai::CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item* item, ItemTemplate const* proto)
+void bot_ai::CastBotItemCombatSpell(DamageInfo const& damageInfo, Item* item, ItemTemplate const* proto)
 {
     //TODO: custom spell triggers maybe?
 
     // Can do effect if any damage done to target
-    if (procVictim & PROC_FLAG_TAKEN_DAMAGE)
+    bool canTrigger = (damageInfo.GetHitMask() & (PROC_HIT_NORMAL | PROC_HIT_CRITICAL | PROC_HIT_ABSORB)) != 0;
+    if (canTrigger)
     {
         for (uint8 i = 0; i != MAX_ITEM_PROTO_SPELLS; ++i)
         {
@@ -12880,7 +12882,7 @@ void bot_ai::CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint
 
             if (spellData.SpellPPMRate)
             {
-                uint32 WeaponSpeed = me->GetAttackTime(attType);
+                uint32 WeaponSpeed = me->GetAttackTime(damageInfo.GetAttackType());
                 chance = me->GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate, spellInfo);
             }
             else if (chance > 100.0f)
@@ -12889,7 +12891,7 @@ void bot_ai::CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint
             if (roll_chance_f(chance))
             {
                 CastSpellExtraArgs args(item);
-                me->CastSpell(me, spellInfo->Id, args);
+                me->CastSpell(damageInfo.GetVictim(), spellInfo->Id, args);
             }
         }
     }
@@ -12908,30 +12910,28 @@ void bot_ai::CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint
                 continue;
 
             SpellEnchantProcEntry const* entry = sSpellMgr->GetSpellEnchantProcEvent(enchant_id);
-
             if (entry && entry->HitMask)
             {
                 // Check hit/crit/dodge/parry requirement
-                if ((entry->HitMask & procEx) == 0)
+                if ((entry->HitMask & damageInfo.GetHitMask()) == 0)
                     continue;
             }
             else
             {
                 // Can do effect if any damage done to target
-                if (!(procVictim & PROC_FLAG_TAKEN_DAMAGE))
+                if (!canTrigger)
                     continue;
             }
 
+            // check if enchant procs only on white hits
+            if (entry && (entry->AttributesMask & ENCHANT_PROC_ATTR_WHITE_HIT) && damageInfo.GetSpellInfo())
+                continue;
+
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pEnchant->EffectArg[s]);
             if (!spellInfo)
-            {
-                //TC_LOG_ERROR("entities.player.items", "Player::CastItemCombatSpell(GUID: %u, name: %s, enchant: %i): unknown spell %i is casted, ignoring...",
-                //    GetGUID().GetCounter(), GetName().c_str(), pEnchant->ID, pEnchant->EffectArg[s]);
                 continue;
-            }
 
             float chance = pEnchant->EffectPointsMin[s] != 0 ? float(pEnchant->EffectPointsMin[s]) : me->GetWeaponProcChance();
-
             if (entry)
             {
                 if (entry->ProcsPerMinute)
@@ -12966,7 +12966,7 @@ void bot_ai::CastBotItemCombatSpell(Unit* target, WeaponAttackType attType, uint
             if (roll_chance_f(chance))
             {
                 CastSpellExtraArgs args(item);
-                me->CastSpell(spellInfo->IsPositive() ? me : target, spellInfo->Id, args);
+                me->CastSpell(spellInfo->IsPositive() ? me : damageInfo.GetVictim(), spellInfo->Id, args);
             }
         }
     }

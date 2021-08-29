@@ -1567,7 +1567,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     else if (ToCreature()->IsNPCBot())
     {
         DamageInfo dmgInfo(*damageInfo);
-        ToCreature()->CastCreatureItemCombatSpell(victim, damageInfo->AttackType, damageInfo->ProcVictim, dmgInfo.GetHitMask());
+        ToCreature()->CastCreatureItemCombatSpell(dmgInfo);
     }
     //end npcbot
 
