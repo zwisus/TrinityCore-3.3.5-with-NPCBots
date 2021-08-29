@@ -4465,6 +4465,11 @@ void Map::SaveRespawnTime(SpawnObjectType type, ObjectGuid::LowType spawnId, uin
 
 void Map::SaveRespawnInfoDB(RespawnInfo const& info, CharacterDatabaseTransaction dbTrans)
 {
+    //npcbot: DO NOT save npcbots respawn time
+    if (info.type == SPAWN_TYPE_CREATURE && info.entry >= BOT_ENTRY_BEGIN && info.entry <= BOT_ENTRY_END)
+        return;
+    //end npcbot
+
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_RESPAWN);
     stmt->setUInt16(0, info.type);
     stmt->setUInt32(1, info.spawnId);

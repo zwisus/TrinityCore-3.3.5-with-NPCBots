@@ -2547,11 +2547,6 @@ void Creature::SaveRespawnTime(uint32 forceDelay)
     if (IsSummon() || !m_spawnId || (m_creatureData && !m_creatureData->dbData))
         return;
 
-    //npcbots: do not save respawn time for bots
-    if (IsNPCBotOrPet())
-        return;
-    //end npcbots
-
     if (m_respawnCompatibilityMode)
     {
         RespawnInfo ri;
