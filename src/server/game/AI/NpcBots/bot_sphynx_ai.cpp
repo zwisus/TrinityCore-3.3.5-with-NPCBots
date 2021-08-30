@@ -113,6 +113,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SLEEP, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SILENCE, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
 
         bool doCast(Unit* victim, uint32 spellId, bool triggered = false)
@@ -185,13 +187,10 @@ public:
             if (me->isMoving() && !me->HasInArc(float(M_PI)/2, opponent))
                 return;
 
-            if (me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST)
+            if (me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST && IsSpellReady(SPLASH_ATTACK_1, diff))
             {
-                if (IsSpellReady(SPLASH_ATTACK_1, diff))
-                {
-                    if (doCast(opponent, GetSpell(SPLASH_ATTACK_1)))
-                        return;
-                }
+                if (doCast(opponent, GetSpell(SPLASH_ATTACK_1)))
+                    return;
             }
             else if (IsSpellReady(MAIN_ATTACK_1, diff))
             {
@@ -216,7 +215,7 @@ public:
 
         void CheckDrainMana(uint32 diff)
         {
-            if (DraincheckTimer > diff || Rand() < 40 || IAmFree() || !HasRole(BOT_ROLE_DPS) || IsCasting() ||
+            if (DraincheckTimer > diff || Rand() > 40 || IAmFree() || !HasRole(BOT_ROLE_DPS) || IsCasting() ||
                 !IsSpellReady(DRAIN_MANA_1, diff, false) || me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST)
                 return;
 
@@ -279,8 +278,7 @@ public:
                     else if (bot->IsAlive())
                         partynocombat++;
 
-                    if (!haveHp && bot != me && bot->IsInWorld() && bot->IsAlive() && me->GetDistance(bot) < 15 &&
-                        GetHealthPCT(bot) < 95)
+                    if (!haveHp && bot != me && bot->IsAlive() && me->GetDistance(bot) < 15 && GetHealthPCT(bot) < 95)
                         haveHp = true;
                 }
             }
@@ -357,26 +355,8 @@ public:
             if (crit)
                 pctbonus *= 1.333f;
 
-            if (baseId == MAIN_ATTACK_1)
-                fdamage += me->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * (spellInfo->Effects[0].BonusMultiplier - 1.f) * me->CalculateDefaultCoefficient(spellInfo, SPELL_DIRECT_DAMAGE) * me->CalculateSpellpowerCoefficientLevelPenalty(spellInfo);
-            if (baseId == SPLASH_ATTACK_1)
-                fdamage += me->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * (spellInfo->Effects[1].BonusMultiplier - 1.f) * me->CalculateDefaultCoefficient(spellInfo, SPELL_DIRECT_DAMAGE) * me->CalculateSpellpowerCoefficientLevelPenalty(spellInfo);
-
             damage = int32(fdamage * pctbonus);
         }
-
-        //void ApplyClassEffectModsTarget(Unit const* target, SpellInfo const* spellInfo, uint8 effIndex, float& value) const
-        //{
-        //    uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
-        //    uint8 lvl = me->getLevel();
-        //    float pctbonus = 1.0f;
-
-        //    //Drain Mana: limits
-        //    if (baseId == DRAIN_MANA_1 && target/* && effIndex == EFFECT_0*/)
-        //        value = std::min<uint32>(me->GetMaxPower(POWER_MANA), target->GetMaxPower(POWER_MANA));
-
-        //    value = value * pctbonus;
-        //}
 
         void OnClassSpellGo(SpellInfo const* spellInfo) override
         {
@@ -398,7 +378,7 @@ public:
                 if (dispelsDealt > 0)
                 {
                     //gain 20% of max mana and 5% of max health for every dispel
-                    int32 manaGain = me->GetMaxPower(POWER_MANA)/5 * dispelsDealt;
+                    int32 manaGain = me->GetMaxPower(POWER_MANA) / 5 * dispelsDealt;
                     uint32 healthGain = me->GetMaxHealth() / 20 * dispelsDealt;
 
                     HealInfo hinfo(me, me, healthGain, spellInfo, spellInfo->GetSchoolMask());

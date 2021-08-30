@@ -15717,19 +15717,19 @@ void bot_ai::InitBotCustomSpells()
     //sinfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
-    sinfo->Effects[0].BasePoints = 200;
+    sinfo->Effects[0].BasePoints = 300;
     sinfo->Effects[0].DieSides = 0;
     sinfo->Effects[0].BonusMultiplier = 0.f;
-    sinfo->Effects[0].DamageMultiplier = 1.0f;
-    sinfo->Effects[0].RealPointsPerLevel = 10.f;
+    sinfo->Effects[0].DamageMultiplier = 0.75f;
+    sinfo->Effects[0].RealPointsPerLevel = 50.f;
     //sinfo->Effects[0].ValueMultiplier = 1.f;
 
     sinfo->Effects[1].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
-    sinfo->Effects[1].BasePoints = 150;
-    sinfo->Effects[1].BonusMultiplier = 2.0f;
-    sinfo->Effects[1].DamageMultiplier = 1.0f;
+    sinfo->Effects[1].BasePoints = 50;
+    sinfo->Effects[1].BonusMultiplier = 1.0f;
+    sinfo->Effects[1].DamageMultiplier = 0.5f;
     sinfo->Effects[1].DieSides = /*17*/25;
-    sinfo->Effects[1].RealPointsPerLevel = 10.f;
+    sinfo->Effects[1].RealPointsPerLevel = 30.f;
     //sinfo->Effects[1].ValueMultiplier = 1.f;
     sinfo->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
     sinfo->Effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
