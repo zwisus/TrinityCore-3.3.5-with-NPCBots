@@ -344,9 +344,9 @@ public:
                 return;
         }
 
-        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* /*spellInfo*/, WeaponAttackType /*attackType*/, bool crit) const override
         {
-            uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
+            //uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             //uint8 lvl = me->getLevel();
             float fdamage = float(damage);
 
