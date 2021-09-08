@@ -156,4 +156,4 @@ DELIMITER ;
 
 CALL `sp__generate_npcbot_equips`();
 
-DROP PROCEDURE IF EXISTS `trinity`.`sp__generate_npcbot_equips`;
+DROP PROCEDURE IF EXISTS `sp__generate_npcbot_equips`;
