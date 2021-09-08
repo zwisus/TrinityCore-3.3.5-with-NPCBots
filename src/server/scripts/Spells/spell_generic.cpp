@@ -51,7 +51,7 @@ class spell_gen_absorb0_hitlimit1 : public AuraScript
     bool Load() override
     {
         // Max absorb stored in 1 dummy effect
-        limit = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+        limit = GetEffectInfo(EFFECT_1).CalcValue();
         return true;
     }
 
@@ -276,7 +276,7 @@ class spell_gen_arena_drink : public AuraScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        if (!spellInfo->Effects[EFFECT_0].IsAura() || spellInfo->Effects[EFFECT_0].ApplyAuraName != SPELL_AURA_MOD_POWER_REGEN)
+        if (!spellInfo->GetEffect(EFFECT_0).IsAura(SPELL_AURA_MOD_POWER_REGEN))
         {
             TC_LOG_ERROR("spells", "Aura %d structure has been changed - first aura is no longer SPELL_AURA_MOD_POWER_REGEN", GetId());
             return false;
@@ -391,7 +391,7 @@ class spell_gen_aura_of_fear : public AuraScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        return ValidateSpellInfo({ spellInfo->Effects[EFFECT_0].TriggerSpell });
+        return ValidateSpellInfo({ spellInfo->GetEffect(EFFECT_0).TriggerSpell });
     }
 
     void PeriodicTick(AuraEffect const* aurEff)
@@ -400,7 +400,7 @@ class spell_gen_aura_of_fear : public AuraScript
         if (!roll_chance_i(GetSpellInfo()->ProcChance))
             return;
 
-        GetTarget()->CastSpell(nullptr, GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell, true);
+        GetTarget()->CastSpell(nullptr, aurEff->GetSpellEffectInfo().TriggerSpell, true);
     }
 
     void Register() override
@@ -633,7 +633,7 @@ class spell_gen_blade_warding : public AuraScript
         int32 bp = 0;
 
         for (uint8 i = 0; i < stacks; ++i)
-            bp += spellInfo->Effects[EFFECT_0].CalcValue(caster);
+            bp += spellInfo->GetEffect(EFFECT_0).CalcValue(caster);
 
         CastSpellExtraArgs args(aurEff);
         args.AddSpellBP0(bp);
@@ -802,18 +802,18 @@ class spell_gen_burning_depths_necrolyte_image : public AuraScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        return ValidateSpellInfo({ static_cast<uint32>(spellInfo->Effects[EFFECT_2].CalcValue()) });
+        return ValidateSpellInfo({ static_cast<uint32>(spellInfo->GetEffect(EFFECT_2).CalcValue()) });
     }
 
     void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         if (Unit* caster = GetCaster())
-            caster->CastSpell(GetTarget(), uint32(GetSpellInfo()->Effects[EFFECT_2].CalcValue()));
+            caster->CastSpell(GetTarget(), uint32(GetEffectInfo(EFFECT_2).CalcValue()));
     }
 
     void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        GetTarget()->RemoveAurasDueToSpell(uint32(GetSpellInfo()->Effects[EFFECT_2].CalcValue()), GetCasterGUID());
+        GetTarget()->RemoveAurasDueToSpell(uint32(GetEffectInfo(EFFECT_2).CalcValue()), GetCasterGUID());
     }
 
     void Register() override
@@ -1420,18 +1420,18 @@ class spell_gen_defend : public AuraScript
         SpellInfo const* spell = sSpellMgr->AssertSpellInfo(m_scriptSpellId);
 
         // Defend spells cast by NPCs (add visuals)
-        if (spell->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
+        if (spell->GetEffect(EFFECT_0).ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
         {
             AfterEffectApply += AuraEffectApplyFn(spell_gen_defend::RefreshVisualShields, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             OnEffectRemove += AuraEffectRemoveFn(spell_gen_defend::RemoveVisualShields, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
         }
 
         // Remove Defend spell from player when he dismounts
-        if (spell->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
+        if (spell->GetEffect(EFFECT_2).ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
             OnEffectRemove += AuraEffectRemoveFn(spell_gen_defend::RemoveDummyFromDriver, EFFECT_2, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
 
         // Defend spells cast by players (add/remove visuals)
-        if (spell->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_DUMMY)
+        if (spell->GetEffect(EFFECT_1).ApplyAuraName == SPELL_AURA_DUMMY)
         {
             AfterEffectApply += AuraEffectApplyFn(spell_gen_defend::RefreshVisualShields, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             OnEffectRemove += AuraEffectRemoveFn(spell_gen_defend::RemoveVisualShields, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
@@ -1448,9 +1448,9 @@ class spell_gen_despawn_self : public SpellScript
         return GetCaster()->GetTypeId() == TYPEID_UNIT;
     }
 
-    void HandleDummy(SpellEffIndex effIndex)
+    void HandleDummy(SpellEffIndex /*effIndex*/)
     {
-        if (GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_DUMMY || GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_SCRIPT_EFFECT)
+        if (GetEffectInfo().IsEffect(SPELL_EFFECT_DUMMY) || GetEffectInfo().IsEffect(SPELL_EFFECT_SCRIPT_EFFECT))
             GetCaster()->ToCreature()->DespawnOrUnsummon();
     }
 
@@ -2387,7 +2387,7 @@ class spell_gen_mounted_charge : public SpellScript
         if (spell->HasEffect(SPELL_EFFECT_SCRIPT_EFFECT))
             OnEffectHitTarget += SpellEffectFn(spell_gen_mounted_charge::HandleScriptEffect, EFFECT_FIRST_FOUND, SPELL_EFFECT_SCRIPT_EFFECT);
 
-        if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_CHARGE)
+        if (spell->GetEffect(EFFECT_0).Effect == SPELL_EFFECT_CHARGE)
             OnEffectHitTarget += SpellEffectFn(spell_gen_mounted_charge::HandleChargeEffect, EFFECT_0, SPELL_EFFECT_CHARGE);
     }
 };
@@ -2427,7 +2427,7 @@ class spell_gen_negative_energy_periodic : public AuraScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        return ValidateSpellInfo({ spellInfo->Effects[EFFECT_0].TriggerSpell });
+        return ValidateSpellInfo({ spellInfo->GetEffect(EFFECT_0).TriggerSpell });
     }
 
     void PeriodicTick(AuraEffect const* aurEff)
@@ -2436,7 +2436,7 @@ class spell_gen_negative_energy_periodic : public AuraScript
 
         CastSpellExtraArgs args(aurEff);
         args.AddSpellMod(SPELLVALUE_MAX_TARGETS, aurEff->GetTickNumber() / 10 + 1);
-        GetTarget()->CastSpell(nullptr, GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell, args);
+        GetTarget()->CastSpell(nullptr, aurEff->GetSpellEffectInfo().TriggerSpell, args);
     }
 
     void Register() override
@@ -2650,11 +2650,11 @@ class spell_gen_oracle_wolvar_reputation : public SpellScript
         return GetCaster()->GetTypeId() == TYPEID_PLAYER;
     }
 
-    void HandleDummy(SpellEffIndex effIndex)
+    void HandleDummy(SpellEffIndex /*effIndex*/)
     {
         Player* player = GetCaster()->ToPlayer();
-        uint32 factionId = GetSpellInfo()->Effects[effIndex].CalcValue();
-        int32  repChange = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+        uint32 factionId = GetEffectInfo().CalcValue();
+        int32  repChange = GetEffectInfo(EFFECT_1).CalcValue();
 
         FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionId);
         if (!factionEntry)
@@ -2776,7 +2776,7 @@ class spell_gen_proc_below_pct_damaged : public AuraScript
         if (!damageInfo || !damageInfo->GetDamage())
             return false;
 
-        int32 pct = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
+        int32 pct = GetEffectInfo(EFFECT_0).CalcValue();
 
         if (eventInfo.GetActionTarget()->HealthBelowPctDamaged(pct, damageInfo->GetDamage()))
             return true;
@@ -3024,7 +3024,7 @@ class spell_gen_remove_on_health_pct : public AuraScript
     {
         // they apply damage so no need to check for ticks here
 
-        if (GetTarget()->HealthAbovePct(GetSpellInfo()->Effects[EFFECT_1].CalcValue()))
+        if (GetTarget()->HealthAbovePct(GetEffectInfo(EFFECT_1).CalcValue()))
         {
             Remove(AURA_REMOVE_BY_ENEMY_SPELL);
             PreventDefaultAction();
@@ -3049,7 +3049,7 @@ class spell_gen_remove_on_full_health : public AuraScript
     void PeriodicTick(AuraEffect const* aurEff)
     {
         // if it has only periodic effect, allow 1 tick
-        bool onlyEffect = !GetSpellInfo()->Effects[EFFECT_1].IsEffect() && !GetSpellInfo()->Effects[EFFECT_2].IsEffect();
+        bool onlyEffect = !GetEffectInfo(EFFECT_1).IsEffect() && !GetEffectInfo(EFFECT_2).IsEffect();
         if (onlyEffect && aurEff->GetTickNumber() <= 1)
             return;
 
@@ -3543,7 +3543,7 @@ class spell_gen_upper_deck_create_foam_sword : public SpellScript
 {
     PrepareSpellScript(spell_gen_upper_deck_create_foam_sword);
 
-    void HandleScript(SpellEffIndex effIndex)
+    void HandleScript(SpellEffIndex /*effIndex*/)
     {
         if (Player* player = GetHitPlayer())
         {
@@ -3555,7 +3555,7 @@ class spell_gen_upper_deck_create_foam_sword : public SpellScript
                     return;
             }
 
-            CreateItem(effIndex, itemId[urand(0, 4)]);
+            CreateItem(itemId[urand(0, 4)]);
         }
     }
 
@@ -3752,7 +3752,7 @@ class spell_gen_eject_passenger : public SpellScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        if (spellInfo->Effects[EFFECT_0].CalcValue() < 1)
+        if (spellInfo->GetEffect(EFFECT_0).CalcValue() < 1)
             return false;
         return true;
     }
@@ -3987,7 +3987,7 @@ class spell_gen_mixology_bonus : public AuraScript
 
     void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
     {
-        if (GetCaster()->HasAura(SPELL_MIXOLOGY) && GetCaster()->HasSpell(GetSpellInfo()->Effects[EFFECT_0].TriggerSpell))
+        if (GetCaster()->HasAura(SPELL_MIXOLOGY) && GetCaster()->HasSpell(GetEffectInfo(EFFECT_0).TriggerSpell))
         {
             switch (GetId())
             {
@@ -4424,7 +4424,7 @@ class spell_freezing_circle : public SpellScript
             spellId = SPELL_FREEZING_CIRCLE;
 
         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
-            SetHitDamage(spellInfo->Effects[EFFECT_0].CalcValue());
+            SetHitDamage(spellInfo->GetEffect(EFFECT_0).CalcValue());
     }
 
     void Register() override
@@ -4469,9 +4469,9 @@ class spell_gen_cannon_blast : public SpellScript
     {
         return ValidateSpellInfo({ SPELL_CANNON_BLAST });
     }
-    void HandleScript(SpellEffIndex effIndex)
+    void HandleScript(SpellEffIndex /*effIndex*/)
     {
-        int32 bp = GetSpellInfo()->Effects[effIndex].CalcValue();
+        int32 bp = GetEffectInfo().CalcValue();
         Unit* target = GetHitUnit();
         CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
         args.AddSpellBP0(bp);

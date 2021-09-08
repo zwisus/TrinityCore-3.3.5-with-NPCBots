@@ -252,7 +252,7 @@ private:
 
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_0).CalcValue(GetCaster());
         return true;
     }
 
@@ -290,8 +290,8 @@ private:
     uint32 absorbPct, hpPct;
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
-        hpPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_0).CalcValue(GetCaster());
+        hpPct = GetEffectInfo(EFFECT_1).CalcValue(GetCaster());
         return true;
     }
 
@@ -343,7 +343,7 @@ private:
 
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_0).CalcValue(GetCaster());
         return true;
     }
 
@@ -359,7 +359,7 @@ private:
         if (!owner)
             return;
 
-        amount = talentSpell->Effects[EFFECT_0].CalcValue(owner);
+        amount = talentSpell->GetEffect(EFFECT_0).CalcValue(owner);
         //npcbot: take bot attack power into account
         if (Creature const* bot = owner->ToCreature())
         {
@@ -557,7 +557,7 @@ class spell_dk_corpse_explosion : public SpellScript
             SPELL_DK_CORPSE_EXPLOSION_TRIGGERED,
             SPELL_DK_GHOUL_EXPLODE,
             SPELL_DK_CORPSE_EXPLOSION_VISUAL,
-            static_cast<uint32>(spellInfo->Effects[EFFECT_1].CalcValue())
+            static_cast<uint32>(spellInfo->GetEffect(EFFECT_1).CalcValue())
         });
     }
 
@@ -594,11 +594,11 @@ class spell_dk_corpse_explosion : public SpellScript
         if (effIndex == EFFECT_0)
         {
             args.AddSpellBP0(GetEffectValue());
-            GetCaster()->CastSpell(target, GetSpellInfo()->Effects[EFFECT_1].CalcValue(), args);
+            GetCaster()->CastSpell(target, GetEffectInfo(EFFECT_1).CalcValue(), args);
         }
         else if (effIndex == EFFECT_1)
         {
-            args.AddSpellBP0(GetSpell()->CalculateDamage(EFFECT_0));
+            args.AddSpellBP0(GetSpell()->CalculateDamage(GetEffectInfo(EFFECT_0)));
             GetCaster()->CastSpell(target, GetEffectValue(), args);
         }
     }
@@ -900,10 +900,10 @@ class spell_dk_death_strike : public SpellScript
         if (Unit* target = GetHitUnit())
         {
             uint32 count = target->GetDiseasesByCaster(caster->GetGUID());
-            int32 bp = int32(count * caster->CountPctFromMaxHealth(int32(GetSpellInfo()->Effects[EFFECT_0].DamageMultiplier)));
+            int32 bp = int32(count * caster->CountPctFromMaxHealth(int32(GetEffectInfo(EFFECT_0).DamageMultiplier)));
             // Improved Death Strike
             if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, DK_ICON_ID_IMPROVED_DEATH_STRIKE, 0))
-                AddPct(bp, caster->CalculateSpellDamage(aurEff->GetSpellInfo(), EFFECT_2));
+                AddPct(bp, caster->CalculateSpellDamage(aurEff->GetSpellInfo()->GetEffect(EFFECT_2)));
 
             // @todo castspell refactor note: this is not triggered - is this intended??
             CastSpellExtraArgs args;
@@ -926,12 +926,12 @@ class spell_dk_ghoul_explode : public SpellScript
     bool Validate(SpellInfo const* spellInfo) override
     {
         return ValidateSpellInfo({ SPELL_DK_CORPSE_EXPLOSION_TRIGGERED }) &&
-            spellInfo->Effects[EFFECT_2].CalcValue() > 0;
+            spellInfo->GetEffect(EFFECT_2).CalcValue() > 0;
     }
 
     void HandleDamage(SpellEffIndex /*effIndex*/)
     {
-        int32 value = int32(GetCaster()->CountPctFromMaxHealth(GetSpellInfo()->Effects[EFFECT_2].CalcValue(GetCaster())));
+        int32 value = int32(GetCaster()->CountPctFromMaxHealth(GetSpellInfo()->GetEffect(EFFECT_2).CalcValue(GetCaster())));
         SetEffectValue(value);
     }
 
@@ -1047,7 +1047,7 @@ class spell_dk_hysteria : public AuraScript
 
     void PeriodicTick(AuraEffect const* aurEff)
     {
-        uint32 const damage = GetTarget()->CountPctFromMaxHealth(GetTarget()->CalculateSpellDamage(GetSpellInfo(), aurEff->GetEffIndex()));
+        uint32 const damage = GetTarget()->CountPctFromMaxHealth(GetTarget()->CalculateSpellDamage(aurEff->GetSpellEffectInfo()));
         Unit::DealDamage(GetTarget(), GetTarget(), damage, nullptr, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
     }
 
@@ -1274,7 +1274,7 @@ class spell_dk_improved_unholy_presence : public AuraScript
         if (target->HasAura(SPELL_DK_UNHOLY_PRESENCE) && !target->HasAura(SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED))
         {
             // Not listed as any effect, only base points set in dbc
-            int32 basePoints = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+            int32 basePoints = GetEffectInfo(EFFECT_1).CalcValue();
             CastSpellExtraArgs args(aurEff);
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 args.AddSpellMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + i), basePoints);
@@ -1525,7 +1525,7 @@ class spell_dk_presence : public AuraScript
             if (GetId() == SPELL_DK_UNHOLY_PRESENCE)
             {
                 // Not listed as any effect, only base points set
-                int32 bp = impAurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+                int32 bp = impAurEff->GetSpellInfo()->GetEffect(EFFECT_1).CalcValue();
                 CastSpellExtraArgs args(aurEff);
                 for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                     args.AddSpellMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + i), bp);
@@ -1590,8 +1590,8 @@ class spell_dk_raise_dead : public SpellScript
     {
         return ValidateSpellInfo(
         {
-            static_cast<uint32>(spellInfo->Effects[EFFECT_1].CalcValue()),
-            static_cast<uint32>(spellInfo->Effects[EFFECT_2].CalcValue()),
+            static_cast<uint32>(spellInfo->GetEffect(EFFECT_1).CalcValue()),
+            static_cast<uint32>(spellInfo->GetEffect(EFFECT_2).CalcValue()),
             SPELL_DK_RAISE_DEAD_USE_REAGENT,
             SPELL_DK_MASTER_OF_GHOULS
         });
@@ -1672,10 +1672,10 @@ class spell_dk_raise_dead : public SpellScript
         // Do we have talent Master of Ghouls?
         if (GetCaster()->HasAura(SPELL_DK_MASTER_OF_GHOULS))
             // summon as pet
-            return GetSpellInfo()->Effects[EFFECT_2].CalcValue();
+            return GetSpellInfo()->GetEffect(EFFECT_2).CalcValue();
 
         // or guardian
-        return GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+        return GetSpellInfo()->GetEffect(EFFECT_1).CalcValue();
     }
 
     void HandleRaiseDead(SpellEffIndex /*effIndex*/)
@@ -1783,7 +1783,7 @@ class spell_dk_scent_of_blood_trigger : public AuraScript
     // or we would be adding stacks to a possibly existing aura
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
     {
-        GetTarget()->RemoveAurasDueToSpell(GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell);
+        GetTarget()->RemoveAurasDueToSpell(aurEff->GetSpellEffectInfo().TriggerSpell);
     }
 
     void Register() override
@@ -1862,7 +1862,7 @@ private:
 
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_0).CalcValue(GetCaster());
         return true;
     }
 
@@ -2147,7 +2147,7 @@ class spell_dk_will_of_the_necropolis : public AuraScript
 
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_0).CalcValue(GetCaster());
         return true;
     }
 
@@ -2164,7 +2164,7 @@ class spell_dk_will_of_the_necropolis : public AuraScript
         SpellInfo const* talentProto = sSpellMgr->AssertSpellInfo(sSpellMgr->GetSpellWithRank(SPELL_DK_WILL_OF_THE_NECROPOLIS_TALENT_R1, rank));
 
         int32 remainingHp = int32(GetTarget()->GetHealth() - dmgInfo.GetDamage());
-        int32 minHp = int32(GetTarget()->CountPctFromMaxHealth(talentProto->Effects[EFFECT_0].CalcValue(GetCaster())));
+        int32 minHp = int32(GetTarget()->CountPctFromMaxHealth(talentProto->GetEffect(EFFECT_0).CalcValue(GetCaster())));
 
         // Damage that would take you below [effect0] health or taken while you are at [effect0]
         if (remainingHp < minHp)
@@ -2238,7 +2238,7 @@ class spell_dk_raise_ally_initial : public SpellScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        return ValidateSpellInfo({ static_cast<uint32>(spellInfo->Effects[EFFECT_0].CalcValue()) });
+        return ValidateSpellInfo({ static_cast<uint32>(spellInfo->GetEffect(EFFECT_0).CalcValue()) });
     }
 
     bool Load() override
@@ -2332,7 +2332,7 @@ public:
             if (!originalCaster)
                 return;
 
-            uint32 entry = uint32(GetSpellInfo()->Effects[effIndex].MiscValue);
+            uint32 entry = uint32(GetEffectInfo().MiscValue);
 
             //! HACK - StatSystem needs further develop to enable update on Puppet stats
             // Using same summon properties as Raise Dead 46585 (Guardian) - EffectMiscValueB = 829

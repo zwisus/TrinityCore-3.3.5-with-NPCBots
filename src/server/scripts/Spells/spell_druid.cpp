@@ -461,7 +461,7 @@ class spell_dru_frenzied_regeneration : public AuraScript
             return;
 
         int32 const mod = std::min(static_cast<int32>(rage), 100);
-        int32 const regen = CalculatePct(GetTarget()->GetMaxHealth(), GetTarget()->CalculateSpellDamage(GetSpellInfo(), EFFECT_1) * mod / 100.f);
+        int32 const regen = CalculatePct(GetTarget()->GetMaxHealth(), GetTarget()->CalculateSpellDamage(GetEffectInfo(EFFECT_1)) * mod / 100.f);
         CastSpellExtraArgs args(aurEff);
         args.AddSpellBP0(regen);
         GetTarget()->CastSpell(nullptr, SPELL_DRUID_FRENZIED_REGENERATION_HEAL, args);
@@ -716,7 +716,7 @@ class spell_dru_idol_lifebloom : public AuraScript
             spellMod->op = SPELLMOD_DOT;
             spellMod->type = SPELLMOD_FLAT;
             spellMod->spellId = GetId();
-            spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
+            spellMod->mask = aurEff->GetSpellEffectInfo().SpellClassMask;
         }
         spellMod->value = aurEff->GetAmount() / 7;
     }
@@ -814,7 +814,7 @@ class spell_dru_leader_of_the_pack : public AuraScript
         ASSERT(impLotpMana);
 
         CastSpellExtraArgs args2(aurEff);
-        args2.AddSpellBP0(CalculatePct(caster->GetMaxPower(POWER_MANA), impLotpMana->GetSpellInfo()->Effects[EFFECT_1].CalcValue()));
+        args2.AddSpellBP0(CalculatePct(caster->GetMaxPower(POWER_MANA), impLotpMana->GetSpellInfo()->GetEffect(EFFECT_1).CalcValue()));
         caster->CastSpell(nullptr, SPELL_DRUID_IMP_LEADER_OF_THE_PACK_MANA, args2);
     }
 
@@ -949,7 +949,7 @@ private:
 
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_0).CalcValue(GetCaster());
         return true;
     }
 
@@ -1114,7 +1114,7 @@ private:
 
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_1).CalcValue(GetCaster());
         return true;
     }
 
@@ -1255,7 +1255,7 @@ class spell_dru_savage_defense : public AuraScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        return ValidateSpellInfo({ spellInfo->Effects[EFFECT_0].TriggerSpell });
+        return ValidateSpellInfo({ spellInfo->GetEffect(EFFECT_0).TriggerSpell });
     }
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -1264,7 +1264,7 @@ class spell_dru_savage_defense : public AuraScript
         Unit* caster = eventInfo.GetActor();
         CastSpellExtraArgs args(aurEff);
         args.AddSpellBP0(CalculatePct(caster->GetTotalAttackPowerValue(BASE_ATTACK), aurEff->GetAmount()));
-        caster->CastSpell(nullptr, GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell, args);
+        caster->CastSpell(nullptr, aurEff->GetSpellEffectInfo().TriggerSpell, args);
     }
 
     void Register() override
@@ -1916,7 +1916,7 @@ class spell_dru_wild_growth : public SpellScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        if (spellInfo->Effects[EFFECT_2].IsEffect() || spellInfo->Effects[EFFECT_2].CalcValue() <= 0)
+        if (spellInfo->GetEffect(EFFECT_2).IsEffect() || spellInfo->GetEffect(EFFECT_2).CalcValue() <= 0)
             return false;
         return true;
     }
@@ -1925,7 +1925,7 @@ class spell_dru_wild_growth : public SpellScript
     {
         targets.remove_if(RaidCheck(GetCaster()));
 
-        uint32 const maxTargets = uint32(GetSpellInfo()->Effects[EFFECT_2].CalcValue(GetCaster()));
+        uint32 const maxTargets = uint32(GetEffectInfo(EFFECT_2).CalcValue(GetCaster()));
 
         if (targets.size() > maxTargets)
         {
