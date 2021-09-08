@@ -505,7 +505,7 @@ void Spell::EffectSchoolDMG()
                 {
                     // converts each extra point of energy into ($f1+$AP/410) additional damage
                     float ap = unitCaster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410 + m_spellInfo->Effects[effIndex].DamageMultiplier;
+                    float multiple = ap / 410 + effectInfo->DamageMultiplier;
                     int32 energy = -(unitCaster->ModifyPower(POWER_ENERGY, -30));
                     damage += int32(energy * multiple);
                     damage += int32(CalculatePct(unitCaster->ToCreature()->GetCreatureComboPoints() * ap, 7));
@@ -596,7 +596,7 @@ void Spell::EffectSchoolDMG()
                                 {
                                     if ((*iter)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_ROGUE && (*iter)->GetSpellInfo()->SpellIconID == 1960)
                                     {
-                                        uint32 chance = (*iter)->GetSpellInfo()->Effects[EFFECT_2].CalcValue(unitCaster);
+                                        uint32 chance = (*iter)->GetSpellInfo()->GetEffect(EFFECT_2).CalcValue(unitCaster);
 
                                         if (chance && roll_chance_i(chance))
                                             needConsume = false;
@@ -839,7 +839,7 @@ void Spell::EffectTriggerSpell()
                             return;
 
                         // % of max health
-                        int32 basepoints0 = 0.01f * unitTarget->GetMaxHealth() * m_spellInfo->Effects[effIndex].BasePoints;
+                        int32 basepoints0 = 0.01f * unitTarget->GetMaxHealth() * effectInfo->BasePoints;
                         //TC_LOG_ERROR("entities.unit", "TriggerSpell(%u from %u): %s on %s base val %i,",
                         //    triggered_spell_id, m_spellInfo->Id, m_caster->GetName().c_str(), unitTarget->GetName().c_str(), int32(basepoints0));
                         CastSpellExtraArgs args(true);
@@ -865,7 +865,7 @@ void Spell::EffectTriggerSpell()
                             return;
 
                         // % of max mana
-                        int32 basepoints0 = m_spellInfo->Effects[effIndex].BasePoints;
+                        int32 basepoints0 = effectInfo->BasePoints;
                         //TC_LOG_ERROR("entities.unit", "TriggerSpell(%u from %u): %s on %s base val %i,",
                         //    triggered_spell_id, m_spellInfo->Id, m_caster->GetName().c_str(), unitTarget->GetName().c_str(), int32(basepoints0));
                         CastSpellExtraArgs args(true);

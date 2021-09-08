@@ -1132,7 +1132,7 @@ class spell_hun_sniper_training : public AuraScript
 
             int32 baseAmount = aurEff->GetBaseAmount();
             int32 amount = bot->isMoving() ?
-            bot->CalculateSpellDamage(GetSpellInfo(), aurEff->GetEffIndex(), &baseAmount) :
+            bot->CalculateSpellDamage(aurEff->GetSpellEffectInfo(), &baseAmount) :
             aurEff->GetAmount() - 1;
             aurEff->SetAmount(amount);
             return;

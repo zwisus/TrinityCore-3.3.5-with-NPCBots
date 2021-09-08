@@ -628,7 +628,7 @@ class spell_sha_flametongue_weapon : public AuraScript
 
             Item* item = ASSERT_NOTNULL(bot->GetBotEquipsByGuid(GetAura()->GetCastItemGUID()));
 
-            float basePoints = GetSpellInfo()->Effects[aurEff->GetEffIndex()].CalcValue();
+            float basePoints = aurEff->GetSpellEffectInfo().CalcValue();
 
             float attackSpeed = bot->GetAttackTime(attType) / 1000.f;
             float fireDamage = basePoints / 100.0f;
@@ -1936,9 +1936,9 @@ class spell_sha_windfury_weapon : public AuraScript
             SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(SPELL_SHAMAN_WINDFURY_WEAPON_R1);
             while (spellInfo)
             {
-                if (spellInfo->Effects[EFFECT_0].MiscValue == enchantId)
+                if (spellInfo->GetEffect(EFFECT_0).MiscValue == enchantId)
                 {
-                    extraAttackPower = spellInfo->Effects[EFFECT_1].CalcValue(bot);
+                    extraAttackPower = spellInfo->GetEffect(EFFECT_1).CalcValue(bot);
                     break;
                 }
                 spellInfo = spellInfo->GetNextRankSpell();

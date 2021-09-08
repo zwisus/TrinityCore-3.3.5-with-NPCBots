@@ -533,7 +533,7 @@ public:
             }
             //Deep Freeze (damage only)
             if (fbCasted && IsSpellReady(DEEP_FREEZE_1, diff) && dist < CalcSpellMaxRange(DEEP_FREEZE_1) && Rand() < 30 &&
-                opponent->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(DEEP_FREEZE_1), 0, me) && (opponent->IsFrozen() || me->HasAuraType(SPELL_AURA_ABILITY_IGNORE_AURASTATE)))
+                IsImmunedToMySpellEffect(opponent, sSpellMgr->GetSpellInfo(DEEP_FREEZE_1), EFFECT_0) && (opponent->IsFrozen() || me->HasAuraType(SPELL_AURA_ABILITY_IGNORE_AURASTATE)))
             {
                 if (doCast(opponent, GetSpell(DEEP_FREEZE_1)))
                     return;
@@ -1251,7 +1251,7 @@ public:
             //Mana gem conjure and use
             if (baseId == CONJURE_MANA_GEM_1)
             {
-                //ItemTemplate const* gem = sObjectMgr->GetItemTemplate(spellInfo->Effects[0].ItemType);
+                //ItemTemplate const* gem = sObjectMgr->GetItemTemplate(spellInfo->_effects[0].ItemType);
                 //ASSERT(gem);
                 //manaGemCharges = uint8(abs(gem->Spells[1].SpellCharges)); //at index 1
 
@@ -1368,12 +1368,12 @@ public:
                 //handle effects
                 for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
                 {
-                    switch (spell->Effects[i].Effect)
+                    switch (spell->_effects[i].Effect)
                     {
                         case SPELL_EFFECT_CREATE_ITEM:
                         case SPELL_EFFECT_CREATE_ITEM_2:
                         {
-                            uint32 newitemid = spell->Effects[i].ItemType;
+                            uint32 newitemid = spell->_effects[i].ItemType;
                             if (newitemid)
                             {
                                 ItemPosCountVec dest;

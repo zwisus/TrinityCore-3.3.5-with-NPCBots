@@ -1900,8 +1900,8 @@ public:
                 pctbonus += 0.5f;
             //Natural Shapeshifter:
             if (lvl >= 15 &&
-                spellInfo->Effects[0].Effect == SPELL_EFFECT_APPLY_AURA &&
-                spellInfo->Effects[0].ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
+                spellInfo->_effects[0].Effect == SPELL_EFFECT_APPLY_AURA &&
+                spellInfo->_effects[0].ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
                 pctbonus += 0.3f;
             //King of the Jungle part 3:
             if (lvl >= 15 && (spellInfo->SpellFamilyFlags[0] & 0xC0000000))
@@ -2864,7 +2864,7 @@ public:
             if (InitSpell(me, NOURISH_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, NOURISH_1));
-                _heals[NOURISH_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[NOURISH_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[NOURISH_1] = 0;
@@ -2872,7 +2872,7 @@ public:
             if (InitSpell(me, REGROWTH_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, REGROWTH_1));
-                _heals[REGROWTH_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[REGROWTH_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[REGROWTH_1] = 0;
@@ -2880,7 +2880,7 @@ public:
             if (InitSpell(me, HEALING_TOUCH_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, HEALING_TOUCH_1));
-                _heals[HEALING_TOUCH_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[HEALING_TOUCH_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[HEALING_TOUCH_1] = 0;
@@ -2888,7 +2888,7 @@ public:
             if (InitSpell(me, REJUVENATION_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, REJUVENATION_1));
-                _heals[REJUVENATION_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), DOT, 0, {});
+                _heals[REJUVENATION_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), DOT, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[REJUVENATION_1] = 0;

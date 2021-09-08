@@ -1875,7 +1875,7 @@ public:
                 uint32 slot = TEMP_ENCHANTMENT_SLOT;
                 uint32 duration = 2 * IN_MILLISECONDS;
                 uint32 charges = 0;
-                uint32 enchant_id = spellInfo->Effects[0].MiscValue;
+                uint32 enchant_id = spellInfo->_effects[0].MiscValue;
                 //SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                 Item* mh = GetEquips(BOT_SLOT_MAINHAND);
                 Item* oh = GetEquips(BOT_SLOT_OFFHAND);
@@ -1997,7 +1997,7 @@ public:
                     if (baseId == CHAIN_LIGHTNING_1)
                     {
                         //Normalize chance
-                        if (urand(1,100) <= (100.f / spell->Effects[0].ChainTarget))
+                        if (urand(1,100) <= (100.f / spell->_effects[0].ChainTarget))
                             me->CastSpell(target, procId, true);
                     }
                 }
@@ -2227,7 +2227,7 @@ public:
 
             float radius = 30.f;
             if (SpellInfo const* info = sSpellMgr->GetSpellInfo(summon->m_spells[0]))
-                if (SpellRadiusEntry const* entry = info->Effects[0].RadiusEntry)
+                if (SpellRadiusEntry const* entry = info->_effects[0].RadiusEntry)
                     radius = std::max<float>(entry->RadiusMax, radius);
 
             uint32 createSpell = summon->GetUInt32Value(UNIT_CREATED_BY_SPELL);
@@ -2659,7 +2659,7 @@ public:
             if (InitSpell(me, HEALING_WAVE_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, HEALING_WAVE_1));
-                _heals[HEALING_WAVE_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[HEALING_WAVE_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[HEALING_WAVE_1] = 0;
@@ -2667,7 +2667,7 @@ public:
             if (InitSpell(me, LESSER_HEALING_WAVE_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, LESSER_HEALING_WAVE_1));
-                _heals[LESSER_HEALING_WAVE_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[LESSER_HEALING_WAVE_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[LESSER_HEALING_WAVE_1] = 0;
@@ -2675,7 +2675,7 @@ public:
             if (InitSpell(me, RIPTIDE_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, RIPTIDE_1));
-                _heals[RIPTIDE_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[RIPTIDE_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[RIPTIDE_1] = 0;
@@ -2683,7 +2683,7 @@ public:
             if (InitSpell(me, CHAIN_HEAL_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, CHAIN_HEAL_1));
-                _heals[CHAIN_HEAL_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[CHAIN_HEAL_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[CHAIN_HEAL_1] = 0;

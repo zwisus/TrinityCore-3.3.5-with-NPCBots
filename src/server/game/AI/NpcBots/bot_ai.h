@@ -239,6 +239,8 @@ class bot_ai : public CreatureAI
 
         static bool IsDamagingSpell(SpellInfo const* spellInfo);
 
+        bool IsImmunedToMySpellEffect(Unit const* unit, SpellInfo const* spellInfo, SpellEffIndex index) const;
+
     protected:
         explicit bot_ai(Creature* creature);
 

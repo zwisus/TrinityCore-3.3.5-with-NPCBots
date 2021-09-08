@@ -569,7 +569,7 @@ SpellCastResult bot_ai::CheckBotCast(Unit const* victim, uint32 spellId) const
     {
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
-            if (spellInfo->Effects[i].Effect == SPELL_EFFECT_APPLY_AURA && spellInfo->IsPositiveEffect(i))
+            if (spellInfo->_effects[i].Effect == SPELL_EFFECT_APPLY_AURA && spellInfo->IsPositiveEffect(i))
             {
                 //TC_LOG_ERROR("scripts", "CheckBotCast(): deny cast of %s by %s on low-level target %s (lvl %u)",
                 //    spellInfo->SpellName[0], me->GetName().c_str(), victim->GetName().c_str(), victim->GetLevel());
@@ -681,9 +681,9 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
             uint8 nonAuraEffectMask = 0;
             for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
-                if (m_botSpellInfo->Effects[i].IsAura())
+                if (m_botSpellInfo->_effects[i].IsAura())
                     approximateAuraEffectMask |= 1 << i;
-                else if (m_botSpellInfo->Effects[i].IsEffect())
+                else if (m_botSpellInfo->_effects[i].IsEffect())
                     nonAuraEffectMask |= 1 << i;
             }
 
@@ -691,8 +691,8 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
             {
                 // check if target already has the same type, but more powerful aura
                 if (!nonAuraEffectMask && (approximateAuraEffectMask & (1 << i)))
-                    if (!victim->IsHighestExclusiveAuraEffect(m_botSpellInfo, AuraType(m_botSpellInfo->Effects[i].ApplyAuraName),
-                        m_botSpellInfo->Effects[i].CalcValue(me, &m_botSpellInfo->Effects[i].BasePoints), approximateAuraEffectMask, false))
+                    if (!victim->IsHighestExclusiveAuraEffect(m_botSpellInfo, AuraType(m_botSpellInfo->_effects[i].ApplyAuraName),
+                        m_botSpellInfo->_effects[i].CalcValue(me, &m_botSpellInfo->_effects[i].BasePoints), approximateAuraEffectMask, false))
                         return false;
             }
         }
@@ -1686,8 +1686,8 @@ bool bot_ai::_canCureTarget(Unit const* target, uint32 cureSpell) const
 
     uint32 dispelMask = 0;
     for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
-        if (info->Effects[i].Effect == SPELL_EFFECT_DISPEL)
-            dispelMask |= SpellInfo::GetDispelMask(DispelType(info->Effects[i].MiscValue));
+        if (info->_effects[i].Effect == SPELL_EFFECT_DISPEL)
+            dispelMask |= SpellInfo::GetDispelMask(DispelType(info->_effects[i].MiscValue));
 
     //SpellBreaker addins
     if (cureSpell == SPELL_STEAL_MAGIC)
@@ -1783,13 +1783,13 @@ bool bot_ai::CanRemoveReflectSpells(Unit const* target, uint32 spellId) const
         //bool directDamage = false;
         //for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
         //{
-        //    if (spellInfo->Effects[i].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY)
+        //    if (spellInfo->_effects[i].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY)
         //    {
-        //        if (spellInfo->Effects[i].IsEffect(SPELL_EFFECT_SCHOOL_DAMAGE) ||
-        //            spellInfo->Effects[i].IsAura(SPELL_AURA_PERIODIC_DAMAGE) ||
-        //            spellInfo->Effects[i].IsAura(SPELL_AURA_PERIODIC_LEECH) ||
-        //            spellInfo->Effects[i].IsAura(SPELL_AURA_MOD_SPEED_SLOW_ALL) ||//Icy Touch
-        //            spellInfo->Effects[i].IsAura(SPELL_AURA_HASTE_SPELLS))//Slow
+        //        if (spellInfo->_effects[i].IsEffect(SPELL_EFFECT_SCHOOL_DAMAGE) ||
+        //            spellInfo->_effects[i].IsAura(SPELL_AURA_PERIODIC_DAMAGE) ||
+        //            spellInfo->_effects[i].IsAura(SPELL_AURA_PERIODIC_LEECH) ||
+        //            spellInfo->_effects[i].IsAura(SPELL_AURA_MOD_SPEED_SLOW_ALL) ||//Icy Touch
+        //            spellInfo->_effects[i].IsAura(SPELL_AURA_HASTE_SPELLS))//Slow
         //        {
         //            directDamage = true;
         //            break;
@@ -1849,7 +1849,7 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
         if (!spellInfo)
             continue;
         uint32 id = spellInfo->Id;
-        SpellInfo const* learnSpellInfo = sSpellMgr->GetSpellInfo(spellInfo->Effects[0].TriggerSpell);
+        SpellInfo const* learnSpellInfo = sSpellMgr->GetSpellInfo(spellInfo->_effects[0].TriggerSpell);
         const std::string name = spellInfo->SpellName[locale];
         botstring << "\n" << id << " - |cffffffff|Hspell:" << id << "|h[" << name;
         botstring << ' ' << localeNames[locale] << "]|h|r";
@@ -3959,7 +3959,7 @@ void bot_ai::CalculateAoeSpots(Unit const* unit, AoeSpotsVec& spots)
         spellInfo = sSpellMgr->GetSpellInfo(57429); //Static Field damage
         for (std::list<Creature*>::const_iterator ci = cList.begin(); ci != cList.end(); ++ci)
         {
-            float radius = spellInfo->Effects[0].CalcRadius() + unit->GetVehicleBase()->GetCombatReach() * 1.2f;
+            float radius = spellInfo->_effects[0].CalcRadius() + unit->GetVehicleBase()->GetCombatReach() * 1.2f;
             spots.push_back(AoeSpotsVec::value_type(*(*ci), radius));
         }
     }
@@ -3975,7 +3975,7 @@ void bot_ai::CalculateAoeSpots(Unit const* unit, AoeSpotsVec& spots)
         spellInfo = sSpellMgr->GetSpellInfo(42630); //Fire Bomb
         for (std::list<Creature*>::const_iterator ci = cList.begin(); ci != cList.end(); ++ci)
         {
-            float radius = spellInfo->Effects[0].CalcRadius() + DEFAULT_PLAYER_COMBAT_REACH * 1.2f;
+            float radius = spellInfo->_effects[0].CalcRadius() + DEFAULT_PLAYER_COMBAT_REACH * 1.2f;
             spots.push_back(AoeSpotsVec::value_type(*(*ci), radius));
         }
     }
@@ -4015,10 +4015,10 @@ bool bot_ai::IsPeriodicDynObjAOEDamage(SpellInfo const* spellInfo)
     {
         for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
         {
-            if (spellInfo->Effects[i].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                spellInfo->Effects[i].ApplyAuraName != 0)
+            if (spellInfo->_effects[i].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+                spellInfo->_effects[i].ApplyAuraName != 0)
             {
-                switch (spellInfo->Effects[i].ApplyAuraName)
+                switch (spellInfo->_effects[i].ApplyAuraName)
                 {
                     case SPELL_AURA_PERIODIC_DAMAGE:
                     case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
@@ -5630,7 +5630,7 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
 
     for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
     {
-        uint32 const auraname = spell->Effects[i].ApplyAuraName;
+        uint32 const auraname = spell->_effects[i].ApplyAuraName;
         //remove pet on mount
         if (auraname == SPELL_AURA_MOUNTED)
         {
@@ -5648,9 +5648,9 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
                     //TC_LOG_ERROR("entities.unit", "OnSpellHit: found aura");
                     for (uint8 j = 0; j != MAX_SPELL_EFFECTS; ++j)
                     {
-                        if (spell->Effects[j].ApplyAuraName != SPELL_AURA_MOD_INCREASE_VEHICLE_FLIGHT_SPEED &&
-                            spell->Effects[j].ApplyAuraName != SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED &&
-                            spell->Effects[j].ApplyAuraName != SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                        if (spell->_effects[j].ApplyAuraName != SPELL_AURA_MOD_INCREASE_VEHICLE_FLIGHT_SPEED &&
+                            spell->_effects[j].ApplyAuraName != SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED &&
+                            spell->_effects[j].ApplyAuraName != SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
                             continue;
                         if (AuraEffect* meff = mount->GetEffect(j))
                         {
@@ -5682,7 +5682,7 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
         else if (auraname == SPELL_AURA_MOD_INCREASE_ENERGY || auraname == SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT)
             UpdateMana(); //Divine Hymn - max mana increase
 
-        uint32 const effect = spell->Effects[i].Effect;
+        uint32 const effect = spell->_effects[i].Effect;
         if (effect == SPELL_EFFECT_RESURRECT || effect == SPELL_EFFECT_RESURRECT_NEW || effect == SPELL_EFFECT_SELF_RESURRECT)
         {
             //resurrect effects are not handled for creatures
@@ -5690,7 +5690,7 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
             {
                 uint32 health = 0;
                 uint32 mana = 0;
-                int32 damage = spell->Effects[i].BasePoints;
+                int32 damage = spell->_effects[i].BasePoints;
 
                 if (effect == SPELL_EFFECT_RESURRECT_NEW)
                 {
@@ -5699,12 +5699,12 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
                         health = me->GetMaxHealth();
                     else
                         health = damage;
-                    mana = spell->Effects[i].MiscValue;
+                    mana = spell->_effects[i].MiscValue;
                 }
                 else if (damage < 0)
                 {
                     health = uint32(-damage);
-                    mana = spell->Effects[i].MiscValue;
+                    mana = spell->_effects[i].MiscValue;
                 }
                 else
                 {
@@ -5723,7 +5723,7 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
         //ravasaur poison (EffectEnchantHeldItem) for mh and oh
         if (effect == SPELL_EFFECT_ENCHANT_HELD_ITEM)
         {
-            uint32 enchant_id = spell->Effects[i].MiscValue;
+            uint32 enchant_id = spell->_effects[i].MiscValue;
             if (!enchant_id)
                 continue;
 
@@ -14125,14 +14125,14 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 bool isAreaSpell = false;
                 for (uint8 j = 0; j != 3 && isAreaSpell == false; ++j)
                 {
-                    if (info->Effects[j].IsEffect() && info->Effects[j].TargetA.GetTarget())
+                    if (info->_effects[j].IsEffect() && info->_effects[j].TargetA.GetTarget())
                     {
-                        if (info->Effects[j].TargetA.GetSelectionCategory() == TARGET_SELECT_CATEGORY_NEARBY ||
-                            info->Effects[j].TargetA.GetSelectionCategory() == TARGET_SELECT_CATEGORY_AREA)
+                        if (info->_effects[j].TargetA.GetSelectionCategory() == TARGET_SELECT_CATEGORY_NEARBY ||
+                            info->_effects[j].TargetA.GetSelectionCategory() == TARGET_SELECT_CATEGORY_AREA)
                             isAreaSpell = true;
                         if (!isAreaSpell)
                         {
-                            switch (info->Effects[j].TargetA.GetTarget())
+                            switch (info->_effects[j].TargetA.GetTarget())
                             {
                             case TARGET_UNIT_CASTER_AREA_PARTY:
                             case TARGET_DEST_CHANNEL_TARGET:
@@ -15526,9 +15526,9 @@ bool bot_ai::IsDamagingSpell(SpellInfo const* spellInfo)
 {
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
-        if (spellInfo->Effects[i].IsEffect())
+        if (spellInfo->_effects[i].IsEffect())
         {
-            switch (spellInfo->Effects[i].Effect)
+            switch (spellInfo->_effects[i].Effect)
             {
                 case SPELL_EFFECT_WEAPON_DAMAGE:
                 case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
@@ -15545,6 +15545,11 @@ bool bot_ai::IsDamagingSpell(SpellInfo const* spellInfo)
     }
 
     return false;
+}
+
+bool bot_ai::IsImmunedToMySpellEffect(Unit const* unit, SpellInfo const* spellInfo, SpellEffIndex index) const
+{
+    return unit->IsImmunedToSpellEffect(spellInfo, spellInfo->GetEffect(index), me);
 }
 
 bool bot_ai::IsBotCustomSpell(uint32 spellId)
@@ -15641,35 +15646,35 @@ void bot_ai::InitBotCustomSpells()
         AURA_INTERRUPT_FLAG_NOT_ABOVEWATER | AURA_INTERRUPT_FLAG_MOUNT; //0x00003C07;vanish
     sinfo->CasterAuraStateNot = 0;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-    sinfo->Effects[0].BasePoints = 100;
-    sinfo->Effects[0].RealPointsPerLevel = 2.5f;
-    sinfo->Effects[0].ValueMultiplier = 1.0f;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_INVISIBILITY;
-    sinfo->Effects[0].Amplitude = 0;
-    sinfo->Effects[0].TriggerSpell = 0;
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[0].BasePoints = 100;
+    sinfo->_effects[0].RealPointsPerLevel = 2.5f;
+    sinfo->_effects[0].ValueMultiplier = 1.0f;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[0].ApplyAuraName = SPELL_AURA_MOD_INVISIBILITY;
+    sinfo->_effects[0].Amplitude = 0;
+    sinfo->_effects[0].TriggerSpell = 0;
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
 
-    sinfo->Effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
-    sinfo->Effects[1].BasePoints = 10;
-    sinfo->Effects[1].RealPointsPerLevel = 0.5f;
-    sinfo->Effects[1].ValueMultiplier = 1.0f;
-    sinfo->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[1].TargetB = SpellImplicitTargetInfo(0);
-    sinfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_INCREASE_SPEED;
-    sinfo->Effects[1].Amplitude = 0;
-    sinfo->Effects[1].TriggerSpell = 0;
-    sinfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS); //14
+    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[1].BasePoints = 10;
+    sinfo->_effects[1].RealPointsPerLevel = 0.5f;
+    sinfo->_effects[1].ValueMultiplier = 1.0f;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[1].TargetB = SpellImplicitTargetInfo(0);
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_MOD_INCREASE_SPEED;
+    sinfo->_effects[1].Amplitude = 0;
+    sinfo->_effects[1].TriggerSpell = 0;
+    sinfo->_effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS); //14
 
-    sinfo->Effects[2].Effect = SPELL_EFFECT_TRIGGER_SPELL;
-    sinfo->Effects[2].BasePoints = 0;
-    sinfo->Effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[2].TargetB = SpellImplicitTargetInfo(0);
-    sinfo->Effects[2].ApplyAuraName = SPELL_AURA_NONE;
-    sinfo->Effects[2].Amplitude = 0;
-    sinfo->Effects[2].TriggerSpell = trig;
-    sinfo->Effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS); //14
+    sinfo->_effects[2].Effect = SPELL_EFFECT_TRIGGER_SPELL;
+    sinfo->_effects[2].BasePoints = 0;
+    sinfo->_effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[2].TargetB = SpellImplicitTargetInfo(0);
+    sinfo->_effects[2].ApplyAuraName = SPELL_AURA_NONE;
+    sinfo->_effects[2].Amplitude = 0;
+    sinfo->_effects[2].TriggerSpell = trig;
+    sinfo->_effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS); //14
     //3) END WINDWALK
 
     //4) MIRROR IMAGE (BLADEMASTER)
@@ -15687,11 +15692,11 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx2 &= ~(SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS);
     //sinfo->AttributesEx3 |= SPELL_ATTR3_DONT_DISPLAY_RANGE;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_DUMMY;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[0].MiscValue = 0;
-    sinfo->Effects[0].MiscValueB = 0;
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[0].MiscValue = 0;
+    sinfo->_effects[0].MiscValueB = 0;
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
     //4) END MIRROR IMAGE (BLADEMASTER)
 
     //SPHYNX
@@ -15717,23 +15722,23 @@ void bot_ai::InitBotCustomSpells()
     //sinfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
-    sinfo->Effects[0].BasePoints = 300;
-    sinfo->Effects[0].DieSides = 0;
-    sinfo->Effects[0].BonusMultiplier = 0.f;
-    sinfo->Effects[0].DamageMultiplier = 0.75f;
-    sinfo->Effects[0].RealPointsPerLevel = 50.f;
-    //sinfo->Effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].BasePoints = 300;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].BonusMultiplier = 0.f;
+    sinfo->_effects[0].DamageMultiplier = 0.75f;
+    sinfo->_effects[0].RealPointsPerLevel = 50.f;
+    //sinfo->_effects[0].ValueMultiplier = 1.f;
 
-    sinfo->Effects[1].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
-    sinfo->Effects[1].BasePoints = 50;
-    sinfo->Effects[1].BonusMultiplier = 1.0f;
-    sinfo->Effects[1].DamageMultiplier = 0.5f;
-    sinfo->Effects[1].DieSides = /*17*/25;
-    sinfo->Effects[1].RealPointsPerLevel = 30.f;
-    //sinfo->Effects[1].ValueMultiplier = 1.f;
-    sinfo->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->Effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
-    sinfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_12_YARDS);
+    sinfo->_effects[1].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
+    sinfo->_effects[1].BasePoints = 50;
+    sinfo->_effects[1].BonusMultiplier = 1.0f;
+    sinfo->_effects[1].DamageMultiplier = 0.5f;
+    sinfo->_effects[1].DieSides = /*17*/25;
+    sinfo->_effects[1].RealPointsPerLevel = 30.f;
+    //sinfo->_effects[1].ValueMultiplier = 1.f;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
+    sinfo->_effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_12_YARDS);
     //5) END SHADOW BLAST (SPLASH ATTACK)
 
     //6) SHADOW BOLT (BASE ATTACK)
@@ -15752,12 +15757,12 @@ void bot_ai::InitBotCustomSpells()
     //sinfo->Attributes |= SPELL_ATTR0_HIDE_IN_COMBAT_LOG | SPELL_ATTR0_HIDDEN_CLIENTSIDE | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
     //sinfo->AttributesEx3 |= SPELL_ATTR3_DONT_DISPLAY_RANGE;
 
-    sinfo->Effects[0].BasePoints = 200;
-    sinfo->Effects[0].DieSides = /*12*/25;
-    sinfo->Effects[0].BonusMultiplier = 1.15f;
-    sinfo->Effects[0].DamageMultiplier = 1.f;
-    sinfo->Effects[0].RealPointsPerLevel = 10.f;
-    //sinfo->Effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].BasePoints = 200;
+    sinfo->_effects[0].DieSides = /*12*/25;
+    sinfo->_effects[0].BonusMultiplier = 1.15f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 10.f;
+    //sinfo->_effects[0].ValueMultiplier = 1.f;
     //6) END SHADOW BOLT (BASE ATTACK)
 
     //7) ATTACK ANIMATION
@@ -15787,15 +15792,15 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
     sinfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED | SPELL_ATTR5_USABLE_WHILE_CONFUSED | SPELL_ATTR5_USABLE_WHILE_FEARED;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_DUMMY;
-    sinfo->Effects[0].BasePoints = 1;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].ValueMultiplier = 0.f;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].DamageMultiplier = 0.f;
-    sinfo->Effects[0].TargetB = SpellImplicitTargetInfo(0);
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
+    sinfo->_effects[0].BasePoints = 1;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].ValueMultiplier = 0.f;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].DamageMultiplier = 0.f;
+    sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(0);
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
     //8) END SPLASH ANIMATION
 
     //9) DEVOUR MAGIC
@@ -15822,23 +15827,23 @@ void bot_ai::InitBotCustomSpells()
     //sinfo->Attributes &= ~(SPELL_ATTR0_HIDE_IN_COMBAT_LOG);
     //sinfo->AttributesEx3 |= SPELL_ATTR3_DONT_DISPLAY_RANGE;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_DISPEL;
-    sinfo->Effects[0].BasePoints = 2;
-    sinfo->Effects[0].MiscValue = DISPEL_MAGIC;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ALLY);
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_DISPEL;
+    sinfo->_effects[0].BasePoints = 2;
+    sinfo->_effects[0].MiscValue = DISPEL_MAGIC;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ALLY);
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
 
-    sinfo->Effects[1].Effect = SPELL_EFFECT_DISPEL;
-    sinfo->Effects[1].BasePoints = 2;
-    sinfo->Effects[1].MiscValue = DISPEL_CURSE;
-    sinfo->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ALLY);
-    sinfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
+    sinfo->_effects[1].Effect = SPELL_EFFECT_DISPEL;
+    sinfo->_effects[1].BasePoints = 2;
+    sinfo->_effects[1].MiscValue = DISPEL_CURSE;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ALLY);
+    sinfo->_effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
 
-    sinfo->Effects[2].Effect = SPELL_EFFECT_DISPEL;
-    sinfo->Effects[2].BasePoints = 2;
-    sinfo->Effects[2].MiscValue = DISPEL_MAGIC;
-    sinfo->Effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
-    sinfo->Effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
+    sinfo->_effects[2].Effect = SPELL_EFFECT_DISPEL;
+    sinfo->_effects[2].BasePoints = 2;
+    sinfo->_effects[2].MiscValue = DISPEL_MAGIC;
+    sinfo->_effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
+    sinfo->_effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
     //9) END DEVOUR MAGIC
 
     //10) DRAIN MANA
@@ -15862,15 +15867,15 @@ void bot_ai::InitBotCustomSpells()
     sinfo->Attributes |= SPELL_ATTR0_ABILITY | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT | SPELL_ATTR3_NO_DONE_BONUS;
 
-    //sinfo->Effects[0].Effect = SPELL_EFFECT_POWER_DRAIN;
-    sinfo->Effects[0].BasePoints = 999999;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].ValueMultiplier = 1.f;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].DamageMultiplier = 1.f;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+    //sinfo->_effects[0].Effect = SPELL_EFFECT_POWER_DRAIN;
+    sinfo->_effects[0].BasePoints = 999999;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
 
-    sinfo->Effects[1].Effect = 0;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_NONE;
     //10) END DRAIN MANA
 
     //11) REPLENISH MANA
@@ -15894,17 +15899,17 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx5 |= SPELL_ATTR5_DONT_TURN_DURING_CAST;
     sinfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_POSSESSED_FRIENDS;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_SPELL;
-    sinfo->Effects[0].BasePoints = 2;
-    sinfo->Effects[0].DieSides = 0;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].ValueMultiplier = 0.f;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].DamageMultiplier = 0.f;
-    sinfo->Effects[0].TriggerSpell = SPELL_TRIGGERED_ENERGIZE;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
-    sinfo->Effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ALLY);
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_25_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_TRIGGER_SPELL;
+    sinfo->_effects[0].BasePoints = 2;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].ValueMultiplier = 0.f;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].DamageMultiplier = 0.f;
+    sinfo->_effects[0].TriggerSpell = SPELL_TRIGGERED_ENERGIZE;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+    sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ALLY);
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_25_YARDS);
     //11) END REPLENISH MANA
 
     //12) REPLENISH HEALTH
@@ -15929,17 +15934,17 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx5 |= SPELL_ATTR5_DONT_TURN_DURING_CAST;
     sinfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_POSSESSED_FRIENDS;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_SPELL;
-    sinfo->Effects[0].BasePoints = 3;
-    sinfo->Effects[0].DieSides = 0;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].ValueMultiplier = 0.f;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].DamageMultiplier = 0.f;
-    sinfo->Effects[0].TriggerSpell = SPELL_TRIGGERED_HEAL;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
-    sinfo->Effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ALLY);
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_25_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_TRIGGER_SPELL;
+    sinfo->_effects[0].BasePoints = 3;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].ValueMultiplier = 0.f;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].DamageMultiplier = 0.f;
+    sinfo->_effects[0].TriggerSpell = SPELL_TRIGGERED_HEAL;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+    sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ALLY);
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_25_YARDS);
     //12) END REPLENISH HEALTH
 
     //ARCHMAGE
@@ -15957,25 +15962,25 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx4 |= SPELL_ATTR4_DONT_REMOVE_IN_ARENA;
     sinfo->AttributesEx7 |= SPELL_ATTR7_CONSOLIDATED_RAID_BUFF;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
-    sinfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_POWER_REGEN_PERCENT;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[0].BasePoints = 100;
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
+    sinfo->_effects[0].ApplyAuraName = SPELL_AURA_MOD_POWER_REGEN_PERCENT;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[0].BasePoints = 100;
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
 
-    sinfo->Effects[1].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
-    sinfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT;
-    sinfo->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[1].BasePoints = 10;
-    sinfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[1].BasePoints = 10;
+    sinfo->_effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
 
     //for stacking rule
     /*
-    sinfo->Effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
-    sinfo->Effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
-    sinfo->Effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[2].BasePoints = 1;
-    sinfo->Effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
+    sinfo->_effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
+    sinfo->_effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[2].BasePoints = 1;
+    sinfo->_effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
     */
     //13) END BRILLIANCE AURA
 
@@ -15999,12 +16004,12 @@ void bot_ai::InitBotCustomSpells()
     sinfo->Attributes &= ~(SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION);
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
-    sinfo->Effects[0].BasePoints = 15;
-    sinfo->Effects[0].DieSides = 9;
-    sinfo->Effects[0].BonusMultiplier = 0.5f;
-    sinfo->Effects[0].DamageMultiplier = 1.f;
-    sinfo->Effects[0].RealPointsPerLevel = 15.f;
-    sinfo->Effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].BasePoints = 15;
+    sinfo->_effects[0].DieSides = 9;
+    sinfo->_effects[0].BonusMultiplier = 0.5f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 15.f;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
     //14) END FIREBALL (MAIN ATTACK)
 
     //15) BLIZZARD
@@ -16030,14 +16035,14 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
     sinfo->AttributesEx5 |= SPELL_ATTR5_HASTE_AFFECT_DURATION;
 
-    sinfo->Effects[0].BasePoints = 26;
-    sinfo->Effects[0].DieSides = 0;
-    sinfo->Effects[0].BonusMultiplier = 1.f;
-    sinfo->Effects[0].DamageMultiplier = 1.f;
-    sinfo->Effects[0].RealPointsPerLevel = 15.f;
-    sinfo->Effects[0].ValueMultiplier = 1.f;
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_13_YARDS);
-    sinfo->Effects[0].Amplitude = 1000;
+    sinfo->_effects[0].BasePoints = 26;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].BonusMultiplier = 1.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 15.f;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_13_YARDS);
+    sinfo->_effects[0].Amplitude = 1000;
     //15) END BLIZZARD
 
     //16) SUMMON WATER ELEMENTAL (dummy spell)
@@ -16057,10 +16062,10 @@ void bot_ai::InitBotCustomSpells()
     sinfo->SchoolMask = SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_ARCANE;
     sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_DUMMY;
-    //sinfo->Effects[0].BasePoints = 1;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
+    //sinfo->_effects[0].BasePoints = 1;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
     //16) END SUMMON WATER ELEMENTAL
 
     //17) WATERBOLT (MAIN_ATTACK)
@@ -16080,12 +16085,12 @@ void bot_ai::InitBotCustomSpells()
     sinfo->SchoolMask = SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_ARCANE;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
-    sinfo->Effects[0].BasePoints = 25;
-    sinfo->Effects[0].DieSides = 20;
-    sinfo->Effects[0].BonusMultiplier = 1.f;
-    sinfo->Effects[0].DamageMultiplier = 1.f;
-    sinfo->Effects[0].RealPointsPerLevel = 25.f;
-    sinfo->Effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].BasePoints = 25;
+    sinfo->_effects[0].DieSides = 20;
+    sinfo->_effects[0].BonusMultiplier = 1.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 25.f;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
     //17) END WATERBOLT (MAIN ATTACK)
 
     //DREADLORD
@@ -16108,27 +16113,27 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx4 |= SPELL_ATTR4_DONT_REMOVE_IN_ARENA;
     sinfo->AttributesEx7 |= SPELL_ATTR7_CONSOLIDATED_RAID_BUFF;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
-    sinfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_CRIT_DAMAGE_BONUS;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[0].BasePoints = 5;
-    sinfo->Effects[0].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
+    sinfo->_effects[0].ApplyAuraName = SPELL_AURA_MOD_CRIT_DAMAGE_BONUS;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[0].BasePoints = 5;
+    sinfo->_effects[0].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
 
-    sinfo->Effects[1].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
-    sinfo->Effects[1].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
-    sinfo->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[1].BasePoints = 1;
-    sinfo->Effects[1].TriggerSpell = SPELL_TRIGGERED_HEAL;
-    sinfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[1].BasePoints = 1;
+    sinfo->_effects[1].TriggerSpell = SPELL_TRIGGERED_HEAL;
+    sinfo->_effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
 
     //for stacking rule
     /*
-    sinfo->Effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
-    sinfo->Effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
-    sinfo->Effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-    sinfo->Effects[2].BasePoints = 1;
-    sinfo->Effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
+    sinfo->_effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
+    sinfo->_effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[2].BasePoints = 1;
+    sinfo->_effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_YARDS);
     */
     //18) END VAMPIRIC AURA
 
@@ -16144,9 +16149,9 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT | SPELL_ATTR3_DISABLE_PROC | SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED | SPELL_ATTR3_NO_DONE_BONUS;
 
-    sinfo->Effects[0].BasePoints = 1;
+    sinfo->_effects[0].BasePoints = 1;
 
-    sinfo->Effects[1].Effect = 0;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_NONE;
     //19) END VAMPIRIC HEAL
 
     //20) SLEEP
@@ -16176,16 +16181,16 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
-    //sinfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-    //sinfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_STUN;
-    //sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    //sinfo->Effects[0].BasePoints = 1;
+    //sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
+    //sinfo->_effects[0].ApplyAuraName = SPELL_AURA_MOD_STUN;
+    //sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    //sinfo->_effects[0].BasePoints = 1;
 
-    sinfo->Effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
-    sinfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_RESISTANCE_PCT;
-    sinfo->Effects[1].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
-    sinfo->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->Effects[1].BasePoints = -100;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_MOD_RESISTANCE_PCT;
+    sinfo->_effects[1].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[1].BasePoints = -100;
     //20) END SLEEP
 
     //21) CARRION SWARM
@@ -16212,15 +16217,15 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT/* | SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS*/;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
-    //sinfo->Effects[0].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_104);
-    sinfo->Effects[0].BasePoints = 425;
-    sinfo->Effects[0].DieSides = 150;
-    sinfo->Effects[0].BonusMultiplier = 2.f;
-    sinfo->Effects[0].DamageMultiplier = 1.f;
-    sinfo->Effects[0].RealPointsPerLevel = 37.5f; //2000 avg at 80
-    sinfo->Effects[0].ValueMultiplier = 1.f;
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+    //sinfo->_effects[0].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_104);
+    sinfo->_effects[0].BasePoints = 425;
+    sinfo->_effects[0].DieSides = 150;
+    sinfo->_effects[0].BonusMultiplier = 2.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 37.5f; //2000 avg at 80
+    sinfo->_effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
     //21) END CARRION SWARM
 
     //22) INFERNO (dummy summon)
@@ -16241,9 +16246,9 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx |= /*SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE | */SPELL_ATTR1_NO_THREAT;
     //sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_DUMMY;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
-    sinfo->Effects[0].BasePoints = 1;
+    sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+    sinfo->_effects[0].BasePoints = 1;
     //22) END INFERNO
 
     //23) INFERNO VISUAL (dummy summon)
@@ -16252,8 +16257,8 @@ void bot_ai::InitBotCustomSpells()
 
     sinfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
 
-    //sinfo->Effects[0].Effect = SPELL_EFFECT_DUMMY;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+    //sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
     //23) END INFERNO VISUAL
 
     //SPELL BREAKER
@@ -16273,10 +16278,10 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
     sinfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_POSSESSED_FRIENDS;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_DUMMY;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
 
-    sinfo->Effects[1].Effect = 0;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_NONE;
     //24) END STEAL MAGIC
 
     //25) FEEDBACK
@@ -16298,9 +16303,9 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_POWER_BURN;
-    sinfo->Effects[0].DieSides = 0;
-    sinfo->Effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].Effect = SPELL_EFFECT_POWER_BURN;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
     //25) END FEEDBACK
 
     // DARK RANGER
@@ -16337,27 +16342,27 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS/* | SPELL_ATTR2_CANT_CRIT*/;
     sinfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->Effects[0].BasePoints = 150;
-    sinfo->Effects[0].DieSides = 0;
-    sinfo->Effects[0].BonusMultiplier = 1.f;
-    sinfo->Effects[0].DamageMultiplier = 1.f;
-    sinfo->Effects[0].RealPointsPerLevel = 0.f;
-    sinfo->Effects[0].ValueMultiplier = 1.f;
-    sinfo->Effects[0].RadiusEntry = nullptr;
+    sinfo->_effects[0].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[0].BasePoints = 150;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].BonusMultiplier = 1.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].RadiusEntry = nullptr;
 
-    sinfo->Effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
-    sinfo->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->Effects[1].ApplyAuraName = SPELL_AURA_PERIODIC_DAMAGE;
-    sinfo->Effects[1].BasePoints = 100;
-    sinfo->Effects[1].DieSides = 0;
-    sinfo->Effects[1].BonusMultiplier = 2.f;
-    sinfo->Effects[1].DamageMultiplier = 1.f;
-    sinfo->Effects[1].RealPointsPerLevel = 10.f;
-    sinfo->Effects[1].ValueMultiplier = 1.f;
-    sinfo->Effects[1].RadiusEntry = nullptr;
-    sinfo->Effects[1].Amplitude = 2000;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_PERIODIC_DAMAGE;
+    sinfo->_effects[1].BasePoints = 100;
+    sinfo->_effects[1].DieSides = 0;
+    sinfo->_effects[1].BonusMultiplier = 2.f;
+    sinfo->_effects[1].DamageMultiplier = 1.f;
+    sinfo->_effects[1].RealPointsPerLevel = 10.f;
+    sinfo->_effects[1].ValueMultiplier = 1.f;
+    sinfo->_effects[1].RadiusEntry = nullptr;
+    sinfo->_effects[1].Amplitude = 2000;
     //26) END BLACK ARROW
 
     //27) DRAIN LIFE
@@ -16390,17 +16395,17 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
     sinfo->AttributesEx5 |= SPELL_ATTR5_START_PERIODIC_AT_APPLY;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_LEECH;
-    sinfo->Effects[0].BasePoints = 45;
-    sinfo->Effects[0].DieSides = 0;
-    sinfo->Effects[0].BonusMultiplier = 1.f;
-    sinfo->Effects[0].DamageMultiplier = 1.f;
-    sinfo->Effects[0].RealPointsPerLevel = 6.f;
-    sinfo->Effects[0].ValueMultiplier = 2.f;
-    sinfo->Effects[0].RadiusEntry = nullptr;
-    sinfo->Effects[0].Amplitude = 1000;
+    sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_LEECH;
+    sinfo->_effects[0].BasePoints = 45;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].BonusMultiplier = 1.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 6.f;
+    sinfo->_effects[0].ValueMultiplier = 2.f;
+    sinfo->_effects[0].RadiusEntry = nullptr;
+    sinfo->_effects[0].Amplitude = 1000;
     //27) END DRAIN LIFE
 
     //28) SILENCE
@@ -16429,12 +16434,12 @@ void bot_ai::InitBotCustomSpells()
     sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT | TARGET_FLAG_DEST_LOCATION;
     sinfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED | SPELL_ATTR1_CANT_BE_REDIRECTED;
 
-    sinfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-    sinfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->Effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
-    sinfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_SILENCE;
-    sinfo->Effects[0].BasePoints = 1;
-    sinfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_15_YARDS);
+    sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
+    sinfo->_effects[0].ApplyAuraName = SPELL_AURA_MOD_SILENCE;
+    sinfo->_effects[0].BasePoints = 1;
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_15_YARDS);
     //28) END SILENCE
 
     TC_LOG_INFO("server.loading", "Re-Loading Spell Proc conditions...");

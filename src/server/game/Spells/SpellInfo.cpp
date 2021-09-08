@@ -445,7 +445,7 @@ int32 SpellEffectInfo::CalcValue(WorldObject const* caster /*= nullptr*/, int32 
     {
         //npcbot: Life Burst heal tempfix 2013
         float pointsPerComboPoint = PointsPerComboPoint;
-        if (_spellInfo->Id == 57143 && _effIndex == 1)
+        if (_spellInfo->Id == 57143 && EffectIndex == EFFECT_1)
         {
             basePoints = 2500;
             value = float(basePoints);

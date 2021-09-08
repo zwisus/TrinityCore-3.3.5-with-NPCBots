@@ -1540,7 +1540,7 @@ public:
             //Hammer of Justice
             if (IsSpellReady(HAMMER_OF_JUSTICE_1, diff) && !CCed(opponent) && dist < 10 && Rand() < 20 &&
                 opponent->GetDiminishing(DIMINISHING_STUN) <= DIMINISHING_LEVEL_2 &&
-                !opponent->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(HAMMER_OF_JUSTICE_1), 0, me))
+                !IsImmunedToMySpellEffect(opponent, sSpellMgr->GetSpellInfo(HAMMER_OF_JUSTICE_1), EFFECT_0))
             {
                 if (doCast(opponent, GetSpell(HAMMER_OF_JUSTICE_1)))
                     return;
@@ -2624,7 +2624,7 @@ public:
             if (InitSpell(me, HOLY_SHOCK_HEAL_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, HOLY_SHOCK_HEAL_1));
-                _heals[HOLY_SHOCK_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[HOLY_SHOCK_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[HOLY_SHOCK_1] = 0;
@@ -2632,7 +2632,7 @@ public:
             if (InitSpell(me, HOLY_LIGHT_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, HOLY_LIGHT_1));
-                _heals[HOLY_LIGHT_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[HOLY_LIGHT_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[HOLY_LIGHT_1] = 0;
@@ -2640,7 +2640,7 @@ public:
             if (InitSpell(me, FLASH_OF_LIGHT_1))
             {
                 spellInfo = sSpellMgr->GetSpellInfo(InitSpell(me, FLASH_OF_LIGHT_1));
-                _heals[FLASH_OF_LIGHT_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->Effects[0].CalcValue(me), HEAL, 0, {});
+                _heals[FLASH_OF_LIGHT_1] = me->SpellHealingBonusDone(me, spellInfo, spellInfo->_effects[0].CalcValue(me), HEAL, spellInfo->GetEffect(EFFECT_0), {});
             }
             else
                 _heals[FLASH_OF_LIGHT_1] = 0;

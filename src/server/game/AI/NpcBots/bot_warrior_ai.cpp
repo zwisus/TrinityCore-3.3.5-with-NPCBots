@@ -1399,7 +1399,7 @@ public:
             //Improved Cleave: 120% increased '!bonus damage!' done by Cleave (flat mod)
             if ((_spec == BOT_SPEC_WARRIOR_FURY) && lvl >= 25 && baseId == CLEAVE_1)
             {
-                float bp = spellInfo->Effects[EFFECT_0].BasePoints; //SPELL_EFFECT_WEAPON_DAMAGE (values: 15 - 222)
+                float bp = spellInfo->_effects[EFFECT_0].BasePoints; //SPELL_EFFECT_WEAPON_DAMAGE (values: 15 - 222)
                 fdamage += bp * 1.2;
             }
 

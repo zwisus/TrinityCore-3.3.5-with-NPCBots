@@ -572,7 +572,7 @@ public:
                 //Kidney Shot
                 if (GetSpell(KIDNEY_SHOT_1) && !stealthed && stunDivider < DIMINISHING_LEVEL_4 &&
                     Rand() < 80 && !CCed(opponent) &&
-                    !opponent->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(KIDNEY_SHOT_1), EFFECT_0, me) &&
+                    !IsImmunedToMySpellEffect(opponent, sSpellMgr->GetSpellInfo(KIDNEY_SHOT_1), EFFECT_0) &&
                     ((comboPoints >= 4 && stunDivider < DIMINISHING_LEVEL_3 &&
                     (opponent->GetHealth() > me->GetMaxHealth() / 2 || opponent->GetTypeId() == TYPEID_PLAYER)) ||
                     opponent->IsNonMeleeSpellCast(false,false,true)) &&
@@ -618,7 +618,7 @@ public:
                     !opponent->HasAuraType(SPELL_AURA_MOD_STUN) && stunDivider < DIMINISHING_LEVEL_3 &&
                     (opponent->GetTypeId() == TYPEID_PLAYER || (!IAmFree() && master->GetNpcBotsCount() > 1)) ? CHEAP_SHOT_1 :
                     GetSpell(GARROTE_1) && HasRole(BOT_ROLE_DPS) && opponent->GetHealth() > me->GetMaxHealth() / 4 &&
-                    !opponent->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(GARROTE_1), 0, me) &&
+                    !IsImmunedToMySpellEffect(opponent, sSpellMgr->GetSpellInfo(GARROTE_1), EFFECT_0) &&
                     (!isdaggerMH || (opponent->GetTypeId() == TYPEID_PLAYER &&
                     (opponent->GetClass() == CLASS_MAGE || opponent->GetClass() == CLASS_PRIEST || opponent->GetClass() == CLASS_WARLOCK))) &&
                     !opponent->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x100, 0x0, 0x0, me->GetGUID()) ? GARROTE_1 :
@@ -860,10 +860,10 @@ public:
                             count += 2;
                         }
                         //area spell
-                        if ((spell->GetSpellInfo()->Effects[0].IsEffect() &&
-                            spell->GetSpellInfo()->Effects[0].TargetB.GetSelectionCategory() == TARGET_SELECT_CATEGORY_NEARBY) ||
-                            (spell->GetSpellInfo()->Effects[1].IsEffect() &&
-                            spell->GetSpellInfo()->Effects[1].TargetB.GetSelectionCategory() == TARGET_SELECT_CATEGORY_NEARBY))
+                        if ((spell->GetSpellInfo()->_effects[0].IsEffect() &&
+                            spell->GetSpellInfo()->_effects[0].TargetB.GetSelectionCategory() == TARGET_SELECT_CATEGORY_NEARBY) ||
+                            (spell->GetSpellInfo()->_effects[1].IsEffect() &&
+                            spell->GetSpellInfo()->_effects[1].TargetB.GetSelectionCategory() == TARGET_SELECT_CATEGORY_NEARBY))
                         {
                             count += 2;
                         }
@@ -1338,7 +1338,7 @@ public:
                 uint32 slot = TEMP_ENCHANTMENT_SLOT;
                 uint32 duration = 2 * IN_MILLISECONDS;
                 uint32 charges = 0;
-                uint32 enchant_id = spellInfo->Effects[0].MiscValue;
+                uint32 enchant_id = spellInfo->_effects[0].MiscValue;
                 //SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                 Item* mh = GetEquips(BOT_SLOT_MAINHAND);
                 Item* oh = GetEquips(BOT_SLOT_OFFHAND);

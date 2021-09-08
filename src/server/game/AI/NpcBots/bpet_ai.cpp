@@ -304,8 +304,8 @@ bool bot_pet_ai::_canCureTarget(Unit const* target, uint32 cureSpell) const
 
     uint32 dispelMask = 0;
     for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
-        if (info->Effects[i].Effect == SPELL_EFFECT_DISPEL)
-            dispelMask |= SpellInfo::GetDispelMask(DispelType(info->Effects[i].MiscValue));
+        if (info->_effects[i].Effect == SPELL_EFFECT_DISPEL)
+            dispelMask |= SpellInfo::GetDispelMask(DispelType(info->_effects[i].MiscValue));
 
     if (dispelMask == 0)
         return false;
@@ -1883,7 +1883,7 @@ void bot_pet_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
 
     for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
     {
-        uint32 const auraname = spell->Effects[i].ApplyAuraName;
+        uint32 const auraname = spell->_effects[i].ApplyAuraName;
 
         //update stats
         if (auraname == SPELL_AURA_MOD_STAT || auraname == SPELL_AURA_MOD_PERCENT_STAT ||

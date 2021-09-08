@@ -659,8 +659,8 @@ class CastingUnitCheck
             bool silenceSpell = false;
             for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
             {
-                if (spellInfo->Effects[i].Effect == SPELL_EFFECT_APPLY_AURA &&
-                    spellInfo->Effects[i].ApplyAuraName == SPELL_AURA_MOD_SILENCE)
+                if (spellInfo->_effects[i].Effect == SPELL_EFFECT_APPLY_AURA &&
+                    spellInfo->_effects[i].ApplyAuraName == SPELL_AURA_MOD_SILENCE)
                 {
                     silenceSpell = true;
                     break;

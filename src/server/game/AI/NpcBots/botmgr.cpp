@@ -1305,30 +1305,30 @@ int32 BotMgr::GetHPSTaken(Unit const* unit) const
 
             for (uint8 j = 0; j != MAX_SPELL_EFFECTS; ++j)
             {
-                if (spellInfo->Effects[j].Effect != SPELL_EFFECT_HEAL)
+                if (spellInfo->_effects[j].Effect != SPELL_EFFECT_HEAL)
                     continue;
 
                 if (targetGuid != unit->GetGUID())
                 {
-                    if (spellInfo->Effects[j].TargetA.GetSelectionCategory() != TARGET_SELECT_CATEGORY_AREA)
+                    if (spellInfo->_effects[j].TargetA.GetSelectionCategory() != TARGET_SELECT_CATEGORY_AREA)
                         continue;
 
-                    //Targets t = spellInfo->Effects[j].TargetA.GetTarget();
+                    //Targets t = spellInfo->_effects[j].TargetA.GetTarget();
                     //non-existing case
                     //if (t == TARGET_UNIT_CASTER_AREA_PARTY && !gr->SameSubGroup(u->GetGUID(), unit->GetGUID()))
                     //    continue;
-                    Targets t = spellInfo->Effects[j].TargetB.GetTarget();
+                    Targets t = spellInfo->_effects[j].TargetB.GetTarget();
                     if (t == TARGET_UNIT_LASTTARGET_AREA_PARTY &&
                         !(GetBot(unit->GetGUID()) && GetBot(targetGuid)) &&
                         !gr->SameSubGroup(unit->GetGUID(), targetGuid))
                         continue;
                 }
 
-                int32 healing = u->SpellHealingBonusDone(const_cast<Unit*>(unit), spellInfo, spellInfo->Effects[0].CalcValue(u), HEAL, 0, {});
+                int32 healing = u->SpellHealingBonusDone(const_cast<Unit*>(unit), spellInfo, spellInfo->_effects[0].CalcValue(u), HEAL, spellInfo->GetEffect(EFFECT_0), {});
                 healing = unit->SpellHealingBonusTaken(u, spellInfo, healing, HEAL);
 
                 if (i == CURRENT_CHANNELED_SPELL)
-                    amount += healing / (spellInfo->Effects[j].Amplitude * 0.001f);
+                    amount += healing / (spellInfo->_effects[j].Amplitude * 0.001f);
                 else
                     amount += healing / (std::max<int32>(spell->GetTimer(), 1000) * 0.001f);
 

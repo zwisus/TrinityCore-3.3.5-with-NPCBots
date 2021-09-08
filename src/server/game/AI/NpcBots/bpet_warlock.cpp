@@ -91,7 +91,7 @@ public:
             {
                 //hacked - confilct with soul link due to ownerGuid mismatch
                 if (IsSpellReady(BLOOD_PACT_1, diff, false) && (!me->HasAuraType(SPELL_AURA_230) ||
-                    me->GetAuraEffectsByType(SPELL_AURA_230).front()->GetAmount() < sSpellMgr->GetSpellInfo(GetSpell(BLOOD_PACT_1))->Effects[0].CalcValue()))
+                    me->GetAuraEffectsByType(SPELL_AURA_230).front()->GetAmount() < sSpellMgr->GetSpellInfo(GetSpell(BLOOD_PACT_1))->_effects[0].CalcValue()))
                 {
                     me->CastSpell(me, GetSpell(BLOOD_PACT_1), false);
                     //CastSpellExtraArgs args(true);

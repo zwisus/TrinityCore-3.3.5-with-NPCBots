@@ -654,7 +654,7 @@ public:
                 //ASSERT(rank >= 1 && rank <= 8);
                 spellInfo = sSpellMgr->GetSpellInfo(_healthStoneSpells[rank - 1]);
                 ASSERT(spellInfo);
-                int32 healing = spellInfo->Effects[0].BasePoints;
+                int32 healing = spellInfo->_effects[0].BasePoints;
                 //Glyph of Healthstone
                 if (me->GetLevel() >= 15)
                     healing = int32(float(healing) * 1.3f);
@@ -1485,7 +1485,7 @@ public:
             if (baseId == LIFE_TAP_1)
             {
                 //level * 3 based on in-game tooltip and spellwork (BasePoints = 2000 + Level * 4,00)
-                int32 damage = spell->Effects[0].CalcValue(me);
+                int32 damage = spell->_effects[0].CalcValue(me);
                 int32 manaGain = damage;
                 damage += int32(me->GetLevel() * 3);
                 manaGain += 0.5f * me->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC);
