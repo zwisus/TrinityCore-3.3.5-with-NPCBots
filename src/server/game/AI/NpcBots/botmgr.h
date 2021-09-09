@@ -67,6 +67,7 @@ class BotMgr
         static bool IsBotStatsLimitsEnabled();
         static bool IsPvPEnabled();
         static bool IsFoodInterruptedByMovement();
+        static bool FilterRaces();
         static uint8 GetMaxClassBots();
         static uint8 GetHealTargetIconFlags();
         static uint8 GetOffTankTargetIconFlags();

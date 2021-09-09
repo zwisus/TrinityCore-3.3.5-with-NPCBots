@@ -4145,6 +4145,13 @@ NpcBot.MaxBots = 1
 NpcBot.MaxBotsPerClass = 0
 
 #
+#    NpcBot.Botgiver.FilterRaces
+#        Description: Make botgiver only offer bots of player faction (normal classes).
+#        Default:     0 - disable
+
+NpcBot.Botgiver.FilterRaces = 0
+
+#
 #    NpcBot.BaseFollowDistance
 #        Description: Default bot follow distance.
 #        Note:        This parameter determines bots' formation size, distance at which bots

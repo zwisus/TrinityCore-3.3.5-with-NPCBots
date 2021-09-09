@@ -50,6 +50,7 @@ bool _limitNpcBotsDungeons;
 bool _limitNpcBotsRaids;
 bool _botPvP;
 bool _botMovementFoodInterrupt;
+bool _filterRaces;
 bool _displayEquipment;
 bool _showCloak;
 bool _showHelm;
@@ -177,6 +178,7 @@ void BotMgr::LoadConfig(bool reload)
     _enableNpcBots                  = sConfigMgr->GetBoolDefault("NpcBot.Enable", true);
     _maxNpcBots                     = sConfigMgr->GetIntDefault("NpcBot.MaxBots", 1);
     _maxClassNpcBots                = sConfigMgr->GetIntDefault("NpcBot.MaxBotsPerClass", 1);
+    _filterRaces                    = sConfigMgr->GetBoolDefault("NpcBot.Botgiver.FilterRaces", false);
     _basefollowdist                 = sConfigMgr->GetIntDefault("NpcBot.BaseFollowDistance", 30);
     _xpReductionNpcBots             = sConfigMgr->GetIntDefault("NpcBot.XpReduction", 0);
     _healTargetIconFlags            = sConfigMgr->GetIntDefault("NpcBot.HealTargetIconsMask", 0);
@@ -359,6 +361,10 @@ bool BotMgr::IsPvPEnabled()
 bool BotMgr::IsFoodInterruptedByMovement()
 {
     return _botMovementFoodInterrupt;
+}
+bool BotMgr::FilterRaces()
+{
+    return _filterRaces;
 }
 uint8 BotMgr::GetMaxClassBots()
 {

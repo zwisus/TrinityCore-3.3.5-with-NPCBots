@@ -574,7 +574,7 @@ class bot_ai : public CreatureAI
 
         struct BotSpell
         {
-            BotSpell() : cooldown(0), enabled(true) {}
+            BotSpell() : spellId(0), cooldown(0), enabled(true) {}
             BotSpell(BotSpell const&) = delete;
             BotSpell(BotSpell&&) = delete;
             BotSpell& operator=(BotSpell const&) = delete;

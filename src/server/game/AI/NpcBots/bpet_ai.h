@@ -151,7 +151,7 @@ class bot_pet_ai : public CreatureAI
 
         struct BotPetSpell
         {
-            explicit BotPetSpell() : cooldown(0), enabled(true) {}
+            explicit BotPetSpell() : spellId(0), cooldown(0), enabled(true) {}
             uint32 spellId;
             uint32 cooldown;
             bool enabled;

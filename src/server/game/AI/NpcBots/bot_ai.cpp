@@ -414,7 +414,7 @@ void bot_ai::CheckOwnerExpiry()
     QueryResult result = accId ? LoginDatabase.PQuery("SELECT UNIX_TIMESTAMP(last_login) FROM account WHERE id = %u", accId) : nullptr;
 
     Field* fields = result ? result->Fetch() : nullptr;
-    time_t lastLoginTime = result ? time_t(fields[0].GetUInt32()) : timeNow;
+    time_t lastLoginTime = fields ? time_t(fields[0].GetUInt32()) : timeNow;
 
     //either expired or owner does not exist
     if (timeNow >= lastLoginTime + expireTime)
@@ -3266,7 +3266,7 @@ bool bot_ai::IsInBotParty(ObjectGuid guid) const
             Player const* p = ref->GetSource();
             if (p && (p->GetPetGUID() == guid || (p->GetVehicle() && p->GetCharmedGUID() == guid)))
                 return true;
-            if (p->HaveBot())
+            if (p && p->HaveBot())
             {
                 if (Creature const* bot = p->GetBotMgr()->GetBot(guid))
                     if (bot->GetGUID() == guid || (bot->GetBotsPet() && bot->GetBotsPet()->GetGUID() == guid) ||
@@ -3488,7 +3488,7 @@ Unit* bot_ai::_getVehicleTarget(BotVehicleStrats /*strat*/) const
     float followdist = float (master->GetBotMgr()->GetBotFollowDist() * 2);
     if (float distOverride = GetVehicleAttackDistanceOverride())
         followdist = distOverride * 2.f;
-    if (mytar && mytar && mytar->GetTypeId() == TYPEID_UNIT &&
+    if (mytar && mytar->GetTypeId() == TYPEID_UNIT &&
         mytar->ToCreature()->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS)
         followdist *= 1.5f;
     else if (mmover->isMoving() && veh->GetMapId() == 578) //oculus
@@ -4357,7 +4357,7 @@ void bot_ai::AdjustTankingPosition() const
     float moveX;
     float moveY;
     //bool move = false;
-    for (uint8 i = 0; i != 6; ++i)
+    for (uint32 i = 0; i != 6; ++i)
     {
         if (i)
         {
@@ -13925,6 +13925,7 @@ bool bot_ai::HasVehicleRoleOverride(uint32 role) const
                     default:
                         break;
                 }
+                break;
             default:
                 break;
         }

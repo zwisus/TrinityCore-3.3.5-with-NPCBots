@@ -166,6 +166,9 @@ public:
                         bot_ai const* ai = bot->GetBotAI();
                         if (bot->GetBotClass() != botclass || !bot->IsAlive() || ai->IsTempBot() || ai->GetBotOwnerGuid() || bot->HasAura(BERSERK))
                             continue;
+                        if (BotMgr::FilterRaces() && botclass < BOT_CLASS_EX_START && (bot->GetRaceMask() & RACEMASK_ALL_PLAYABLE) &&
+                            !(bot->GetRaceMask() & ((player->GetRaceMask() & RACEMASK_ALLIANCE) ? RACEMASK_ALLIANCE : RACEMASK_HORDE)))
+                            continue;
 
                         std::ostringstream message1;
                         message1 << bot_ai::LocalizedNpcText(player, BOT_TEXT_BOTGIVER_WISH_TO_HIRE_) << bot->GetName() << '?';
@@ -174,17 +177,17 @@ public:
                         uint32 raceTextId;
                         switch (bot->GetRace())
                         {
-                            case RACE_HUMAN:        raceTextId = BOT_TEXT_RACE_HUMAN;  break;
-                            case RACE_ORC:          raceTextId = BOT_TEXT_RACE_ORC;    break;
-                            case RACE_DWARF:        raceTextId = BOT_TEXT_RACE_DWARF;  break;
-                            case RACE_NIGHTELF:     raceTextId = BOT_TEXT_RACE_NELF;   break;
-                            case RACE_UNDEAD_PLAYER:raceTextId = BOT_TEXT_RACE_UNDEAD; break;
-                            case RACE_TAUREN:       raceTextId = BOT_TEXT_RACE_TAUREN; break;
-                            case RACE_GNOME:        raceTextId = BOT_TEXT_RACE_GNOME;  break;
-                            case RACE_TROLL:        raceTextId = BOT_TEXT_RACE_TROLL;  break;
-                            case RACE_BLOODELF:     raceTextId = BOT_TEXT_RACE_BELF;   break;
-                            case RACE_DRAENEI:      raceTextId = BOT_TEXT_RACE_DRAENEI;break;
-                            default:                raceTextId = BOT_TEXT_RACE_UNKNOWN;break;
+                            case RACE_HUMAN:        raceTextId = BOT_TEXT_RACE_HUMAN;   break;
+                            case RACE_ORC:          raceTextId = BOT_TEXT_RACE_ORC;     break;
+                            case RACE_DWARF:        raceTextId = BOT_TEXT_RACE_DWARF;   break;
+                            case RACE_NIGHTELF:     raceTextId = BOT_TEXT_RACE_NELF;    break;
+                            case RACE_UNDEAD_PLAYER:raceTextId = BOT_TEXT_RACE_UNDEAD;  break;
+                            case RACE_TAUREN:       raceTextId = BOT_TEXT_RACE_TAUREN;  break;
+                            case RACE_GNOME:        raceTextId = BOT_TEXT_RACE_GNOME;   break;
+                            case RACE_TROLL:        raceTextId = BOT_TEXT_RACE_TROLL;   break;
+                            case RACE_BLOODELF:     raceTextId = BOT_TEXT_RACE_BELF;    break;
+                            case RACE_DRAENEI:      raceTextId = BOT_TEXT_RACE_DRAENEI; break;
+                            default:                raceTextId = BOT_TEXT_RACE_UNKNOWN; break;
                         }
                         info_ostr << bot->GetName() << " (" << (
                             bot->GetGender() == GENDER_MALE ? bot_ai::LocalizedNpcText(player, BOT_TEXT_GENDER_MALE) + ' ' :
