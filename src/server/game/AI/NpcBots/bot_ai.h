@@ -231,11 +231,13 @@ class bot_ai : public CreatureAI
         Unit* HelpFindCastingTarget(float maxdist = 10, float mindist = 0, uint32 spellId = 0, uint8 minHpPct = 0) const { return FindCastingTarget(maxdist, mindist, spellId, minHpPct); }
         void HelpGetNearbyTargetsList(std::list<Unit*> &targets, float maxdist, uint8 CCoption, WorldObject const* source = nullptr) const { GetNearbyTargetsList(targets, maxdist, CCoption, source); }
 
+        bool IsPointedTarget(Unit const* target, uint8 targetFlags) const;
         bool IsPointedHealTarget(Unit const* target) const;
         bool IsPointedTankingTarget(Unit const* target) const;
         bool IsPointedDPSTarget(Unit const* target) const;
         bool IsPointedRangedDPSTarget(Unit const* target) const;
         bool IsPointedNoDPSTarget(Unit const* target) const;
+        bool IsPointedAnyAttackTarget(Unit const* target) const;
 
         static bool IsDamagingSpell(SpellInfo const* spellInfo);
 

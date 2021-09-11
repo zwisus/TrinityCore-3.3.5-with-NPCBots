@@ -477,12 +477,11 @@ class UndeadCCUnitCheck
                 !(u->GetCreatureType() == CREATURE_TYPE_UNDEAD && !u->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE)))
                 return false;
             if (me->ToCreature()->GetBotClass() == BOT_CLASS_PALADIN &&
-                u->GetCreatureType() != CREATURE_TYPE_UNDEAD &&
-                u->GetCreatureType() != CREATURE_TYPE_DEMON)
+                u->GetCreatureType() != CREATURE_TYPE_UNDEAD && u->GetCreatureType() != CREATURE_TYPE_DEMON)
                 return false;
             if (me->ToCreature()->GetBotClass() == BOT_CLASS_WARLOCK &&
-                u->GetCreatureType() != CREATURE_TYPE_DEMON &&
-                u->GetCreatureType() != CREATURE_TYPE_ELEMENTAL)
+                ((u->GetCreatureType() != CREATURE_TYPE_DEMON && u->GetCreatureType() != CREATURE_TYPE_ELEMENTAL) ||
+                m_ai->IsPointedAnyAttackTarget(u)))
                 return false;
             if (u->GetVictim() && !m_ai->IsInBotParty(u->GetVictim()))
                 return false;
@@ -490,8 +489,7 @@ class UndeadCCUnitCheck
                 return false;
             if (u->IsImmunedToSpell(sSpellMgr->GetSpellInfo(m_spellId), me))
                 return false;
-            if (me->GetTypeId() == TYPEID_UNIT && me->ToCreature()->GetBotAI() && me->ToCreature()->GetBotAI()->IsPointedNoDPSTarget(u) &&
-                bot_ai::IsDamagingSpell(sSpellMgr->GetSpellInfo(m_spellId)))
+            if (m_ai->IsPointedNoDPSTarget(u) && bot_ai::IsDamagingSpell(sSpellMgr->GetSpellInfo(m_spellId)))
                 return false;
 
             return true;
