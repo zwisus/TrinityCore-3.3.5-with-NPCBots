@@ -10,6 +10,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
+#include "InstanceScript.h"
 #include "Language.h"
 #include "Map.h"
 #include "MapManager.h"
@@ -737,7 +738,13 @@ void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z,
         bot->InterruptNonMeleeSpells(true);
         //bot->IsAIEnabled = false;
         if (bot->IsInWorld())
+        {
+            if (!bot->IsFreeBot())
+                if (InstanceScript* iscr = bot->GetBotOwner()->GetInstanceScript())
+                    iscr->OnNPCBotLeave(bot);
+
             bot->RemoveFromWorld();
+        }
 
         ASSERT(bot->GetGUID());
 

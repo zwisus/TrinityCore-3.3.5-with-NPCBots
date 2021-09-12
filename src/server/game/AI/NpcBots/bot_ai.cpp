@@ -14734,6 +14734,10 @@ bool bot_ai::FinishTeleport(/*uint32 mapId, uint32 instanceId, float x, float y,
         if (gr->IsMember(me->GetGUID()))
             gr->SendUpdate();
 
+    //map hooks
+    if (InstanceScript* iscr = master->GetInstanceScript())
+        iscr->OnNPCBotEnter(me);
+
     return true;
 }
 
