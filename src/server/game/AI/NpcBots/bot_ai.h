@@ -20,7 +20,7 @@ class bot_ai : public CreatureAI
         bool canUpdate;
 
         void InitializeAI() override { Reset(); }
-        void Reset() override { }
+        //void Reset() override { }
 
         void JustDied(Unit*) override;
         void KilledUnit(Unit* u) override;
@@ -28,9 +28,10 @@ class bot_ai : public CreatureAI
         void JustEnteredCombat(Unit* u) override;
         void MoveInLineOfSight(Unit* u) override;
         void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType) override;
-        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo*/) override { }
+        //void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo*/) override { }
         void ReceiveEmote(Player* player, uint32 emote) override;
-        void EnterEvadeMode(EvadeReason/* why*/ = EVADE_REASON_OTHER) override { }
+        //void EnterEvadeMode(EvadeReason/* why*/ = EVADE_REASON_OTHER) override { }
+        //void LeavingWorld() override { }
 
         virtual void OnBotSummon(Creature* /*summon*/) {}
         virtual void OnBotDespawn(Creature* /*summon*/) {}
@@ -445,6 +446,9 @@ class bot_ai : public CreatureAI
         void _OnManaUpdate() const;
         void _OnManaRegenUpdate() const;
 
+        void _OnZoneUpdate(uint32 zoneId, uint32 areaId);
+        void _OnAreaUpdate(uint32 areaId);
+
         void RemoveItemBonuses(uint8 slot);
         void RemoveItemEnchantments(Item const* item);
         void RemoveItemEnchantment(Item const* item, EnchantmentSlot eslot);
@@ -549,6 +553,8 @@ class bot_ai : public CreatureAI
         //save timers
         uint32 _saveDisabledSpellsTimer;
 
+        uint32 _lastZoneId, _lastAreaId;
+
         uint8 _jumpCount, _evadeCount;
         uint32 _roleMask;
         ObjectGuid::LowType _ownerGuid;
@@ -614,25 +620,30 @@ class bot_ai : public CreatureAI
                 } spellCastParams;
             } params;
 
-            BotOrder(BotOrderTypes order_type) : _type(order_type)
+            explicit BotOrder(BotOrderTypes order_type) : _type(order_type)
             {
                 memset(params.whole, 0, ORDERS_PARAMS_MAX_SIZE);
             }
+            BotOrder(BotOrder&&) noexcept = default;
+
+            BotOrder(BotOrder const&) = delete;
+            BotOrder& operator=(BotOrder const&) = delete;
+            BotOrder& operator=(BotOrder&&) = delete;
 
         private:
             BotOrderTypes _type;
         };
 
         bool HasOrders() const { return !_orders.empty(); }
-        bool AddOrder(BotOrder const* order);
-        void CancelOrder(BotOrder const* order);
-        void CompleteOrder(BotOrder const* order);
+        bool AddOrder(BotOrder&& order);
+        void CancelOrder(BotOrder const& order);
+        void CompleteOrder(BotOrder const& order);
         void CancelAllOrders();
 
     private:
         void _ProcessOrders();
 
-        typedef std::queue<BotOrder const*> OrdersQueue;
+        typedef std::queue<BotOrder> OrdersQueue;
         OrdersQueue _orders;
 };
 

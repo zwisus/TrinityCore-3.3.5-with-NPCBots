@@ -215,6 +215,9 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
     teleHomeEvent = nullptr;
     teleFinishEvent = nullptr;
 
+    _lastZoneId = 0;
+    _lastAreaId = 0;
+
     _ownerGuid = 0;
 
     ResetBotAI(BOTAI_RESET_INIT);
@@ -233,12 +236,6 @@ bot_ai::~bot_ai()
     for (uint8 i = BOT_SLOT_MAINHAND; i != BOT_INVENTORY_SIZE; ++i)
         if (_equips[i])
             delete _equips[i];
-
-    while (!_orders.empty())
-    {
-        delete _orders.front();
-        _orders.pop();
-    }
 
     delete _classinfo;
 
@@ -810,8 +807,8 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
     {
         //failed to cast
         if (HasBotCommandState(BOT_COMMAND_ISSUED_ORDER) &&
-            !_orders.empty() && _orders.front()->_type == BOT_ORDER_SPELLCAST &&
-            _orders.front()->params.spellCastParams.baseSpell == m_botSpellInfo->GetFirstRankSpell()->Id)
+            !_orders.empty() && _orders.front()._type == BOT_ORDER_SPELLCAST &&
+            _orders.front().params.spellCastParams.baseSpell == m_botSpellInfo->GetFirstRankSpell()->Id)
         {
             if (DEBUG_BOT_ORDERS)
                 TC_LOG_ERROR("entities.player", "doCast(): ordered spell %u is not casted!", m_botSpellInfo->Id);
@@ -5562,6 +5559,69 @@ void bot_ai::_OnManaRegenUpdate() const
     me->SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, power_regen_mp5 + CalculatePct(value, modManaRegenInterrupt));
     me->SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, power_regen_mp5 + value);
 }
+
+void bot_ai::_OnZoneUpdate(uint32 zoneId, uint32 areaId)
+{
+    ASSERT(!IAmFree());
+    ASSERT(me->IsInWorld());
+
+    _lastZoneId = zoneId;
+
+    _OnAreaUpdate(areaId);
+
+    AreaTableEntry const* zone = sAreaTableStore.LookupEntry(zoneId);
+    if (!zone)
+        return;
+
+    SpellAreaForAreaMapBounds saBounds = sSpellMgr->GetSpellAreaForAreaMapBounds(zoneId);
+    for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+    {
+        if (itr->second->autocast && itr->second->IsFitToRequirements(master, zoneId, 0))
+        {
+            if (!me->HasAura(itr->second->spellId))
+                me->CastSpell(me, itr->second->spellId, true);
+            if (botPet && !botPet->HasAura(itr->second->spellId))
+                botPet->CastSpell(botPet, itr->second->spellId, true);
+        }
+    }
+}
+
+void bot_ai::_OnAreaUpdate(uint32 areaId)
+{
+    ASSERT(!IAmFree());
+    ASSERT(me->IsInWorld());
+
+    _lastAreaId = areaId;
+
+    Unit::AuraMap& ownerAuras = me->GetOwnedAuras();
+    for (Unit::AuraMap::iterator iter = ownerAuras.begin(); iter != ownerAuras.end();)
+    {
+        if (iter->second->GetSpellInfo()->CheckLocation(me->GetMapId(), _lastZoneId, areaId, master, false) != SPELL_CAST_OK)
+        {
+            //me->RemoveOwnedAura(iter);
+            //we assume 1 aura at a time at most for area (once per 1.5 sec)
+            me->RemoveAurasDueToSpell(iter->first);
+            if (botPet)
+                botPet->RemoveAurasDueToSpell(iter->first);
+            break;
+        }
+        else
+            ++iter;
+    }
+
+    SpellAreaForAreaMapBounds saBounds = sSpellMgr->GetSpellAreaForAreaMapBounds(areaId);
+    for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+    {
+        if (itr->second->autocast && itr->second->IsFitToRequirements(master, _lastZoneId, 0))
+        {
+            if (!me->HasAura(itr->second->spellId))
+                me->CastSpell(me, itr->second->spellId, true);
+            if (botPet && !botPet->HasAura(itr->second->spellId))
+                botPet->CastSpell(botPet, itr->second->spellId, true);
+        }
+    }
+}
+
 //SpellHit()... OnSpellHit()
 void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
 {
@@ -12678,8 +12738,8 @@ void bot_ai::OnBotSpellGo(Spell const* spell, bool ok)
     }
 
     if (HasBotCommandState(BOT_COMMAND_ISSUED_ORDER) &&
-        !_orders.empty() && _orders.front()->_type == BOT_ORDER_SPELLCAST &&
-        _orders.front()->params.spellCastParams.baseSpell == curInfo->GetFirstRankSpell()->Id)
+        !_orders.empty() && _orders.front()._type == BOT_ORDER_SPELLCAST &&
+        _orders.front().params.spellCastParams.baseSpell == curInfo->GetFirstRankSpell()->Id)
     {
         if (DEBUG_BOT_ORDERS)
             TC_LOG_ERROR("entities.player", "doCast(): ordered spell %u by %s was %s!",
@@ -12764,8 +12824,8 @@ void bot_ai::OnBotSpellInterrupted(SpellSchoolMask schoolMask, uint32 unTimeMs)
         if (info->PreventionType != SPELL_PREVENTION_TYPE_SILENCE) continue;
 
         if (HasBotCommandState(BOT_COMMAND_ISSUED_ORDER) &&
-            !_orders.empty() && _orders.front()->_type == BOT_ORDER_SPELLCAST &&
-            _orders.front()->params.spellCastParams.baseSpell == itr->first)
+            !_orders.empty() && _orders.front()._type == BOT_ORDER_SPELLCAST &&
+            _orders.front().params.spellCastParams.baseSpell == itr->first)
         {
             if (DEBUG_BOT_ORDERS)
                 TC_LOG_ERROR("entities.player", "doCast(): ordered spell %u was interrupted!", info->Id);
@@ -12951,8 +13011,8 @@ void bot_ai::CastBotItemCombatSpell(DamageInfo const& damageInfo, Item* item, It
         }
     }
 }
-//OREDERS
-bool bot_ai::AddOrder(BotOrder const* order)
+//ORDERS
+bool bot_ai::AddOrder(BotOrder&& order)
 {
     if (_orders.size() >= MAX_BOT_ORDERS_QUEUE_SIZE)
     {
@@ -12960,55 +13020,50 @@ bool bot_ai::AddOrder(BotOrder const* order)
         return false;
     }
 
-    _orders.push(order);
+    _orders.push(std::move(order));
     return true;
 }
-void bot_ai::CancelOrder(BotOrder const* order)
+void bot_ai::CancelOrder(BotOrder const& order)
 {
     if (_orders.empty())
     {
         TC_LOG_ERROR("scripts", "bot_ai::CancelOrder: %s orders are empty while trying to remove order type %u!",
-            me->GetName().c_str(), uint32(order->_type));
+            me->GetName().c_str(), uint32(order._type));
         return;
     }
-    if (_orders.front()->_type != order->_type || _orders.front()->params.whole != order->params.whole)
+    if (_orders.front()._type != order._type || _orders.front().params.whole != order.params.whole)
     {
         TC_LOG_ERROR("scripts", "bot_ai::CancelOrder: %s front order (type %u) is different from cur order (type %u)!",
-            me->GetName().c_str(), uint32(_orders.front()->_type), uint32(order->_type));
+            me->GetName().c_str(), uint32(_orders.front()._type), uint32(order._type));
         return;
     }
 
     RemoveBotCommandState(BOT_COMMAND_ISSUED_ORDER);
-    delete _orders.front();
     _orders.pop();
 }
-void bot_ai::CompleteOrder(BotOrder const* order)
+void bot_ai::CompleteOrder(BotOrder const& order)
 {
     if (_orders.empty())
     {
         TC_LOG_ERROR("scripts", "bot_ai::CompleteOrder: %s orders are empty while trying to remove order type %u!",
-            me->GetName().c_str(), uint32(order->_type));
+            me->GetName().c_str(), uint32(order._type));
         return;
     }
-    if (_orders.front()->_type != order->_type || _orders.front()->params.whole != order->params.whole)
+    if (_orders.front()._type != order._type || _orders.front().params.whole != order.params.whole)
     {
         TC_LOG_ERROR("scripts", "bot_ai::CompleteOrder: %s front order (type %u) is different from cur order (type %u)!",
-            me->GetName().c_str(), uint32(_orders.front()->_type), uint32(order->_type));
+            me->GetName().c_str(), uint32(_orders.front()._type), uint32(order._type));
         return;
     }
 
     RemoveBotCommandState(BOT_COMMAND_ISSUED_ORDER);
-    delete _orders.front();
     _orders.pop();
 }
 void bot_ai::CancelAllOrders()
 {
     RemoveBotCommandState(BOT_COMMAND_ISSUED_ORDER);
     while (!_orders.empty())
-    {
-        delete _orders.front();
         _orders.pop();
-    }
 }
 void bot_ai::_ProcessOrders()
 {
@@ -13023,9 +13078,9 @@ void bot_ai::_ProcessOrders()
 
     ordersTimer = 500;
 
-    BotOrder const* &order = _orders.front();
+    BotOrder const& order = _orders.front();
     Unit* target = nullptr;
-    switch (order->_type)
+    switch (order._type)
     {
         case BOT_ORDER_SPELLCAST:
         {
@@ -13034,7 +13089,7 @@ void bot_ai::_ProcessOrders()
 
             SetBotCommandState(BOT_COMMAND_ISSUED_ORDER);
 
-            ObjectGuid guid(order->params.spellCastParams.targetGuid);
+            ObjectGuid guid(order.params.spellCastParams.targetGuid);
             if (guid == me->GetGUID())
                 target = me;
             else if (guid == master->GetGUID())
@@ -13048,14 +13103,14 @@ void bot_ai::_ProcessOrders()
             }
             else
             {
-                TC_LOG_ERROR("scripts", "bot_ai:_ProcessOrders: invalid spellCastParams.targetGuid " UI64FMTD "!", order->params.spellCastParams.targetGuid);
+                TC_LOG_ERROR("scripts", "bot_ai:_ProcessOrders: invalid spellCastParams.targetGuid " UI64FMTD "!", order.params.spellCastParams.targetGuid);
                 CancelOrder(order);
                 return;
             }
 
             if (!target || !target->IsInWorld())
             {
-                TC_LOG_ERROR("scripts", "bot_ai:_ProcessOrders: target " UI64FMTD " not found!", order->params.spellCastParams.targetGuid);
+                TC_LOG_ERROR("scripts", "bot_ai:_ProcessOrders: target " UI64FMTD " not found!", order.params.spellCastParams.targetGuid);
                 CancelOrder(order);
                 return;
             }
@@ -13063,11 +13118,11 @@ void bot_ai::_ProcessOrders()
             if (IsCasting())
                 me->InterruptNonMeleeSpells(false);
 
-            doCast(target, _spells[order->params.spellCastParams.baseSpell]->spellId);
+            doCast(target, _spells[order.params.spellCastParams.baseSpell]->spellId);
             break;
         }
         default:
-            TC_LOG_ERROR("scripts", "bot_ai:_ProcessOrders: invalid order type %u!", uint32(order->_type));
+            TC_LOG_ERROR("scripts", "bot_ai:_ProcessOrders: invalid order type %u!", uint32(order._type));
             CancelOrder(order);
             return;
     }
@@ -14235,6 +14290,18 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         //        }
         //    }
         //}
+
+        //Zone / Area
+        if (!IAmFree() && me->IsInWorld())
+        {
+            uint32 newzone, newarea;
+            me->GetZoneAndAreaId(newzone, newarea);
+
+            if (_lastZoneId != newzone)
+                _OnZoneUpdate(newzone, newarea); // also updates area
+            else if (_lastAreaId != newarea)
+                _OnAreaUpdate(newarea);
+        }
 
         //Gathering
         if (me->IsInWorld() && HasRole(BOT_ROLE_MASK_GATHERING) && !me->IsInCombat() && !master->IsInCombat() && !master->IsMounted() && !CCed(me) &&

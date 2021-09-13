@@ -443,11 +443,11 @@ public:
             return true;
         }
 
-        bot_ai::BotOrder* order = new bot_ai::BotOrder(BOT_ORDER_SPELLCAST);
-        order->params.spellCastParams.baseSpell = basespell;
-        order->params.spellCastParams.targetGuid = target_guid.GetRawValue();
+        bot_ai::BotOrder order(BOT_ORDER_SPELLCAST);
+        order.params.spellCastParams.baseSpell = basespell;
+        order.params.spellCastParams.targetGuid = target_guid.GetRawValue();
 
-        if (bot->GetBotAI()->AddOrder(order))
+        if (bot->GetBotAI()->AddOrder(std::move(order)))
         {
             if (DEBUG_BOT_ORDERS)
                 handler->PSendSysMessage("Order given: %s: %s on %s", bot->GetName().c_str(),

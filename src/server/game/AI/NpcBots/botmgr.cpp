@@ -724,19 +724,14 @@ void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z,
         bot->ExitVehicle();
 
     if (bot->IsInWorld())
-    {
-        //bot->MonsterWhisper("teleport...", bot->GetBotAI()->GetBotOwnerGuid());
         bot->CastSpell(bot, COSMETIC_TELEPORT_EFFECT, true);
-    }
 
     if (Map* mymap = bot->FindMap())
     {
         bot->BotStopMovement();
         bot->GetBotAI()->UnsummonAll();
 
-        ////start Unit::CleanupBeforeRemoveFromMap()
         bot->InterruptNonMeleeSpells(true);
-        //bot->IsAIEnabled = false;
         if (bot->IsInWorld())
         {
             if (!bot->IsFreeBot())
@@ -748,40 +743,21 @@ void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z,
 
         ASSERT(bot->GetGUID());
 
-        //RemoveAllAuras();
         bot->RemoveAllGameObjects();
 
-        bot->m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
+        bot->m_Events.KillAllEvents(false);
         bot->CombatStop();
         bot->ClearComboPoints();
         bot->ClearComboPointHolders();
-        //bot->DeleteThreatList();
-        //bot->getHostileRefManager().setOnlineOfflineState(false);
-
-        //bot->CleanupBeforeRemoveFromMap(false);
 
         mymap->RemoveFromMap(bot, false);
     }
 
-    if (bot->IsFreeBot()/* || bot->GetBotOwner()->GetSession()->isLogingOut()*/)
+    if (bot->IsFreeBot())
     {
-        //bot->FarTeleportTo(newMap, x, y, z, ori);
-
-        //Creature::FarTeleportTo()
-        //{
-        //CleanupBeforeRemoveFromMap(false); //done above
-        //GetMap()->RemoveFromMap(this, false); //done above
-        //Relocate(X, Y, Z, O);
-        //SetMap(map);
-        //GetMap()->AddToMap(this);
-        //}
         bot->Relocate(x, y, z, ori);
         bot->SetMap(newMap);
         bot->GetMap()->AddToMap(bot);
-        //end Creature::FarTeleportTo()
-
-        //bot->SetAI(oldAI);
-        //bot->IsAIEnabled = true;
         return;
     }
 
@@ -790,8 +766,7 @@ void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z,
         if (gr->IsMember(bot->GetGUID()))
             gr->SendUpdate();
 
-    //bot->Relocate(x, y, z);
-    TeleportFinishEvent* finishEvent = new TeleportFinishEvent(bot->GetBotAI()/*, newMap->GetId(), newMap->GetInstanceId(), x, y, z, ori*/);
+    TeleportFinishEvent* finishEvent = new TeleportFinishEvent(bot->GetBotAI());
     std::chrono::milliseconds delay(urand(5000, 8000));
     bot->GetBotAI()->GetEvents()->AddEvent(finishEvent, bot->GetBotAI()->GetEvents()->CalculateTime(delay));
     bot->GetBotAI()->SetTeleportFinishEvent(finishEvent);
@@ -812,14 +787,7 @@ void BotMgr::CleanupsBeforeBotDelete(ObjectGuid guid, uint8 /*removetype*/)
 
     //don't allow removing bots while they are teleporting
     if (!bot->IsInWorld())
-    {
         bot->GetBotAI()->AbortTeleport();
-        //if (!bot->IsInWorld())
-        //{
-        //    TC_LOG_ERROR("entities.player", "BotMgr::CleanupsBeforeBotDelete(): Failed to abort %s's teleport! Still out of world!", bot->GetName().c_str());
-        //    ASSERT(false);
-        //}
-    }
 
     if (bot->GetVehicle())
         bot->ExitVehicle();
