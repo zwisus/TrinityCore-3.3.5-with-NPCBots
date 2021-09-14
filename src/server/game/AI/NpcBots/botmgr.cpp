@@ -633,7 +633,7 @@ Creature* BotMgr::GetBot(ObjectGuid guid) const
     return itr != _bots.end() ? itr->second : nullptr;
 }
 
-Creature* BotMgr::GetBotByName(std::string const& name) const
+Creature* BotMgr::GetBotByName(std::string_view name) const
 {
     std::wstring wname;
     if (Utf8toWStr(name, wname))

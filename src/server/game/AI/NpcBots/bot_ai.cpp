@@ -1,5 +1,4 @@
 #include "bot_ai.h"
-//#include "botcommon.h"
 #include "bot_Events.h"
 #include "bot_GridNotifiers.h"
 #include "botmgr.h"
@@ -23,10 +22,9 @@
 #include "TemporarySummon.h"
 /*
 NpcBot System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
-Version 4.10.15a
+Version 4.14.5a
 Original idea: https://bitbucket.org/lordpsyan/trinitycore-patches/src/3b8b9072280e/Individual/11185-BOTS-NPCBots.patch
 TODO:
-Bot commands to RBAC permissions
 dk pets (garg, aod, rdw)
 'Go there and do stuff' scenarios
 Encounter Scenarios
@@ -14292,7 +14290,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         //}
 
         //Zone / Area
-        if (!IAmFree() && me->IsInWorld())
+        if (me->IsInWorld())
         {
             uint32 newzone, newarea;
             me->GetZoneAndAreaId(newzone, newarea);

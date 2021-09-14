@@ -106,7 +106,7 @@ class BotMgr
         void Update(uint32 diff);
 
         Creature* GetBot(ObjectGuid guid) const;
-        Creature* GetBotByName(std::string const& name) const;
+        Creature* GetBotByName(std::string_view name) const;
         bool HaveBot() const { return !_bots.empty(); }
         uint8 GetNpcBotsCount() const;
         uint8 GetNpcBotsCountByRole(uint32 roles) const;

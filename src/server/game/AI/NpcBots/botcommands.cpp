@@ -16,24 +16,12 @@
 #include "Vehicle.h"
 #include "World.h"
 
-#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
-# pragma warning (push)
-# pragma warning (disable : 4996)
-#endif
-
 /*
 Name: script_bot_commands
 %Complete: ???
 Comment: Npc Bot related commands by Trickerer (onlysuffering@gmail.com)
 Category: commandscripts/custom/
 */
-
-#define ADMIN_COMMANDS rbac::RBACPermissions(196)
-#define GM_COMMANDS rbac::RBACPermissions(197)
-#define PLAYER_COMMANDS rbac::RBACPermissions(199)
 
 using namespace Trinity::ChatCommands;
 
@@ -42,14 +30,17 @@ class script_bot_commands : public CommandScript
 private:
     struct BotInfo
     {
-        public:
-            BotInfo(uint32 Id, std::string Name, uint8 Race) : id(Id), name(Name), race(Race) {}
+            explicit BotInfo(uint32 Id, std::string&& Name, uint8 Race) : id(Id), name(std::move(Name)), race(Race) {}
             uint32 id;
             std::string name;
             uint8 race;
-        private:
-            BotInfo() {}
-            //BotInfo(BotInfo const&);
+
+            BotInfo (BotInfo&&) noexcept = default;
+            BotInfo& operator=(BotInfo&&) noexcept = default;
+
+            BotInfo() = delete;
+            BotInfo(BotInfo const&) = delete;
+            BotInfo& operator=(BotInfo const&) = delete;
     };
     static bool sortbots(BotInfo const& p1, BotInfo const& p2)
     {
@@ -61,97 +52,97 @@ public:
 
     ChatCommandTable GetCommands() const override
     {
-        //static std::vector<ChatCommand> npcbotToggleCommandTable =
-        //{
-        //    { "flags",      GM_COMMANDS,            false, &HandleNpcBotToggleFlagsCommand,         "" },
-        //};
+        static ChatCommandTable npcbotToggleCommandTable =
+        {
+            { "flags",      HandleNpcBotToggleFlagsCommand,         rbac::RBAC_PERM_COMMAND_NPCBOT_TOGGLE_FLAGS,       Console::No  },
+        };
 
         static ChatCommandTable npcbotDebugCommandTable =
         {
-            { "raid",       HandleNpcBotDebugRaidCommand,               GM_COMMANDS, Console::No  },
-            { "mount",      HandleNpcBotDebugMountCommand,              GM_COMMANDS, Console::No  },
-            { "spellvisual",HandleNpcBotDebugSpellVisualCommand,        GM_COMMANDS, Console::No  },
-            { "states",     HandleNpcBotDebugStatesCommand,             GM_COMMANDS, Console::No  },
+            { "raid",       HandleNpcBotDebugRaidCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_DEBUG_RAID,         Console::No  },
+            { "mount",      HandleNpcBotDebugMountCommand,          rbac::RBAC_PERM_COMMAND_NPCBOT_DEBUG_MOUNT,        Console::No  },
+            { "spellvisual",HandleNpcBotDebugSpellVisualCommand,    rbac::RBAC_PERM_COMMAND_NPCBOT_DEBUG_VISUAL,       Console::No  },
+            { "states",     HandleNpcBotDebugStatesCommand,         rbac::RBAC_PERM_COMMAND_NPCBOT_DEBUG_STATES,       Console::No  },
         };
 
         static ChatCommandTable npcbotSetCommandTable =
         {
-            { "faction",    HandleNpcBotSetFactionCommand,              GM_COMMANDS, Console::No  },
-            { "owner",      HandleNpcBotSetOwnerCommand,                GM_COMMANDS, Console::No  },
-            { "spec",       HandleNpcBotSetSpecCommand,                 GM_COMMANDS, Console::No  },
+            { "faction",    HandleNpcBotSetFactionCommand,          rbac::RBAC_PERM_COMMAND_NPCBOT_SET_FACTION,        Console::No  },
+            { "owner",      HandleNpcBotSetOwnerCommand,            rbac::RBAC_PERM_COMMAND_NPCBOT_SET_OWNER,          Console::No  },
+            { "spec",       HandleNpcBotSetSpecCommand,             rbac::RBAC_PERM_COMMAND_NPCBOT_SET_SPEC,           Console::No  },
         };
 
         static ChatCommandTable npcbotCommandCommandTable =
         {
-            { "standstill", HandleNpcBotCommandStandstillCommand,   PLAYER_COMMANDS, Console::No  },
-            { "stopfully",  HandleNpcBotCommandStopfullyCommand,    PLAYER_COMMANDS, Console::No  },
-            { "follow",     HandleNpcBotCommandFollowCommand,       PLAYER_COMMANDS, Console::No  },
+            { "standstill", HandleNpcBotCommandStandstillCommand,   rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_STANDSTILL, Console::No  },
+            { "stopfully",  HandleNpcBotCommandStopfullyCommand,    rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_STOPFULLY,  Console::No  },
+            { "follow",     HandleNpcBotCommandFollowCommand,       rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_FOLLOW,     Console::No  },
         };
 
         static ChatCommandTable npcbotAttackDistanceCommandTable =
         {
-            { "short",      HandleNpcBotAttackDistanceShortCommand, PLAYER_COMMANDS, Console::No  },
-            { "long",       HandleNpcBotAttackDistanceLongCommand,  PLAYER_COMMANDS, Console::No  },
-            { "",           HandleNpcBotAttackDistanceExactCommand, PLAYER_COMMANDS, Console::No  },
+            { "short",      HandleNpcBotAttackDistanceShortCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_ATTDISTANCE_SHORT,  Console::No  },
+            { "long",       HandleNpcBotAttackDistanceLongCommand,  rbac::RBAC_PERM_COMMAND_NPCBOT_ATTDISTANCE_LONG,   Console::No  },
+            { "",           HandleNpcBotAttackDistanceExactCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_ATTDISTANCE_EXACT,  Console::No  },
         };
 
         static ChatCommandTable npcbotDistanceCommandTable =
         {
-            { "attack",     npcbotAttackDistanceCommandTable                                      },
-            { "",           HandleNpcBotFollowDistanceCommand,      PLAYER_COMMANDS, Console::No  },
+            { "attack",     npcbotAttackDistanceCommandTable                                                                        },
+            { "",           HandleNpcBotFollowDistanceCommand,      rbac::RBAC_PERM_COMMAND_NPCBOT_FOLDISTANCE_EXACT,  Console::No  },
         };
 
         static ChatCommandTable npcbotOrderCommandTable =
         {
-            { "cast",       HandleNpcBotOrderCastCommand,           PLAYER_COMMANDS, Console::No  },
+            { "cast",       HandleNpcBotOrderCastCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_ORDER_CAST,         Console::No  },
         };
 
         static ChatCommandTable npcbotVehicleCommandTable =
         {
-            { "eject",      HandleNpcBotVehicleEjectCommand,        PLAYER_COMMANDS, Console::No  },
+            { "eject",      HandleNpcBotVehicleEjectCommand,        rbac::RBAC_PERM_COMMAND_NPCBOT_VEHICLE_EJECT,      Console::No  },
         };
 
         static ChatCommandTable npcbotDumpCommandTable =
         {
-            { "load",      HandleNpcBotDumpLoadCommand,             ADMIN_COMMANDS,  Console::Yes },
-            { "write",     HandleNpcBotDumpWriteCommand,            ADMIN_COMMANDS,  Console::Yes },
+            { "load",       HandleNpcBotDumpLoadCommand,            rbac::RBAC_PERM_COMMAND_NPCBOT_DUMP_LOAD,          Console::Yes },
+            { "write",      HandleNpcBotDumpWriteCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_DUMP_WRITE,         Console::Yes },
         };
 
         static ChatCommandTable npcbotCommandTable =
         {
-            //{ "debug",      npcbotDebugCommandTable                                               },
-            //{ "toggle",     npcbotToggleCommandTable                                              },
-            { "set",        npcbotSetCommandTable                                                 },
-            { "add",        HandleNpcBotAddCommand,                     GM_COMMANDS, Console::No  },
-            { "remove",     HandleNpcBotRemoveCommand,                  GM_COMMANDS, Console::No  },
-            { "spawn",      HandleNpcBotSpawnCommand,                   GM_COMMANDS, Console::No  },
-            { "move",       HandleNpcBotMoveCommand,                    GM_COMMANDS, Console::No  },
-            { "delete",     HandleNpcBotDeleteCommand,                  GM_COMMANDS, Console::No  },
-            { "lookup",     HandleNpcBotLookupCommand,                  GM_COMMANDS, Console::No  },
-            { "revive",     HandleNpcBotReviveCommand,                  GM_COMMANDS, Console::No  },
-            { "reloadconfig",HandleNpcBotReloadConfigCommand,           GM_COMMANDS, Console::Yes },
-            { "command",    npcbotCommandCommandTable                                             },
-            { "info",       HandleNpcBotInfoCommand,                PLAYER_COMMANDS, Console::No  },
-            { "hide",       HandleNpcBotHideCommand,                PLAYER_COMMANDS, Console::No  },
-            { "unhide",     HandleNpcBotUnhideCommand,              PLAYER_COMMANDS, Console::No  },
-            { "show",       HandleNpcBotUnhideCommand,              PLAYER_COMMANDS, Console::No  },
-            { "recall",     HandleNpcBotRecallCommand,              PLAYER_COMMANDS, Console::No  },
-            { "kill",       HandleNpcBotKillCommand,                PLAYER_COMMANDS, Console::No  },
-            { "suicide",    HandleNpcBotKillCommand,                PLAYER_COMMANDS, Console::No  },
-            { "distance",   npcbotDistanceCommandTable                                            },
-            { "order",      npcbotOrderCommandTable                                               },
-            { "vehicle",    npcbotVehicleCommandTable                                             },
-            { "dump",       npcbotDumpCommandTable                                                },
+            //{ "debug",      npcbotDebugCommandTable                                                                                 },
+            //{ "toggle",     npcbotToggleCommandTable                                                                                },
+            { "set",        npcbotSetCommandTable                                                                                   },
+            { "add",        HandleNpcBotAddCommand,                 rbac::RBAC_PERM_COMMAND_NPCBOT_ADD,                Console::No  },
+            { "remove",     HandleNpcBotRemoveCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_REMOVE,             Console::No  },
+            { "spawn",      HandleNpcBotSpawnCommand,               rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "move",       HandleNpcBotMoveCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_MOVE,               Console::No  },
+            { "delete",     HandleNpcBotDeleteCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_DELETE,             Console::No  },
+            { "lookup",     HandleNpcBotLookupCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_LOOKUP,             Console::No  },
+            { "revive",     HandleNpcBotReviveCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_REVIVE,             Console::No  },
+            { "reloadconfig",HandleNpcBotReloadConfigCommand,       rbac::RBAC_PERM_COMMAND_NPCBOT_RELOADCONFIG,       Console::Yes },
+            { "command",    npcbotCommandCommandTable                                                                               },
+            { "info",       HandleNpcBotInfoCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_INFO,               Console::No  },
+            { "hide",       HandleNpcBotHideCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_HIDE,               Console::No  },
+            { "unhide",     HandleNpcBotUnhideCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_UNHIDE,             Console::No  },
+            { "show",       HandleNpcBotUnhideCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_UNHIDE,             Console::No  },
+            { "recall",     HandleNpcBotRecallCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_RECALL,             Console::No  },
+            { "kill",       HandleNpcBotKillCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_KILL,               Console::No  },
+            { "suicide",    HandleNpcBotKillCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_KILL,               Console::No  },
+            { "distance",   npcbotDistanceCommandTable                                                                              },
+            { "order",      npcbotOrderCommandTable                                                                                 },
+            { "vehicle",    npcbotVehicleCommandTable                                                                               },
+            { "dump",       npcbotDumpCommandTable                                                                                  },
         };
 
         static ChatCommandTable commandTable =
         {
-            { "npcbot",     npcbotCommandTable                                                    },
+            { "npcbot",     npcbotCommandTable                                                                                      },
         };
         return commandTable;
     }
 
-    static bool HandleNpcBotDebugStatesCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotDebugStatesCommand(ChatHandler* handler)
     {
         Unit* target = handler->getSelectedUnit();
         if (!target)
@@ -160,20 +151,19 @@ public:
             return true;
         }
 
-        static uint8 const MAX_UNIT_STATES = 29;
         std::ostringstream ostr;
         ostr << "Listing states for " << target->GetName() << ":";
-        for (uint8 i = 0; i != MAX_UNIT_STATES; ++i)
+        for (uint32 state = 1u; state != 1u << 31; state <<= 1)
         {
-            if (target->HasUnitState(1 << i))
-                ostr << "\n    0x" << std::hex << (1 << i);
+            if (target->HasUnitState(state))
+                ostr << "\n    0x" << std::hex << (state);
         }
 
         handler->SendSysMessage(ostr.str().c_str());
         return true;
     }
 
-    static bool HandleNpcBotDebugRaidCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotDebugRaidCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         Group const* gr = owner->GetGroup();
@@ -215,16 +205,9 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotDebugMountCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotDebugMountCommand(ChatHandler* handler, Optional<uint32> mountId)
     {
-        if (!*args)
-            return false;
-
-        //float speed = 1.f;
-        uint32 num = 0;
-
-        num = atoi((char*)args);
-        if (!num)
+        if (!mountId)
             return false;
 
         Unit* target = handler->getSelectedUnit();
@@ -234,11 +217,11 @@ public:
             return true;
         }
 
-        target->Mount(num);
+        target->Mount(*mountId);
         return true;
     }
 
-    static bool HandleNpcBotDebugSpellVisualCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotDebugSpellVisualCommand(ChatHandler* handler, Optional<uint32> kit)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         Unit* target = owner->GetSelectedUnit();
@@ -248,42 +231,33 @@ public:
             return true;
         }
 
-        const std::string intStr = args;
-        uint32 kit = (uint32)atoi((char*)args);
-
-        target->SendPlaySpellVisual(kit);
+        target->SendPlaySpellVisual(kit.value_or(0));
         return true;
     }
 
-    static bool HandleNpcBotDumpLoadCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotDumpLoadCommand(ChatHandler* handler, Optional<std::string> file_str, Optional<bool> forceKick)
     {
-        char* fileStr = strtok((char*)args, " ");
-        char* kickStr = strtok(NULL, " ");
-
-        bool forceKick = kickStr ? bool(atoi(kickStr)) : false;
-
-        if (!fileStr || (!forceKick && sWorld->GetPlayerCount() > 0))
+        bool force_kick = forceKick.value_or(false);
+        if (!file_str || (!force_kick && sWorld->GetPlayerCount() > 0))
         {
             handler->SendSysMessage(".npcbot dump load");
             handler->SendSysMessage("Imports NPCBots from a backup SQL file created with '.npcbot dump write' command.");
             handler->SendSysMessage("Syntax: .npcbot dump load #file_name [#force_kick_all]");
-            if (!forceKick && sWorld->GetPlayerCount() > 0)
+            if (!force_kick && sWorld->GetPlayerCount() > 0)
                 handler->SendSysMessage("Make sure no players are online before importing.");
             handler->SetSentErrorMessage(true);
             return false;
         }
 
         sWorld->SetPlayerAmountLimit(0);
-        if (forceKick)
+        if (force_kick)
             sWorld->KickAll();
 
-        std::string file_str = fileStr;
-
         //omit file ext if needed
-        if (file_str.find('.') == std::string::npos)
-            file_str += ".sql";
+        if (file_str->find('.') == std::string::npos)
+            *file_str += ".sql";
 
-        switch (NPCBotsDump().Load(file_str))
+        switch (NPCBotsDump().Load(*file_str))
         {
             case BOT_DUMP_SUCCESS:
                 handler->SendSysMessage("Import successful.");
@@ -291,7 +265,7 @@ public:
                 sWorld->ShutdownServ(4, SHUTDOWN_MASK_RESTART, 70);
                 break;
             case BOT_DUMP_FAIL_FILE_NOT_EXIST:
-                handler->PSendSysMessage("Can't open %s or the file doesn't exist!", file_str.c_str());
+                handler->PSendSysMessage("Can't open %s or the file doesn't exist!", file_str->c_str());
                 handler->SetSentErrorMessage(true);
                 return false;
             case BOT_DUMP_FAIL_FILE_CORRUPTED:
@@ -299,7 +273,7 @@ public:
                 handler->SetSentErrorMessage(true);
                 return false;
             case BOT_DUMP_FAIL_DATA_OCCUPIED:
-                handler->PSendSysMessage("Table data contained in %s overlaps with existing table entries!", file_str.c_str());
+                handler->PSendSysMessage("Table data contained in %s overlaps with existing table entries!", file_str->c_str());
                 handler->SetSentErrorMessage(true);
                 return false;
             default:
@@ -311,30 +285,26 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotDumpWriteCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotDumpWriteCommand(ChatHandler* handler, Optional<std::string> file_str)
     {
-        char* fileStr = strtok((char*)args, " ");
-
-        if (!fileStr)
+        if (!file_str)
         {
             handler->SendSysMessage(".npcbot dump write\nExports spawned NPCBots into a SQL file.\nSyntax: .npcbot dump write #file_name");
             handler->SetSentErrorMessage(true);
             return false;
         }
 
-        std::string file_str = fileStr;
-
         //omit file ext if needed
-        if (file_str.find('.') == std::string::npos)
-            file_str += ".sql";
+        if (file_str->find('.') == std::string::npos)
+            *file_str += ".sql";
 
-        switch (NPCBotsDump().Write(file_str))
+        switch (NPCBotsDump().Write(*file_str))
         {
             case BOT_DUMP_SUCCESS:
                 handler->SendSysMessage("Export successful.");
                 break;
             case BOT_DUMP_FAIL_FILE_ALREADY_EXISTS:
-                handler->PSendSysMessage("File %s already exists!", file_str.c_str());
+                handler->PSendSysMessage("File %s already exists!", file_str->c_str());
                 handler->SetSentErrorMessage(true);
                 return false;
             case BOT_DUMP_FAIL_CANT_WRITE_TO_FILE:
@@ -354,28 +324,24 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotOrderCastCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotOrderCastCommand(ChatHandler* handler, Optional<std::string_view> bot_name, Optional<std::string> spell_name, Optional<std::string_view> target_token)
     {
         Player* owner = handler->GetSession()->GetPlayer();
-        char* bot_name = !*args ? nullptr : strtok((char*)args, " ");
-        char* spell_name = !*args ? nullptr : strtok(NULL, " ");
-        char* target_token = !*args ? nullptr : strtok(NULL, " ");
-
-        if (!owner->HaveBot() || !*args || !bot_name || !spell_name)
+        if (!owner->HaveBot() || !bot_name || !spell_name)
         {
             handler->SendSysMessage(".npcbot order cast #bot_name #spell_underscored_name #[target_token]");
             handler->SendSysMessage("Orders bot to cast a spell immediately");
             return true;
         }
 
-        for (uint32 i = 0; i < strlen(spell_name); ++i)
-            if (spell_name[i] == '_')
-                spell_name[i] = ' ';
+        for (auto i = 0; i < spell_name->size(); ++i)
+            if ((*spell_name)[i] == '_')
+                (*spell_name)[i] = ' ';
 
-        Creature* bot = owner->GetBotMgr()->GetBotByName(bot_name);
+        Creature* bot = owner->GetBotMgr()->GetBotByName(*bot_name);
         if (!bot || !bot->IsInWorld())
         {
-            handler->PSendSysMessage("Bot %s is not found!", bot_name);
+            handler->PSendSysMessage("Bot %s is not found!", *bot_name);
             return true;
         }
         if (!bot->IsAlive())
@@ -385,7 +351,7 @@ public:
         }
 
         uint32 basespell = 0;
-        std::string sname = spell_name;
+        std::string sname = *spell_name;
         std::wstring wname;
         if (Utf8toWStr(sname, wname))
         {
@@ -410,7 +376,7 @@ public:
         }
         if (!basespell)
         {
-            handler->PSendSysMessage("%s doesn't have spell named '%s'!", bot->GetName().c_str(), spell_name);
+            handler->PSendSysMessage("%s doesn't have spell named '%s'!", bot->GetName().c_str(), spell_name->c_str());
             return true;
         }
         //we ignore GCD for now
@@ -421,17 +387,17 @@ public:
         }
 
         ObjectGuid target_guid;
-        if (!target_token || !stricmp(target_token, "bot") || !stricmp(target_token, "self"))
+        if (!target_token || target_token == "bot" || target_token == "self")
             target_guid = bot->GetGUID();
-        else if (!stricmp(target_token, "me") || !stricmp(target_token, "master"))
+        else if (target_token == "me" || target_token == "master")
             target_guid = owner->GetGUID();
-        else if (!stricmp(target_token, "target"))
+        else if (target_token == "target")
             target_guid = bot->GetTarget();
-        else if (!stricmp(target_token, "mytarget"))
+        else if (target_token == "mytarget")
             target_guid = owner->GetTarget();
         else
         {
-            handler->PSendSysMessage("Invalid target token '%s'!", target_token);
+            handler->PSendSysMessage("Invalid target token '%s'!", *target_token);
             handler->SendSysMessage("Valid target tokens:\n    '','bot','self', 'me','master', 'target', 'mytarget'");
             return true;
         }
@@ -463,7 +429,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotVehicleEjectCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotVehicleEjectCommand(ChatHandler* handler)
     {
         Player const* owner = handler->GetSession()->GetPlayer();
         Unit const* target = handler->getSelectedUnit();
@@ -521,26 +487,25 @@ public:
         return false;
     }
 
-    static bool HandleNpcBotFollowDistanceCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotFollowDistanceCommand(ChatHandler* handler, Optional<int32> dist)
     {
         Player* owner = handler->GetSession()->GetPlayer();
-        char* dist_str = strtok((char*)args, " ");
 
-        if (!owner->HaveBot() || !dist_str)
+        if (!owner->HaveBot() || !dist || !*dist)
         {
             handler->SendSysMessage(".npcbot distance #[attack] #newdist");
             handler->SendSysMessage("Sets follow / attack distance for bots");
             return true;
         }
 
-        uint8 newdist = (uint8)std::min<int32>(std::max<int32>(atoi(dist_str), 0), 100);
+        uint8 newdist = uint8(std::min<int32>(std::max<int32>(*dist, 0), 100));
         owner->GetBotMgr()->SetBotFollowDist(newdist);
 
         handler->PSendSysMessage("Bots' follow distance is set to %u", uint32(newdist));
         return true;
     }
 
-    static bool HandleNpcBotAttackDistanceShortCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotAttackDistanceShortCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         if (!owner->HaveBot())
@@ -556,7 +521,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotAttackDistanceLongCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotAttackDistanceLongCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         if (!owner->HaveBot())
@@ -572,26 +537,25 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotAttackDistanceExactCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotAttackDistanceExactCommand(ChatHandler* handler, Optional<int32> dist)
     {
         Player* owner = handler->GetSession()->GetPlayer();
-        char* dist_str = strtok((char*)args, " ");
 
-        if (!owner->HaveBot() || !dist_str)
+        if (!owner->HaveBot() || !dist || !*dist)
         {
             handler->SendSysMessage(".npcbot distance attack #newdist");
             handler->SendSysMessage("Sets attack distance for bots");
             return true;
         }
 
-        uint8 newdist = (uint8)std::min<int32>(std::max<int32>(atoi(dist_str), 0), 50);
+        uint8 newdist = uint8(std::min<int32>(std::max<int32>(*dist, 0), 50));
         owner->GetBotMgr()->SetBotAttackRangeMode(BOT_ATTACK_RANGE_EXACT, newdist);
 
         handler->PSendSysMessage("Bots' attack distance is set to %u", uint32(newdist));
         return true;
     }
 
-    static bool HandleNpcBotHideCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotHideCommand(ChatHandler* handler)
     {
         // Hiding/unhiding bots should be allowed only out of combat
         // Currenly bots can teleport to master in combat
@@ -623,7 +587,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotUnhideCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotUnhideCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         if (!owner->HaveBot())
@@ -652,7 +616,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotKillCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotKillCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
 
@@ -681,7 +645,7 @@ public:
         return false;
     }
 
-    static bool HandleNpcBotRecallCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotRecallCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
 
@@ -716,11 +680,11 @@ public:
         return false;
     }
 
-    /*static bool HandleNpcBotToggleFlagsCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotToggleFlagsCommand(ChatHandler* handler, Optional<uint32> flag)
     {
         Player* chr = handler->GetSession()->GetPlayer();
         Unit* unit = chr->GetSelectedUnit();
-        if (!unit || unit->GetTypeId() != TYPEID_UNIT || !*args)
+        if (!unit || unit->GetTypeId() != TYPEID_UNIT || !flag)
         {
             handler->SendSysMessage(".npcbot toggle flags #flag");
             handler->SendSysMessage("This is a debug command");
@@ -728,24 +692,20 @@ public:
             return false;
         }
 
-        const std::string facStr = args;
-        int32 flag = (int32)atoi((char*)args);
-
         uint32 setFlags = 0;
-
-        switch (flag)
+        switch (*flag)
         {
             case 6:
                 setFlags = UNIT_FLAG_UNK_6;
                 break;
             case 14:
-                setFlags = UNIT_FLAG_UNK_14;
+                setFlags = UNIT_FLAG_CANNOT_SWIM;
                 break;
             case 15:
-                setFlags = UNIT_FLAG_UNK_15;
+                setFlags = UNIT_FLAG_SWIMMING;
                 break;
             case 16:
-                setFlags = UNIT_FLAG_UNK_16;
+                setFlags = UNIT_FLAG_NON_ATTACKABLE_2;
                 break;
             default:
                 break;
@@ -757,13 +717,13 @@ public:
         handler->PSendSysMessage("Toggling flag %u on %s", setFlags, unit->GetName().c_str());
         unit->ToggleFlag(UNIT_FIELD_FLAGS, setFlags);
         return true;
-    }*/
+    }
 
-    static bool HandleNpcBotSetFactionCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotSetFactionCommand(ChatHandler* handler, Optional<std::string> factionStr)
     {
         Player* chr = handler->GetSession()->GetPlayer();
         Unit* ubot = chr->GetSelectedUnit();
-        if (!ubot || !*args)
+        if (!ubot || !factionStr)
         {
             handler->SendSysMessage(".npcbot set faction #faction");
             handler->SendSysMessage("Sets faction for selected npcbot (saved in DB)");
@@ -781,21 +741,19 @@ public:
         }
 
         uint32 factionId = 0;
-        const std::string facStr = args;
-        char const* factionChar = facStr.c_str();
 
-        if (factionChar[0] == 'a')
+        if ((*factionStr)[0] == 'a')
             factionId = 1802; //Alliance
-        else if (factionChar[0] == 'h')
+        else if ((*factionStr)[0] == 'h')
             factionId = 1801; //Horde
-        else if (factionChar[0] == 'm')
+        else if ((*factionStr)[0] == 'm')
             factionId = 14; //Monsters
-        else if (factionChar[0] == 'f')
+        else if ((*factionStr)[0] == 'f')
             factionId = 35; //Friendly to all
 
         if (!factionId)
         {
-            char* pfactionid = handler->extractKeyFromLink((char*)args, "Hfaction");
+            char* pfactionid = handler->extractKeyFromLink((char*)factionStr->c_str(), "Hfaction");
             factionId = atoi(pfactionid);
         }
 
@@ -813,11 +771,13 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotSetOwnerCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotSetOwnerCommand(ChatHandler* handler, Variant<std::string, uint32> charVal)
     {
+        using string_type = decltype(charVal)::first_type;
+
         Player* chr = handler->GetSession()->GetPlayer();
         Unit* ubot = chr->GetSelectedUnit();
-        if (!ubot || !*args)
+        if (!ubot)
         {
             handler->SendSysMessage(".npcbot set owner #guid | #name");
             handler->SendSysMessage("Binds selected npcbot to new player owner using guid or name and updates owner in DB");
@@ -840,12 +800,14 @@ public:
             return false;
         }
 
-        char* characterName_str = strtok((char*)args, " ");
-        if (!characterName_str)
+        string_type characterName;
+        uint32 guidlow = 0;
+        if (charVal.holds_alternative<string_type>())
+            characterName = charVal.get<string_type>();
+        else if (charVal.holds_alternative<uint32>())
+            guidlow = charVal.get<uint32>();
+        else
             return false;
-
-        std::string characterName = characterName_str;
-        uint32 guidlow = (uint32)atoi(characterName_str);
 
         bool found = true;
         if (guidlow)
@@ -868,11 +830,11 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotSetSpecCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotSetSpecCommand(ChatHandler* handler, Optional<uint8> spec)
     {
         Player* chr = handler->GetSession()->GetPlayer();
         Unit* ubot = chr->GetSelectedUnit();
-        if (!ubot || !*args)
+        if (!ubot || !spec)
         {
             handler->SendSysMessage(".npcbot set spec #specnumber");
             handler->SendSysMessage("Changes talent spec for selected npcbot");
@@ -888,11 +850,6 @@ public:
             return false;
         }
 
-        char* specStr = strtok((char*)args, " ");
-        if (!specStr)
-            return false;
-
-        uint8 spec = (uint8)atoi(specStr);
         if (spec < BOT_SPEC_BEGIN || spec > BOT_SPEC_END)
         {
             handler->SendSysMessage("Spec is out of range (1 to 3)!");
@@ -900,16 +857,16 @@ public:
             return false;
         }
 
-        bot->GetBotAI()->SetSpec(spec);
+        bot->GetBotAI()->SetSpec(*spec);
 
-        handler->PSendSysMessage("%s's new spec is %u", bot->GetName().c_str(), uint32(spec));
+        handler->PSendSysMessage("%s's new spec is %u", bot->GetName().c_str(), uint32(*spec));
         return true;
     }
 
-    static bool HandleNpcBotLookupCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotLookupCommand(ChatHandler* handler, Optional<uint8> botclass)
     {
         //this is just a modified '.lookup creature' command
-        if (!*args)
+        if (!botclass)
         {
             handler->SendSysMessage(".npcbot lookup #class");
             handler->SendSysMessage("Looks up npcbots by #class, and returns all matches with their creature ID's");
@@ -933,24 +890,18 @@ public:
             return false;
         }
 
-        char* classstr = strtok((char*)args, " ");
-        uint8 botclass = BOT_CLASS_NONE;
-
-        if (classstr)
-            botclass = (uint8)atoi(classstr);
-
         if (botclass == BOT_CLASS_NONE || botclass >= BOT_CLASS_END)
         {
-            handler->PSendSysMessage("Unknown bot class %u", uint32(botclass));
+            handler->PSendSysMessage("Unknown bot class %u", uint32(*botclass));
             handler->SetSentErrorMessage(true);
             return false;
         }
 
-        handler->PSendSysMessage("Looking for bots of class %u...", uint32(botclass));
+        handler->PSendSysMessage("Looking for bots of class %u...", uint32(*botclass));
 
         uint8 localeIndex = handler->GetSessionDbLocaleIndex();
         CreatureTemplateContainer const& ctc = sObjectMgr->GetCreatureTemplates();
-        typedef std::list<BotInfo> BotList;
+        typedef std::vector<BotInfo> BotList;
         BotList botlist;
         for (CreatureTemplateContainer::const_iterator itr = ctc.begin(); itr != ctc.end(); ++itr)
         {
@@ -964,18 +915,12 @@ public:
             if (botclass == BOT_CLASS_BM)
                 continue;
 
-            //TC_LOG_ERROR("entities.unit", "NpcBotLookup: cur %u", id);
-
             NpcBotExtras const* _botExtras = BotDataMgr::SelectNpcBotExtras(id);
             if (!_botExtras)
                 continue;
 
-            //TC_LOG_ERROR("entities.unit", "NpcBotLookup: found extras...");
-
             if (_botExtras->bclass != botclass)
                 continue;
-
-            //TC_LOG_ERROR("entities.unit", "NpcBotLookup: class matches...");
 
             uint8 race = _botExtras->race;
 
@@ -983,7 +928,7 @@ public:
             {
                 if (creatureLocale->Name.size() > localeIndex && !creatureLocale->Name[localeIndex].empty())
                 {
-                    botlist.push_back(BotInfo(id, creatureLocale->Name[localeIndex], race));
+                    botlist.emplace_back(id, std::string(creatureLocale->Name[localeIndex]), race);
                     continue;
                 }
             }
@@ -992,9 +937,7 @@ public:
             if (name.empty())
                 continue;
 
-            //TC_LOG_ERROR("entities.unit", "NpcBotLookup: ading to list");
-
-            botlist.push_back(BotInfo(id, name, race));
+            botlist.emplace_back(id, std::move(name), race);
         }
 
         if (botlist.empty())
@@ -1004,19 +947,15 @@ public:
             return false;
         }
 
-        botlist.sort(&script_bot_commands::sortbots);
+        std::sort(botlist.begin(), botlist.end(), script_bot_commands::sortbots);
 
         for (BotList::const_iterator itr = botlist.begin(); itr != botlist.end(); ++itr)
         {
-            uint32 id = itr->id;
-            char const* name = itr->name.c_str();
             uint8 race = itr->race;
-
-            //TODO:
             if (race >= MAX_RACES)
                 race = RACE_NONE;
 
-            char const* raceName;
+            std::string_view raceName;
             switch (race)
             {
                 case RACE_HUMAN:        raceName = "Human";     break;
@@ -1033,13 +972,13 @@ public:
                 default:                raceName = "Unknown";   break;
             }
 
-            handler->PSendSysMessage("%d - |cffffffff|Hcreature_entry:%d|h[%s]|h|r %s", id, id, name, raceName);
+            handler->PSendSysMessage("%d - |cffffffff|Hcreature_entry:%d|h[%s]|h|r %s", itr->id, itr->id, itr->name.c_str(), raceName);
         }
 
         return true;
     }
 
-    static bool HandleNpcBotDeleteCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotDeleteCommand(ChatHandler* handler)
     {
         Player* chr = handler->GetSession()->GetPlayer();
         Unit* ubot = chr->GetSelectedUnit();
@@ -1087,12 +1026,16 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotMoveCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotMoveCommand(ChatHandler* handler, Variant<std::string, uint32> creVal)
     {
+        using string_type = decltype(creVal)::first_type;
+
         Player* player = handler->GetSession()->GetPlayer();
         Creature* creature = handler->getSelectedCreature();
+        bool is_string = creVal.holds_alternative<string_type>();
+        bool is_num = creVal.holds_alternative<uint32>();
 
-        if (!*args && !creature)
+        if (!is_string && !is_num && !creature)
         {
             handler->SendSysMessage(".npcbot move");
             handler->SendSysMessage("Moves npcbot to your location");
@@ -1101,11 +1044,15 @@ public:
             return false;
         }
 
-        char* charID = *args ? handler->extractKeyFromLink((char*)args, "Hcreature_entry") : nullptr;
-        if (!charID && !creature)
-            return false;
+        char* charID = nullptr;
+        if (!is_num)
+        {
+            char* charID = is_string ? handler->extractKeyFromLink((char*)creVal.get<string_type>().c_str(), "Hcreature_entry") : nullptr;
+            if (!charID && !creature)
+                return false;
+        }
 
-        uint32 id = charID ? atoi(charID) : creature->GetEntry();
+        uint32 id = is_num ? creVal.get<uint32>() : charID ? atoi(charID) : creature->GetEntry();
 
         CreatureTemplate const* creInfo = sObjectMgr->GetCreatureTemplate(id);
         if (!creInfo)
@@ -1158,9 +1105,13 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotSpawnCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcBotSpawnCommand(ChatHandler* handler, Variant<std::string, uint32> creVal)
     {
-        if (!*args)
+        using string_type = decltype(creVal)::first_type;
+        bool is_string = creVal.holds_alternative<string_type>();
+        bool is_num = creVal.holds_alternative<uint32>();
+
+        if (!is_string && !is_num)
         {
             handler->SendSysMessage(".npcbot spawn");
             handler->SendSysMessage("Adds new npcbot spawn of given entry in world. You can shift-link the npc");
@@ -1169,11 +1120,15 @@ public:
             return false;
         }
 
-        char* charID = handler->extractKeyFromLink((char*)args, "Hcreature_entry");
-        if (!charID)
-            return false;
+        char* charID = nullptr;
+        if (is_string)
+        {
+            char* charID = handler->extractKeyFromLink((char*)creVal.get<string_type>().c_str(), "Hcreature_entry");
+            if (!charID)
+                return false;
+        }
 
-        uint32 id = atoi(charID);
+        uint32 id = charID ? atoi(charID) : creVal.get<uint32>();
 
         CreatureTemplate const* creInfo = sObjectMgr->GetCreatureTemplate(id);
 
@@ -1268,7 +1223,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotInfoCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotInfoCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         if (!owner->GetTarget())
@@ -1346,7 +1301,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotCommandStandstillCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotCommandStandstillCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
 
@@ -1375,7 +1330,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotCommandStopfullyCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotCommandStopfullyCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
 
@@ -1404,7 +1359,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotCommandFollowCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotCommandFollowCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
 
@@ -1433,7 +1388,7 @@ public:
         return true;
     }
 
-    static bool HandleNpcBotRemoveCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotRemoveCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         Unit* u = owner->GetSelectedUnit();
@@ -1488,7 +1443,7 @@ public:
         return false;
     }
 
-    static bool HandleNpcBotReviveCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotReviveCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         Unit* u = owner->GetSelectedUnit();
@@ -1535,7 +1490,7 @@ public:
         return false;
     }
 
-    static bool HandleNpcBotAddCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotAddCommand(ChatHandler* handler)
     {
         Player* owner = handler->GetSession()->GetPlayer();
         Unit* cre = owner->GetSelectedUnit();
@@ -1571,7 +1526,7 @@ public:
         return false;
     }
 
-    static bool HandleNpcBotReloadConfigCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleNpcBotReloadConfigCommand(ChatHandler* handler)
     {
         TC_LOG_INFO("misc", "Re-Loading config settings...");
         sWorld->LoadConfigSettings(true);
@@ -1587,9 +1542,3 @@ void AddSC_script_bot_commands()
 {
     new script_bot_commands();
 }
-
-#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
-# pragma GCC diagnostic pop
-#elif TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
-# pragma warning (pop)
-#endif
