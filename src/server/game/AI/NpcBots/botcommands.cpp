@@ -334,7 +334,7 @@ public:
             return true;
         }
 
-        for (auto i = 0; i < spell_name->size(); ++i)
+        for (std::decay_t<decltype(*spell_name)>::size_type i = 0u; i < spell_name->size(); ++i)
             if ((*spell_name)[i] == '_')
                 (*spell_name)[i] = ' ';
 
