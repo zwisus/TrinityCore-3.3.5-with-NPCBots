@@ -235,7 +235,7 @@ class AffectedTargetCheck
         {
             if (!u->IsAlive())
                 return false;
-            if (caster && u->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            if (caster && u->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                 return false;
             if (!checker->IsWithinDistInMap(u, m_range))
                 return false;

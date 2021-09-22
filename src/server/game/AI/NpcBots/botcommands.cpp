@@ -702,7 +702,7 @@ public:
                 setFlags = UNIT_FLAG_CANNOT_SWIM;
                 break;
             case 15:
-                setFlags = UNIT_FLAG_SWIMMING;
+                setFlags = UNIT_FLAG_CAN_SWIM;
                 break;
             case 16:
                 setFlags = UNIT_FLAG_NON_ATTACKABLE_2;
