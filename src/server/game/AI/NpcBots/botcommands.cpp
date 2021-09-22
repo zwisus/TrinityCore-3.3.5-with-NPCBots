@@ -846,9 +846,10 @@ public:
             return false;
         }
 
-        if (spec < BOT_SPEC_BEGIN || spec > BOT_SPEC_END)
+        if (!bot_ai::IsValidSpecForClass(bot->GetBotClass(), *spec))
         {
-            handler->SendSysMessage("Spec is out of range (1 to 3)!");
+            handler->PSendSysMessage("%s is not a valid spec for bot class %u!",
+                bot_ai::LocalizedNpcText(chr, bot_ai::TextForSpec(*spec)), uint32(bot->GetBotClass()));
             handler->SetSentErrorMessage(true);
             return false;
         }

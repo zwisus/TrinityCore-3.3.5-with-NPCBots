@@ -12005,6 +12005,123 @@ uint32 bot_ai::TextForSpec(uint8 spec)
     }
 }
 
+bool bot_ai::IsValidSpecForClass(uint8 m_class, uint8 spec)
+{
+    switch (m_class)
+    {
+        case BOT_CLASS_WARRIOR:
+            switch (spec)
+            {
+                case BOT_SPEC_WARRIOR_ARMS:
+                case BOT_SPEC_WARRIOR_FURY:
+                case BOT_SPEC_WARRIOR_PROTECTION:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_PALADIN:
+            switch (spec)
+            {
+                case BOT_SPEC_PALADIN_HOLY:
+                case BOT_SPEC_PALADIN_PROTECTION:
+                case BOT_SPEC_PALADIN_RETRIBUTION:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_HUNTER:
+            switch (spec)
+            {
+                case BOT_SPEC_HUNTER_BEASTMASTERY:
+                case BOT_SPEC_HUNTER_MARKSMANSHIP:
+                case BOT_SPEC_HUNTER_SURVIVAL:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_ROGUE:
+            switch (spec)
+            {
+                case BOT_SPEC_ROGUE_ASSASINATION:
+                case BOT_SPEC_ROGUE_COMBAT:
+                case BOT_SPEC_ROGUE_SUBTLETY:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_PRIEST:
+            switch (spec)
+            {
+                case BOT_SPEC_PRIEST_DISCIPLINE:
+                case BOT_SPEC_PRIEST_HOLY:
+                case BOT_SPEC_PRIEST_SHADOW:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_DEATH_KNIGHT:
+            switch (spec)
+            {
+                case BOT_SPEC_DK_BLOOD:
+                case BOT_SPEC_DK_FROST:
+                case BOT_SPEC_DK_UNHOLY:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_SHAMAN:
+            switch (spec)
+            {
+                case BOT_SPEC_SHAMAN_ELEMENTAL:
+                case BOT_SPEC_SHAMAN_ENHANCEMENT:
+                case BOT_SPEC_SHAMAN_RESTORATION:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_MAGE:
+            switch (spec)
+            {
+                case BOT_SPEC_MAGE_ARCANE:
+                case BOT_SPEC_MAGE_FIRE:
+                case BOT_SPEC_MAGE_FROST:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_WARLOCK:
+            switch (spec)
+            {
+                case BOT_SPEC_WARLOCK_AFFLICTION:
+                case BOT_SPEC_WARLOCK_DEMONOLOGY:
+                case BOT_SPEC_WARLOCK_DESTRUCTION:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_DRUID:
+            switch (spec)
+            {
+                case BOT_SPEC_DRUID_BALANCE:
+                case BOT_SPEC_DRUID_FERAL:
+                case BOT_SPEC_DRUID_RESTORATION:
+                    return true;
+                default:
+                    break;
+            }
+        case BOT_CLASS_BM:
+        case BOT_CLASS_SPHYNX:
+        case BOT_CLASS_ARCHMAGE:
+        case BOT_CLASS_DREADLORD:
+        case BOT_CLASS_SPELLBREAKER:
+        case BOT_CLASS_DARK_RANGER:
+            return spec == BOT_SPEC_DEFAULT;
+        default:
+            break;
+    }
+    return false;
+}
+
 void bot_ai::InitEquips()
 {
     int8 id = 1;

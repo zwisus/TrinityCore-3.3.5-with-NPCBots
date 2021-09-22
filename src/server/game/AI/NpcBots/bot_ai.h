@@ -210,6 +210,7 @@ class bot_ai : public CreatureAI
         uint8 GetSpec() const { return _spec; }
         static uint8 DefaultSpecForClass(uint8 m_class);
         static uint32 TextForSpec(uint8 spec);
+        static bool IsValidSpecForClass(uint8 m_class, uint8 spec);
 
         static bool IsMeleeClass(uint8 m_class);
         static bool IsTankingClass(uint8 m_class);
