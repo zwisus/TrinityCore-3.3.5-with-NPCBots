@@ -491,7 +491,7 @@ public:
     {
         Player* owner = handler->GetSession()->GetPlayer();
 
-        if (!owner->HaveBot() || !dist || !*dist)
+        if (!owner->HaveBot() || !dist)
         {
             handler->SendSysMessage(".npcbot distance #[attack] #newdist");
             handler->SendSysMessage("Sets follow / attack distance for bots");
@@ -541,7 +541,7 @@ public:
     {
         Player* owner = handler->GetSession()->GetPlayer();
 
-        if (!owner->HaveBot() || !dist || !*dist)
+        if (!owner->HaveBot() || !dist)
         {
             handler->SendSysMessage(".npcbot distance attack #newdist");
             handler->SendSysMessage("Sets attack distance for bots");
