@@ -3762,6 +3762,11 @@ void Map::RemoveFromActive(Creature* c)
     if (!c->IsPet() && c->GetSpawnId())
     {
         float x, y, z;
+        //npcbot: prevent crash from accessing deleted creatureData
+        if (c->IsNPCBot())
+            c->GetHomePosition().GetPosition(x, y, z);
+        else
+        //end npcbot
         c->GetRespawnPosition(x, y, z);
         GridCoord p = Trinity::ComputeGridCoord(x, y);
         if (getNGrid(p.x_coord, p.y_coord))
