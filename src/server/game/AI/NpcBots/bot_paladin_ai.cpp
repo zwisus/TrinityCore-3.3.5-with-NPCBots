@@ -195,7 +195,9 @@ enum PaladinSpecial
     SACRED_SHIELD_AURA_TRIGGERED        = 58597,
 
     AVENGING_WRATH_MARKER_SPELL         = 61987,
-    IMMUNITY_SHIELD_MARKER_SPELL        = 61988
+    IMMUNITY_SHIELD_MARKER_SPELL        = 61988,
+
+    IMPROVED_DEVOTION_AURA_SPELL        = 63514
 };
 
 static const uint32 Paladin_spells_damage_arr[] =
@@ -2037,6 +2039,22 @@ public:
             targets = targets + bonusTargets;
         }
 
+        void ApplyClassEffectMods(SpellInfo const* spellInfo, uint8 effIndex, float& value) const override
+        {
+            uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
+            uint8 lvl = me->GetLevel();
+            float pctbonus = 1.0f;
+
+            //Improved Devotion Aura: 50% increased effect
+            if (baseId == DEVOTION_AURA_1 && effIndex == EFFECT_0 && _spec == BOT_SPEC_PALADIN_PROTECTION && lvl >= 25)
+                pctbonus *= 1.5f;
+            //Improved Devotion Aura: 6% bonus healing
+            if (baseId == IMPROVED_DEVOTION_AURA_SPELL && effIndex == EFFECT_1 && _spec == BOT_SPEC_PALADIN_PROTECTION && lvl >= 25)
+                value += 6.f;
+
+            value = value * pctbonus;
+        }
+
         void OnClassSpellGo(SpellInfo const* spellInfo) override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
@@ -2146,16 +2164,6 @@ public:
                 if (lvl >= 30)
                 {
                     //Sanctified Retribution: 50% increased effect
-                    AuraEffect* eff = target->GetAuraEffect(spellId, EFFECT_0, me->GetGUID());
-                    if (eff)
-                        eff->ChangeAmount(eff->GetAmount() * 3 / 2);
-                }
-            }
-            if ((_spec == BOT_SPEC_PALADIN_PROTECTION) && baseId == DEVOTION_AURA_1)
-            {
-                if (lvl >= 25)
-                {
-                    //Improved Devotion Aura: 50% increased effect
                     AuraEffect* eff = target->GetAuraEffect(spellId, EFFECT_0, me->GetGUID());
                     if (eff)
                         eff->ChangeAmount(eff->GetAmount() * 3 / 2);

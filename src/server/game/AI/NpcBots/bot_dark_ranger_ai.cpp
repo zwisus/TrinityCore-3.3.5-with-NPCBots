@@ -317,14 +317,6 @@ public:
             value = value * pctbonus;
         }
 
-        void ApplyClassEffectModsTarget(Unit const* /*target*/, SpellInfo const* /*spellInfo*/, uint8 /*effIndex*/, float& value) const
-        {
-            //uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
-            float pctbonus = 1.0f;
-
-            value = value * pctbonus;
-        }
-
         void OnClassSpellGo(SpellInfo const* /*spellInfo*/) override
         {
             //uint32 spellId = spellInfo->Id;
