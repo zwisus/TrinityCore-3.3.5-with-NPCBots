@@ -1903,7 +1903,7 @@ class spell_pal_sheath_of_light : public AuraScript
         PreventDefaultAction();
 
         HealInfo* healInfo = eventInfo.GetHealInfo();
-        if (!healInfo || !healInfo->GetHeal())
+        if (!healInfo || !healInfo->GetEffectiveHeal())
             return;
 
         Unit* caster = eventInfo.GetActor();
