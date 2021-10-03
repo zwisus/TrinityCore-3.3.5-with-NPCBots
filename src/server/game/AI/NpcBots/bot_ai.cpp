@@ -13039,9 +13039,6 @@ void bot_ai::CastBotItemCombatSpell(DamageInfo const& damageInfo, Item* item, It
                 continue;
             }
 
-            if (me->m_extraAttacks && spellInfo->HasEffect(SPELL_EFFECT_ADD_EXTRA_ATTACKS))
-                return;
-
             float chance = (float)spellInfo->ProcChance;
 
             if (spellData.SpellPPMRate)
