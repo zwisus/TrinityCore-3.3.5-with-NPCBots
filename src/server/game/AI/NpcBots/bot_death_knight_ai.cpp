@@ -216,6 +216,8 @@ public:
         death_knight_botAI(Creature* creature) : bot_ai(creature)
         {
             _botclass = BOT_CLASS_DEATH_KNIGHT;
+
+            InitUnitFlags();
         }
 
         bool doCast(Unit* victim, uint32 spellId)

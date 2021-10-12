@@ -221,6 +221,8 @@ public:
         warlock_botAI(Creature* creature) : bot_ai(creature)
         {
             _botclass = BOT_CLASS_WARLOCK;
+
+            InitUnitFlags();
         }
 
         bool doCast(Unit* victim, uint32 spellId)

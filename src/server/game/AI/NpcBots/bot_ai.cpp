@@ -128,7 +128,6 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
 {
     //moved
     _potionTimer = 0;
-    _classinfo = new PlayerClassLevelInfo();
 
     for (uint8 i = BOT_SLOT_MAINHAND; i != BOT_INVENTORY_SIZE; ++i)
         for (uint8 j = 0; j != MAX_BOT_ITEM_MOD; ++j)
@@ -146,12 +145,6 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
     _evadeCount = 0;
 
     _lastTargetGuid = ObjectGuid::Empty;
-
-    if (BotMgr::DisplayEquipment() == false)
-    {
-        (const_cast<CreatureTemplate*>(me->GetCreatureTemplate()))->unit_flags2 &= ~(UNIT_FLAG2_MIRROR_IMAGE);
-        me->SetFlag(UNIT_FIELD_FLAGS_2, me->GetCreatureTemplate()->unit_flags2);
-    }
 
     checkMasterTimer = urand(5000, 15000);
     feast_health = false;
@@ -234,8 +227,6 @@ bot_ai::~bot_ai()
     for (uint8 i = BOT_SLOT_MAINHAND; i != BOT_INVENTORY_SIZE; ++i)
         if (_equips[i])
             delete _equips[i];
-
-    delete _classinfo;
 
     BotDataMgr::UnregisterBot(me);
 }
@@ -474,6 +465,15 @@ void bot_ai::CheckOwnerExpiry()
         //...and spec
         uint8 spec = DefaultSpecForClass(npcBotExtra->bclass);
         BotDataMgr::UpdateNpcBotData(me->GetEntry(), NPCBOT_UPDATE_SPEC, &spec);
+    }
+}
+
+void bot_ai::InitUnitFlags()
+{
+    if (BotMgr::DisplayEquipment() == true && (_botclass < BOT_CLASS_EX_START || _botclass == BOT_CLASS_ARCHMAGE))
+    {
+        (const_cast<CreatureTemplate*>(me->GetCreatureTemplate()))->unit_flags2 |= UNIT_FLAG2_MIRROR_IMAGE;
+        me->SetFlag(UNIT_FIELD_FLAGS_2, me->GetCreatureTemplate()->unit_flags2);
     }
 }
 
@@ -2093,14 +2093,9 @@ void bot_ai::SetStats(bool force)
         InitPowers();
         InitSpells(); //this must stay before class passives
         ApplyClassPassives();
-    }
 
-    //INIT STATS
-    //get base class stats, we'll need all this later
-    sObjectMgr->GetPlayerClassLevelInfo(GetPlayerClass(), std::min<uint8>(mylevel, 80), _classinfo);
+        sObjectMgr->GetPlayerClassLevelInfo(GetPlayerClass(), std::min<uint8>(mylevel, 80), &_classinfo);
 
-    if (force)
-    {
         PlayerLevelInfo info;
         sObjectMgr->GetPlayerLevelInfo(GetPlayerRace(), GetPlayerClass(), std::min<uint8>(mylevel, 80), &info);
         for (uint8 i = STAT_STRENGTH; i != MAX_STATS; ++i)
@@ -5378,7 +5373,7 @@ void bot_ai::_OnHealthUpdate() const
     //TC_LOG_ERROR("entities.player", "_OnHealthUpdate(): updating bot %s", me->GetName().c_str());
     bool fullhp = me->GetHealth() == me->GetMaxHealth();
     float pct = fullhp ? 100.f : me->GetHealthPct(); // needs for regeneration
-    uint32 m_basehp = _classinfo->basehealth;
+    uint32 m_basehp = _classinfo.basehealth;
     //TC_LOG_ERROR("entities.player", "class base health: %u", m_basehp);
     me->SetCreateHealth(m_basehp);
 
@@ -5433,7 +5428,7 @@ void bot_ai::_OnManaUpdate() const
     //TC_LOG_ERROR("entities.player", "_OnManaUpdate(): updating bot %s", me->GetName().c_str());
     bool fullmana = me->GetPower(POWER_MANA) == me->GetMaxPower(POWER_MANA);
     float pct = fullmana ? 100.f : (float(me->GetPower(POWER_MANA)) * 100.f) / float(me->GetMaxPower(POWER_MANA));
-    float m_basemana = _classinfo->basemana;
+    float m_basemana = _classinfo.basemana;
     if (_botclass == BOT_CLASS_BM)
         m_basemana = BASE_MANA_1_BM + (BASE_MANA_10_BM - BASE_MANA_1_BM) * (mylevel/81.f);
     if (_botclass == BOT_CLASS_SPHYNX)
@@ -5448,7 +5443,7 @@ void bot_ai::_OnManaUpdate() const
         m_basemana = BASE_MANA_1_DARK_RANGER + (BASE_MANA_10_DARK_RANGER - BASE_MANA_1_DARK_RANGER) * ((mylevel - 40)/82.f);
     //TC_LOG_ERROR("entities.player", "classinfo base mana = %f", m_basemana);
 
-    me->SetCreateMana(uint32(m_basemana));
+    me->SetCreateMana(uint32(_classinfo.basemana));
 
     float intValue = _getTotalBotStat(BOT_STAT_MOD_INTELLECT);
 

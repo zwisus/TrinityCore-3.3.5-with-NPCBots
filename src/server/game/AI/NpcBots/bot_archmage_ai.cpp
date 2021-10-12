@@ -77,6 +77,8 @@ public:
         {
             _botclass = BOT_CLASS_ARCHMAGE;
 
+            InitUnitFlags();
+
             //archmage immunities
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_POSSESS, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);

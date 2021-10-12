@@ -213,13 +213,15 @@ public:
         warrior_botAI(Creature* creature) : bot_ai(creature)
         {
             _botclass = BOT_CLASS_WARRIOR;
+
+            InitUnitFlags();
         }
 
-        bool doCast(Unit* victim, uint32 spellId, bool triggered = false)
+        bool doCast(Unit* victim, uint32 spellId)
         {
             if (CheckBotCast(victim, spellId) != SPELL_CAST_OK)
                 return false;
-            return bot_ai::doCast(victim, spellId, triggered);
+            return bot_ai::doCast(victim, spellId);
         }
 
         uint8 GetBotStance() const override

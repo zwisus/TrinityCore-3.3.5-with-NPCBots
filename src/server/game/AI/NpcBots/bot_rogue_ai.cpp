@@ -213,6 +213,8 @@ public:
         rogue_botAI(Creature* creature) : bot_ai(creature)
         {
             _botclass = BOT_CLASS_ROGUE;
+
+            InitUnitFlags();
         }
 
         bool doCast(Unit* victim, uint32 spellId)

@@ -239,6 +239,8 @@ public:
         bot_druid_ai(Creature* creature) : bot_ai(creature)
         {
             _botclass = BOT_CLASS_DRUID;
+
+            InitUnitFlags();
         }
 
         bool doCast(Unit* victim, uint32 spellId)

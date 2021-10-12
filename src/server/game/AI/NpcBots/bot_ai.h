@@ -7,8 +7,6 @@
 NpcBot System by Trickerer (onlysuffering@gmail.com)
 */
 
-struct PlayerClassLevelInfo;
-
 class TeleportHomeEvent;
 class TeleportFinishEvent;
 
@@ -259,6 +257,7 @@ class bot_ai : public CreatureAI
         void CureGroup(uint32 cureSpell, uint32 diff);
         void SetStats(bool force);
         void DefaultInit();
+        void InitUnitFlags(); // call only in constructor
 
         void OnOwnerDamagedBy(Unit* attacker);
 
@@ -536,7 +535,7 @@ class bot_ai : public CreatureAI
 
         void _saveStats();
 
-        PlayerClassLevelInfo* _classinfo;
+        PlayerClassLevelInfo _classinfo;
         SpellInfo const* m_botSpellInfo;
         Position pos, attackpos;
 
