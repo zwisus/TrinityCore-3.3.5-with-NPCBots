@@ -1,5 +1,6 @@
 #include "bot_ai.h"
 #include "botmgr.h"
+#include "Creature.h"
 #include "Group.h"
 #include "Item.h"
 #include "Map.h"
@@ -2611,19 +2612,19 @@ public:
             specList.push_back(LocalizedNpcText(player, BOT_TEXT_AURA) + ": " + LocalizedNpcText(player, textId));
         }
 
-        std::vector<uint32> const* GetDamagingSpellsList() const
+        std::vector<uint32> const* GetDamagingSpellsList() const override
         {
             return &Paladin_spells_damage;
         }
-        std::vector<uint32> const* GetCCSpellsList() const
+        std::vector<uint32> const* GetCCSpellsList() const override
         {
             return &Paladin_spells_cc;
         }
-        std::vector<uint32> const* GetHealingSpellsList() const
+        std::vector<uint32> const* GetHealingSpellsList() const override
         {
             return &Paladin_spells_heal;
         }
-        std::vector<uint32> const* GetSupportSpellsList() const
+        std::vector<uint32> const* GetSupportSpellsList() const override
         {
             return &Paladin_spells_support;
         }

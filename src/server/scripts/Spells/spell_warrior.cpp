@@ -31,6 +31,10 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+//npcbot
+#include "Creature.h"
+//end npcbot
+
 enum WarriorSpells
 {
     SPELL_WARRIOR_BLADESTORM_PERIODIC_WHIRLWIND     = 50622,

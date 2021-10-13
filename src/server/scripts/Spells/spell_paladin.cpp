@@ -32,6 +32,10 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+//npcbot
+#include "Creature.h"
+//end npcbot
+
 enum PaladinSpells
 {
     SPELL_PALADIN_DIVINE_PLEA                    = 54428,

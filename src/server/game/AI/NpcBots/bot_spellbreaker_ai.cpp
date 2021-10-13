@@ -1,5 +1,6 @@
 #include "bot_ai.h"
 #include "bot_GridNotifiers.h"
+#include "Creature.h"
 //#include "GridNotifiers.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
@@ -301,19 +302,19 @@ public:
             }
         }
 
-        //std::vector<uint32> const* GetDamagingSpellsList() const
+        //std::vector<uint32> const* GetDamagingSpellsList() const override
         //{
         //    return &Spellbreaker_spells_damage;
         //}
-        //std::vector<uint32> const* GetCCSpellsList() const
+        //std::vector<uint32> const* GetCCSpellsList() const override
         //{
         //    return &Spellbreaker_spells_cc;
         //}
-        //std::vector<uint32> const* GetHealingSpellsList() const
+        //std::vector<uint32> const* GetHealingSpellsList() const override
         //{
         //    return &Spellbreaker_spells_heal;
         //}
-        std::vector<uint32> const* GetSupportSpellsList() const
+        std::vector<uint32> const* GetSupportSpellsList() const override
         {
             return &Spellbreaker_spells_support;
         }

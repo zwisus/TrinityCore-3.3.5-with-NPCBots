@@ -1,6 +1,8 @@
 #include "bot_ai.h"
 #include "botmgr.h"
+#include "Log.h"
 #include "MotionMaster.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
@@ -222,7 +224,7 @@ public:
                 Creature* ill = ObjectAccessor::GetCreature(*me, *itr);
                 if (!ill)
                 {
-                    TC_LOG_ERROR("entities.player", "bm_bot::IllusionsCheck(): unit %u is not found in world!", (*itr).GetCounter());
+                    TC_LOG_ERROR("entities.player", "bm_bot::IllusionsCheck(): unit %s is not found in world!", (*itr).ToString().c_str());
                     continue;
                 }
 
@@ -900,19 +902,19 @@ public:
             return false;
         }
 
-        //std::vector<uint32> const* GetDamagingSpellsList() const
+        //std::vector<uint32> const* GetDamagingSpellsList() const override
         //{
         //    return &Blademaster_spells_damage;
         //}
-        //std::vector<uint32> const* GetCCSpellsList() const
+        //std::vector<uint32> const* GetCCSpellsList() const override
         //{
         //    return &Blademaster_spells_cc;
         //}
-        //std::vector<uint32> const* GetHealingSpellsList() const
+        //std::vector<uint32> const* GetHealingSpellsList() const override
         //{
         //    return &Blademaster_spells_heal;
         //}
-        std::vector<uint32> const* GetSupportSpellsList() const
+        std::vector<uint32> const* GetSupportSpellsList() const override
         {
             return &Blademaster_spells_support;
         }

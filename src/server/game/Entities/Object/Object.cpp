@@ -2885,8 +2885,8 @@ SpellCastResult WorldObject::CastSpell(SpellCastTargets const& targets, uint32 s
     //npcbot
     if (Creature::IsBotCustomSpell(spellId) && !(ToCreature() && (ToCreature()->IsNPCBot() || ToCreature()->IsNPCBotPet())))
     {
-        TC_LOG_ERROR("entities.unit", "CastSpell: NpcBot system custom spell %u by caster: %s %u), aborted. Please report",
-            spellId, (GetTypeId() == TYPEID_PLAYER ? "player (GUID:" : "creature (Entry:"), (GetTypeId() == TYPEID_PLAYER ? GetGUID().GetCounter() : GetEntry()));
+        TC_LOG_ERROR("entities.unit", "CastSpell: NpcBot system custom spell %u by caster: %s), aborted. Please report",
+            spellId, GetGUID().ToString().c_str());
         return SPELL_FAILED_SPELL_UNAVAILABLE;
     }
     //end npcbot

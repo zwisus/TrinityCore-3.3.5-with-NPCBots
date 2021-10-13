@@ -1,5 +1,6 @@
 #include "bot_ai.h"
 #include "bpet_ai.h"
+#include "ObjectAccessor.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellInfo.h"

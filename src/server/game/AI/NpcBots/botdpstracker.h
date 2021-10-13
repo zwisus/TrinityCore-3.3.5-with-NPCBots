@@ -1,6 +1,12 @@
 #ifndef _BOT_DPSTRACKER_H
 #define _BOT_DPSTRACKER_H
 
+#include "Define.h"
+
+#include <unordered_map>
+
+class Unit;
+
 class DPSTracker
 {
     public:

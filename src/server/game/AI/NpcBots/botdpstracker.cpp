@@ -1,4 +1,6 @@
 #include "botdpstracker.h"
+#include "Unit.h"
+
 /*
 Name: bot_dps_tracker
 %Complete: 100

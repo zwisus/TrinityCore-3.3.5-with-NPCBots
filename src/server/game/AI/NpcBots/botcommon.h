@@ -1,6 +1,12 @@
 #ifndef _BOTCOMMON_H
 #define _BOTCOMMON_H
 
+#include "SharedDefines.h"
+#include "SpellAuraDefines.h"
+
+#include <utility>
+#include <vector>
+
 /*
 NpcBot System by Trickerer (onlysuffering@gmail.com)
 Original patch from: LordPsyan https://bitbucket.org/lordpsyan/trinitycore-patches/src/3b8b9072280e/Individual/11185-BOTS-NPCBots.patch
@@ -71,7 +77,7 @@ enum BotCommonValues
     POTION_CD                           = 60000,//default 60sec potion cd
     REGEN_CD                            = 1000, //update hp/mana every X milliseconds
 //COMMON TIMERS
-    ITEM_ENCHANTMENT_EXPIRE_TIMER       = 1 * HOUR * IN_MILLISECONDS,
+    ITEM_ENCHANTMENT_EXPIRE_TIMER       = 3600000, //1 Hour
 //COMMON GOSSIPS
     GOSSIP_NORMAL_SERVE_MASTER          = 70001,//"I live only to serve the master."
     GOSSIP_GREET_NEED_SMTH              = 70002,//"You need something?"
@@ -1015,7 +1021,7 @@ enum BotStatMods
     BOT_STAT_MOD_BLOCK_VALUE                = 48,
     //END ItemProtoType.h
 
-    BOT_STAT_MOD_DAMAGE_MIN                 = MAX_ITEM_MOD,
+    BOT_STAT_MOD_DAMAGE_MIN                 = BOT_STAT_MOD_BLOCK_VALUE + 1,
     BOT_STAT_MOD_DAMAGE_MAX,
     BOT_STAT_MOD_ARMOR,
     BOT_STAT_MOD_RESIST_HOLY,

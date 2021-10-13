@@ -634,7 +634,7 @@ class spell_sha_flametongue_weapon : public AuraScript
             float fireDamage = basePoints / 100.0f;
             fireDamage *= attackSpeed;
 
-            RoundToInterval(fireDamage, basePoints / 77.0f, basePoints / 25.0f);            
+            RoundToInterval(fireDamage, basePoints / 77.0f, basePoints / 25.0f);
             float spellPowerBonus = bot->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE);
             spellPowerBonus += target->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_DAMAGE_TAKEN, SPELL_SCHOOL_MASK_FIRE);
 

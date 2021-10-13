@@ -4,12 +4,14 @@
 #include "Group.h"
 #include "Map.h"
 #include "MotionMaster.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
+#include "World.h"
 /*
 Hunter NpcBot (reworked by Trickerer onlysuffering@gmail.com)
 Complete - around 95%
@@ -2270,19 +2272,19 @@ public:
             specList.push_back(LocalizedNpcText(player, BOT_TEXT_ASPECT) + ": " + LocalizedNpcText(player, textId));
         }
 
-        std::vector<uint32> const* GetDamagingSpellsList() const
+        std::vector<uint32> const* GetDamagingSpellsList() const override
         {
             return &Hunter_spells_damage;
         }
-        std::vector<uint32> const* GetCCSpellsList() const
+        std::vector<uint32> const* GetCCSpellsList() const override
         {
             return &Hunter_spells_cc;
         }
-        //std::vector<uint32> const* GetHealingSpellsList() const
+        //std::vector<uint32> const* GetHealingSpellsList() const override
         //{
         //    return &Hunter_spells_heal;
         //}
-        std::vector<uint32> const* GetSupportSpellsList() const
+        std::vector<uint32> const* GetSupportSpellsList() const override
         {
             return &Hunter_spells_support;
         }

@@ -1,6 +1,9 @@
 #ifndef _BOTDUMP_H
 #define _BOTDUMP_H
 
+#include "Define.h"
+
+#include <fstream>
 #include <string>
 
 enum BotDataDumpResult

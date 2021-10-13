@@ -1,15 +1,19 @@
 #include "bot_ai.h"
 #include "botmgr.h"
+#include "DBCStores.h"
 #include "GameEventMgr.h"
 #include "Group.h"
+#include "Log.h"
 #include "Map.h"
 #include "MotionMaster.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
+#include "World.h"
 /*
 Death Knight NpcBot by Trickerer onlysuffering@gmail.com
 Complete - around 85%
@@ -957,7 +961,6 @@ public:
                 if (chil->IsAffectedOnSpell(spellInfo))
                     crit_chance += 100.f;
 
-
             //Subversion: 9% additional critical chance for Blood Strike, Scourge Strike, Heart Strike and Obliterate
             if (baseId == BLOOD_STRIKE_1 || baseId == HEART_STRIKE_1 || baseId == SCOURGE_STRIKE_1 || baseId == OBLITERATE_1)
                 crit_chance += 9.f;
@@ -1273,7 +1276,7 @@ public:
             if (baseId == EMPOWER_RUNE_WEAPON_1)
                 timebonus += 180000;
 
-            cooldown = std::max<int32>((float(cooldown) * (1.0f - pctbonus)) - timebonus, 0);
+            cooldown = int32(std::max<float>((float(cooldown) * (1.0f - pctbonus)) - timebonus, 0.f));
         }
 
         void ApplyClassSpellCategoryCooldownMods(SpellInfo const* spellInfo, uint32& cooldown) const override
@@ -1299,7 +1302,7 @@ public:
             if (lvl >= 80 && baseId == DARK_COMMAND_1)
                 timebonus += 2000;
 
-            cooldown = std::max<int32>((float(cooldown) * (1.0f - pctbonus)) - timebonus, 0);
+            cooldown = int32(std::max<float>((float(cooldown) * (1.0f - pctbonus)) - timebonus, 0.f));
         }
 
         void ApplyClassSpellGlobalCooldownMods(SpellInfo const* spellInfo, float& cooldown) const override
@@ -1457,7 +1460,7 @@ public:
                     baseThreat += threatEntry->flatMod;
 
                     if (baseThreat)
-                        target->GetThreatManager().AddThreat(me, baseThreat * 6, spell);
+                        target->GetThreatManager().AddThreat(me, baseThreat * 6.f, spell);
                 }
             }
 
@@ -1556,7 +1559,7 @@ public:
                     shell->SetMaxDuration(dur);
                     //Magic Suppression part 2
                     if (AuraEffect* shab = shell->GetEffect(0))
-                        shab->ChangeAmount(shab->GetAmount() * 1.25f);
+                        shab->ChangeAmount(int32(shab->GetAmount() * 1.25f));
                 }
             }
             if (baseId == VAMPIRIC_BLOOD_1)
@@ -1592,7 +1595,7 @@ public:
                     if (AuraEffect* eff2 = fort->GetEffect(EFFECT_2))
                     {
                         //calc correct amount
-                        int32 amount = eff2->GetAmount() - (0.15f * (std::max<float>(0, GetBotDefense() - lvl*5)));
+                        int32 amount = eff2->GetAmount() - int32(0.15f * (std::max<int32>(0, GetBotDefense() - lvl*5)));
                         //Glyph of Icebound Fortitude
                         amount = std::min<int32>(amount, -40);
                         //Increased Icebound Fortitude Mitigation (54803)
@@ -1665,7 +1668,7 @@ public:
             Position pos;
 
             Creature* myPet = me->SummonCreature(entry, *me, TEMPSUMMON_CORPSE_DESPAWN);
-            me->GetNearPoint(myPet, pos.m_positionX, pos.m_positionY, pos.m_positionZ, 0, me->GetOrientation() + M_PI / 2);
+            me->GetNearPoint(myPet, pos.m_positionX, pos.m_positionY, pos.m_positionZ, 0.f, float(me->GetOrientation() + M_PI / 2.f));
             myPet->GetMotionMaster()->MovePoint(me->GetMapId(), pos);
             myPet->SetCreatorGUID(master->GetGUID());
             myPet->SetOwnerGUID(me->GetGUID());
@@ -1757,7 +1760,6 @@ public:
             //    //Runic Power Mastery rank 2
             //    mast->ChangeAmount(1300);
             //}
-
 
             if (botPet && botPet->GetPowerType() != POWER_ENERGY)
                 botPet->SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_ENERGY);
@@ -1897,19 +1899,19 @@ public:
             }
         }
 
-        std::vector<uint32> const* GetDamagingSpellsList() const
+        std::vector<uint32> const* GetDamagingSpellsList() const override
         {
             return &Deathknight_spells_damage;
         }
-        std::vector<uint32> const* GetCCSpellsList() const
+        std::vector<uint32> const* GetCCSpellsList() const override
         {
             return &Deathknight_spells_cc;
         }
-        //std::vector<uint32> const* GetHealingSpellsList() const
+        //std::vector<uint32> const* GetHealingSpellsList() const override
         //{
         //    return &Deathknight_spells_heal;
         //}
-        std::vector<uint32> const* GetSupportSpellsList() const
+        std::vector<uint32> const* GetSupportSpellsList() const override
         {
             return &Deathknight_spells_support;
         }

@@ -1,14 +1,36 @@
 #ifndef _BOT_AI_H
 #define _BOT_AI_H
 
-#include "CreatureAI.h"
 #include "botcommon.h"
+
+#include "CreatureAI.h"
+#include "EventProcessor.h"
+#include "ItemDefines.h"
+#include "Position.h"
+
 /*
 NpcBot System by Trickerer (onlysuffering@gmail.com)
 */
 
 class TeleportHomeEvent;
 class TeleportFinishEvent;
+
+enum CombatRating : uint8;
+enum MeleeHitOutcome : uint8;
+
+struct CleanDamage;
+struct CalcDamageInfo;
+struct ItemTemplate;
+struct PlayerClassLevelInfo;
+struct SpellNonMeleeDamage;
+
+class Aura;
+class DamageInfo;
+class Item;
+class Spell;
+class SpellCastTargets;
+class Unit;
+class Vehicle;
 
 class bot_ai : public CreatureAI
 {
@@ -123,8 +145,7 @@ class bot_ai : public CreatureAI
         uint8 GetPlayerClass() const;
         uint8 GetPlayerRace() const;
 
-        //bool IsTempBot() const { return me->GetSpawnId() == 0; }
-        bool IsTempBot() const { return me->GetEntry() == BOT_ENTRY_MIRROR_IMAGE_BM; }
+        bool IsTempBot() const;
 
         void SetShouldUpdateStats() { shouldUpdateStats = true; }
         void UpdateHealth() { doHealth = true; }
@@ -313,11 +334,11 @@ class bot_ai : public CreatureAI
 
         bool IsShootingWand(Unit const* u = nullptr) const;
 
-        bool IsChanneling(Unit const* u = nullptr) const { if (!u) u = me; return u->GetCurrentSpell(CURRENT_CHANNELED_SPELL); }
-        bool IsCasting(Unit const* u = nullptr) const { if (!u) u = me; return (u->HasUnitState(UNIT_STATE_CASTING) || IsChanneling(u) || u->IsNonMeleeSpellCast(false, false, true, false, false)); }
-        bool JumpingFlyingOrFalling() const { return Jumping() || me->IsFalling() || me->HasUnitMovementFlag(MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_SPLINE_ELEVATION|MOVEMENTFLAG_FALLING_SLOW); }
-        bool JumpingOrFalling() const { return Jumping() || me->IsFalling() || me->HasUnitMovementFlag(MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_FALLING_SLOW); }
-        bool Jumping() const { return me->HasUnitState(UNIT_STATE_JUMPING); }
+        bool IsChanneling(Unit const* u = nullptr) const;
+        bool IsCasting(Unit const* u = nullptr) const;
+        bool JumpingFlyingOrFalling() const;
+        bool JumpingOrFalling() const;
+        bool Jumping() const;
 
         float CalcSpellMaxRange(uint32 spellId, bool enemy = true) const;
 
@@ -387,11 +408,11 @@ class bot_ai : public CreatureAI
         uint16 Rand() const;
         void GenerateRand() const;
 
-        static uint32 GetLostHP(Unit const* unit) { return unit->GetMaxHealth() - unit->GetHealth(); }
-        static uint8 GetHealthPCT(Unit const* u) { if (!u || !u->IsAlive() || u->GetMaxHealth() <= 1) return 100; return uint8(((float(u->GetHealth()))/u->GetMaxHealth()) * 100); }
-        static uint8 GetManaPCT(Unit const* u) { if (!u || !u->IsAlive() || u->GetMaxPower(POWER_MANA) <= 1) return 100; return (u->GetPower(POWER_MANA)*10/(1 + u->GetMaxPower(POWER_MANA)/10)); }
+        static uint32 GetLostHP(Unit const* unit);
+        static uint8 GetHealthPCT(Unit const* u);
+        static uint8 GetManaPCT(Unit const* u);
 
-        virtual MeleeHitOutcome GetNextAttackMeleeOutCome() const { return MELEE_HIT_CRUSHING; }
+        virtual MeleeHitOutcome GetNextAttackMeleeOutCome() const;
 
         //event helpers
         void BotJumpInPlaceInFrontOf(Position const* pos, float speedXY, float maxHeight);
@@ -535,7 +556,7 @@ class bot_ai : public CreatureAI
 
         void _saveStats();
 
-        PlayerClassLevelInfo _classinfo;
+        PlayerClassLevelInfo* _classinfo;
         SpellInfo const* m_botSpellInfo;
         Position pos, attackpos;
 

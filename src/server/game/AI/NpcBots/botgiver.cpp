@@ -3,6 +3,7 @@
 #include "botdatamgr.h"
 #include "botmgr.h"
 #include "Creature.h"
+#include "Log.h"
 #include "Player.h"
 #include "ScriptedGossip.h"
 #include "ScriptMgr.h"
@@ -27,7 +28,7 @@ public:
     {
         bot_giver_AI(Creature* creature) : CreatureAI(creature) {}
 
-        void UpdateAI(uint32 /*diff*/) {}
+        void UpdateAI(uint32 /*diff*/) override {}
 
         bool OnGossipHello(Player* player) override
         {

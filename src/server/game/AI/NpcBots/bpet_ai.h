@@ -2,9 +2,17 @@
 #define _BOT_PET_AI_H
 
 #include "CreatureAI.h"
+#include "Position.h"
+
 /*
 NpcBot Pet System by Trickerer (onlysuffering@gmail.com)
 */
+
+struct SpellNonMeleeDamage;
+
+class Aura;
+class Spell;
+class Unit;
 
 class bot_pet_ai : public CreatureAI
 {
@@ -92,11 +100,11 @@ class bot_pet_ai : public CreatureAI
         void OnStartAttack(Unit const* /*u*/);
         bool StartAttack(Unit const* u, bool force = false);
 
-        inline bool IsChanneling(Unit const* u = nullptr) const { if (!u) u = me; return u->GetCurrentSpell(CURRENT_CHANNELED_SPELL); }
-        inline bool IsCasting(Unit const* u = nullptr) const { if (!u) u = me; return (u->HasUnitState(UNIT_STATE_CASTING) || IsChanneling(u) || u->IsNonMeleeSpellCast(false, false, true, false, false)); }
-        inline bool JumpingFlyingOrFalling() const { return Jumping() || me->IsFalling() || me->HasUnitMovementFlag(MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_SPLINE_ELEVATION|MOVEMENTFLAG_FALLING_SLOW); }
-        inline bool JumpingOrFalling() const { return Jumping() || me->IsFalling() || me->HasUnitMovementFlag(MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_FALLING_SLOW); }
-        inline bool Jumping() const { return me->HasUnitState(UNIT_STATE_JUMPING); }
+        bool IsChanneling(Unit const* u = nullptr) const;
+        bool IsCasting(Unit const* u = nullptr) const;
+        bool JumpingFlyingOrFalling() const;
+        bool JumpingOrFalling() const;
+        bool Jumping() const;
 
         float CalcSpellMaxRange(uint32 spellId, bool enemy = true) const;
         void CalculateAttackPos(Unit* target, Position &pos) const;
@@ -117,9 +125,9 @@ class bot_pet_ai : public CreatureAI
         uint16 Rand() const;
         void GenerateRand() const;
 
-        static inline uint32 GetLostHP(Unit const* unit) { return unit->GetMaxHealth() - unit->GetHealth(); }
-        static inline uint8 GetHealthPCT(Unit const* u) { if (!u || !u->IsAlive() || u->GetMaxHealth() <= 1) return 100; return uint8(((float(u->GetHealth()))/u->GetMaxHealth()) * 100); }
-        static inline uint8 GetManaPCT(Unit const* u) { if (!u || !u->IsAlive() || u->GetMaxPower(POWER_MANA) <= 1) return 100; return (u->GetPower(POWER_MANA)*10/(1 + u->GetMaxPower(POWER_MANA)/10)); }
+        static uint32 GetLostHP(Unit const* unit);
+        static uint8 GetHealthPCT(Unit const* u);
+        static uint8 GetManaPCT(Unit const* u);
 
         Unit* opponent;
         Creature* petOwner;

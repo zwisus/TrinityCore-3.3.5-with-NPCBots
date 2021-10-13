@@ -3,6 +3,8 @@
 
 #include "botcommon.h"
 
+#include <set>
+
 class Creature;
 
 enum NpcBotDataUpdateType

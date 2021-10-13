@@ -1,9 +1,12 @@
 #include "bpet_ai.h"
 #include "bot_GridNotifiers.h"
 #include "botmgr.h"
+#include "Log.h"
 #include "Map.h"
 #include "MotionMaster.h"
+#include "ObjectMgr.h"
 #include "SpellAuraEffects.h"
+#include "World.h"
 /*
 NpcBot Pet System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
 */
@@ -2310,4 +2313,46 @@ void bot_pet_ai::CommonTimers(uint32 diff)
 void bot_pet_ai::KillEvents(bool /*force*/)
 {
     //_petEvents.KillAllEvents(force);
+}
+
+bool bot_pet_ai::IsChanneling(Unit const* u/* = nullptr*/) const
+{
+    if (!u)
+        u = me;
+    return u->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
+}
+bool bot_pet_ai::IsCasting(Unit const* u/* = nullptr*/) const
+{
+    if (!u)
+        u = me;
+    return (u->HasUnitState(UNIT_STATE_CASTING) || IsChanneling(u) || u->IsNonMeleeSpellCast(false, false, true, false, false));
+}
+bool bot_pet_ai::JumpingFlyingOrFalling() const
+{
+    return Jumping() || me->IsFalling() || me->HasUnitMovementFlag(MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_SPLINE_ELEVATION|MOVEMENTFLAG_FALLING_SLOW);
+}
+bool bot_pet_ai::JumpingOrFalling() const
+{
+    return Jumping() || me->IsFalling() || me->HasUnitMovementFlag(MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_FALLING_SLOW);
+}
+bool bot_pet_ai::Jumping() const
+{
+    return me->HasUnitState(UNIT_STATE_JUMPING);
+}
+
+uint32 bot_pet_ai::GetLostHP(Unit const* unit)
+{
+    return unit->GetMaxHealth() - unit->GetHealth();
+}
+uint8 bot_pet_ai::GetHealthPCT(Unit const* u)
+{
+    if (!u || !u->IsAlive() || u->GetMaxHealth() <= 1)
+        return 100;
+    return uint8(((float(u->GetHealth()))/u->GetMaxHealth()) * 100);
+}
+uint8 bot_pet_ai::GetManaPCT(Unit const* u)
+{
+    if (!u || !u->IsAlive() || u->GetMaxPower(POWER_MANA) <= 1)
+        return 100;
+    return (u->GetPower(POWER_MANA)*10/(1 + u->GetMaxPower(POWER_MANA)/10));
 }

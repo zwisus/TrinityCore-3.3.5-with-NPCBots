@@ -4,10 +4,16 @@
 #include "botdatamgr.h"
 #include "Chat.h"
 #include "CharacterCache.h"
+#include "Creature.h"
+#include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "Language.h"
 #include "Group.h"
+#include "Log.h"
 #include "Map.h"
 #include "MapManager.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "RBAC.h"
 #include "ScriptMgr.h"
@@ -15,6 +21,8 @@
 #include "SpellMgr.h"
 #include "Vehicle.h"
 #include "World.h"
+#include "WorldDatabase.h"
+#include "WorldSession.h"
 
 /*
 Name: script_bot_commands

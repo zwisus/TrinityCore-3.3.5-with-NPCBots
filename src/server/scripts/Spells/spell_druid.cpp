@@ -32,6 +32,7 @@
 #include "SpellScript.h"
 
 //npcbot
+#include "Creature.h"
 #include "Group.h"
 //end npcbot
 

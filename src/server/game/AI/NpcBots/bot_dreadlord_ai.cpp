@@ -281,7 +281,7 @@ public:
             if (CCed(damageinfo.Target))
                 pctbonus *= 1.5f;
 
-            damageinfo.Damages[0].Damage *= pctbonus;
+            damageinfo.Damages[0].Damage = uint32(damageinfo.Damages[0].Damage * pctbonus);
         }
 
         void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
@@ -504,19 +504,19 @@ public:
             }
         }
 
-        std::vector<uint32> const* GetDamagingSpellsList() const
+        std::vector<uint32> const* GetDamagingSpellsList() const override
         {
             return &Dreadlord_spells_damage;
         }
-        std::vector<uint32> const* GetCCSpellsList() const
+        std::vector<uint32> const* GetCCSpellsList() const override
         {
             return &Dreadlord_spells_cc;
         }
-        //std::vector<uint32> const* GetHealingSpellsList() const
+        //std::vector<uint32> const* GetHealingSpellsList() const override
         //{
         //    return &Dreadlord_spells_heal;
         //}
-        std::vector<uint32> const* GetSupportSpellsList() const
+        std::vector<uint32> const* GetSupportSpellsList() const override
         {
             return &Dreadlord_spells_support;
         }

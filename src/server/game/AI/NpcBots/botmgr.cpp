@@ -12,6 +12,7 @@
 #include "Group.h"
 #include "InstanceScript.h"
 #include "Language.h"
+#include "Log.h"
 #include "Map.h"
 #include "MapManager.h"
 #include "MotionMaster.h"
@@ -242,7 +243,7 @@ void BotMgr::LoadConfig(bool reload)
 uint8 BotMgr::GetNpcBotsCount() const
 {
     //if (!inWorldOnly)
-        return _bots.size();
+        return (uint8)_bots.size();
 
     //CRITICAL SECTION
     //inWorldOnly is only for one-shot cases (opcodes, etc.)
@@ -1309,9 +1310,9 @@ int32 BotMgr::GetHPSTaken(Unit const* unit) const
                 healing = unit->SpellHealingBonusTaken(u, spellInfo, healing, HEAL);
 
                 if (i == CURRENT_CHANNELED_SPELL)
-                    amount += healing / (spellInfo->_effects[j].Amplitude * 0.001f);
+                    amount += int32(healing / (spellInfo->_effects[j].Amplitude * 0.001f));
                 else
-                    amount += healing / (std::max<int32>(spell->GetTimer(), 1000) * 0.001f);
+                    amount += int32(healing / (std::max<int32>(spell->GetTimer(), 1000) * 0.001f));
 
                 //TC_LOG_ERROR("entities.player", "BotMgr:pendingHeals: found %s's %s on %s in %u (%i, total %i)",
                 //    u->GetName().c_str(), spellInfo->SpellName[0], target->GetName().c_str(), pheal->delay, healing, pheal->amount);
@@ -1324,7 +1325,7 @@ int32 BotMgr::GetHPSTaken(Unit const* unit) const
     //HoTs
     Unit::AuraEffectList const& hots = unit->GetAuraEffectsByType(SPELL_AURA_PERIODIC_HEAL);
     for (Unit::AuraEffectList::const_iterator itr = hots.begin(); itr != hots.end(); ++itr)
-        amount += (*itr)->GetAmount() / ((*itr)->GetAmplitude() * 0.001f);
+        amount += int32((*itr)->GetAmount() / ((*itr)->GetAmplitude() * 0.001f));
 
     //if (amount != 0)
     //    TC_LOG_ERROR("entities.player", "BotMgr:GetHPSTaken(): %s got %i)", unit->GetName().c_str(), amount);

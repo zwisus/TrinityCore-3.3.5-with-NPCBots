@@ -33,6 +33,10 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+//npcbot
+#include "Creature.h"
+//end npcbot
+
 enum RogueSpells
 {
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK       = 22482,

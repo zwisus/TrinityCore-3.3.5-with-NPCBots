@@ -1,8 +1,15 @@
 #include "botdatamgr.h"
+#include "Creature.h"
+#include "DatabaseEnv.h"
 #include "Item.h"
+#include "Log.h"
 #include "Map.h"
 #include "MapManager.h"
+#include "ObjectMgr.h"
 #include "StringConvert.h"
+#include "WorldDatabase.h"
+
+#include <shared_mutex>
 /*
 Npc Bot Data Manager by Trickerer (onlysuffering@gmail.com)
 NpcBots DB Data management

@@ -311,7 +311,7 @@ struct PlayerMovementPendingChange
     } knockbackInfo; // used if knockback
 };
 
-enum CombatRating
+enum CombatRating : uint8
 {
     CR_WEAPON_SKILL             = 0,
     CR_DEFENSE_SKILL            = 1,

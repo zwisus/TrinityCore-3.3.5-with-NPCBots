@@ -27,6 +27,7 @@
 
 //npcbot
 #include "botmgr.h"
+#include "ObjectAccessor.h"
 //end npcbot
 
 Totem::Totem(SummonPropertiesEntry const* properties, Unit* owner) : Minion(properties, owner, false)

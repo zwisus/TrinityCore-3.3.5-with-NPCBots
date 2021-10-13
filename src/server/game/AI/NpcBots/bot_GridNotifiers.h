@@ -3,6 +3,9 @@
 
 #include "DynamicObject.h"
 #include "Corpse.h"
+#include "Creature.h"
+#include "DBCStores.h"
+#include "GameObject.h"
 #include "Group.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
