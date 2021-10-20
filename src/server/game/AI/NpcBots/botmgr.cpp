@@ -1189,13 +1189,12 @@ void BotMgr::UpdatePvPForBots()
 
 void BotMgr::PropagateEngageTimers() const
 {
-    uint32 delay;
     for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
     {
         if (itr->second->GetBotAI()->IsTank())
             continue;
 
-        delay = itr->second->GetBotAI()->HasRole(BOT_ROLE_HEAL) ? GetEngageDelayHeal() :
+        uint32 delay = itr->second->GetBotAI()->HasRole(BOT_ROLE_HEAL) ? GetEngageDelayHeal() :
             itr->second->GetBotAI()->HasRole(BOT_ROLE_DPS) ? GetEngageDelayDPS() : 0;
 
         itr->second->GetBotAI()->ResetEngageTimer(delay);
@@ -1436,6 +1435,32 @@ void BotMgr::OnBotOwnerExitVehicle(Player const* passenger, Vehicle const* vehic
         if (Creature const* bot = itr->second)
             if (bot->IsInWorld() && bot->IsAlive())
                 bot->GetBotAI()->OnBotOwnerExitVehicle(vehicle);
+}
+
+void BotMgr::OnBotPartyEngage(Player const* owner)
+{
+    Group const* gr = owner->GetGroup();
+    if (gr)
+    {
+        std::vector<Player const*> affectedPlayers;
+        for (GroupReference const* itr = gr->GetFirstMember(); itr != nullptr; itr = itr->next())
+        {
+            Player const* player = itr->GetSource();
+            if (!player || owner->GetMap() != player->FindMap() ||
+                player->GetDistance(owner) > sWorld->GetMaxVisibleDistanceOnContinents() ||
+                !player->HaveBot())
+                continue;
+
+            if (player->GetBotMgr()->IsPartyInCombat())
+                return;
+
+            affectedPlayers.push_back(player);
+        }
+        for (Player const* p : affectedPlayers)
+            p->GetBotMgr()->PropagateEngageTimers();
+    }
+    else
+        owner->GetBotMgr()->PropagateEngageTimers();
 }
 
 void BotMgr::ApplyBotEffectMods(Unit const* caster, Unit const* target, SpellInfo const* spellInfo, uint8 effIndex, float& value)

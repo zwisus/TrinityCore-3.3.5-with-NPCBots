@@ -12736,14 +12736,6 @@ void bot_ai::JustEnteredCombat(Unit* u)
     if (me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
-    if (!IAmFree())
-    {
-        if (u->CanHaveThreatList())
-            master->GetBotMgr()->PropagateEngageTimers();
-
-        return;
-    }
-
     _evadeMode = false;
     AbortTeleport();
 

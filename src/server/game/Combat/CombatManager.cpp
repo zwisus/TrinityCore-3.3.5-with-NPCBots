@@ -364,6 +364,18 @@ bool CombatManager::UpdateOwnerCombatState() const
 
     if (combatState)
     {
+        //npcbot: party combat hook
+        Player* playerOwner = nullptr;
+        if (_owner->GetTypeId() == TYPEID_PLAYER && _owner->ToPlayer()->HaveBot())
+            playerOwner = _owner->ToPlayer();
+        else if (_owner->GetTypeId() == TYPEID_UNIT && _owner->ToCreature()->IsNPCBotOrPet() &&
+            !_owner->ToCreature()->IsFreeBot())
+            playerOwner = _owner->ToCreature()->GetBotOwner();
+
+        if (playerOwner)
+            BotMgr::OnBotPartyEngage(playerOwner);
+        //end npcbot
+
         _owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
         _owner->AtEnterCombat();
         if (_owner->GetTypeId() != TYPEID_UNIT)

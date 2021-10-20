@@ -96,6 +96,7 @@ class BotMgr
         static void OnBotExitVehicle(Creature const* passenger, Vehicle const* vehicle);
         static void OnBotOwnerEnterVehicle(Player const* passenger, Vehicle const* vehicle);
         static void OnBotOwnerExitVehicle(Player const* passenger, Vehicle const* vehicle);
+        static void OnBotPartyEngage(Player const* owner);
         //mod hooks
         static void ApplyBotEffectMods(Unit const* caster, Unit const* target, SpellInfo const* spellInfo, uint8 effIndex, float& value);
         static float GetBotDamageTakenMod(Creature const* bot, bool magic);
