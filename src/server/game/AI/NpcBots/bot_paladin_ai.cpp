@@ -1057,6 +1057,9 @@ public:
             CheckSeal(diff);
             CheckAura(diff);
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
                 return;
 

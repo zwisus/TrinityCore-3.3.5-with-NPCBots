@@ -204,6 +204,9 @@ public:
                 return;
             }
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
                 return;
 

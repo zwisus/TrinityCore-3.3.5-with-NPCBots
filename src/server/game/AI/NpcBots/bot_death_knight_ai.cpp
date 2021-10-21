@@ -600,6 +600,9 @@ public:
             CheckHysteria(diff);
             CheckAntiMagic(diff);
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
                 return;
 

@@ -711,6 +711,9 @@ public:
 
             CheckDrainMana(diff);
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
                 return;
 

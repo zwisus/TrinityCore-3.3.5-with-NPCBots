@@ -282,6 +282,9 @@ public:
             if (IsCasting())
                 return;
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             CheckSprint(diff);
             CheckCloakOfShadows(diff);
             CheckVanish(diff);

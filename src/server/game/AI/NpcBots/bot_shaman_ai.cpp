@@ -1024,6 +1024,9 @@ public:
             if (!me->IsInCombat())
                 DoNonCombatActions(diff);
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             CheckGhostWolf(diff);
 
             if (!CheckAttackTarget())

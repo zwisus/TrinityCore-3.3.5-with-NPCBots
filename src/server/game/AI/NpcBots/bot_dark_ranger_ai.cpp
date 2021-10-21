@@ -169,6 +169,9 @@ public:
                     DrinkPotion(false);
             }
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
             {
                 me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);

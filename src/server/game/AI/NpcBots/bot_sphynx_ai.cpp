@@ -162,6 +162,9 @@ public:
             CheckReplenishHealth(diff);
             CheckReplenishMana(diff);
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
                 return;
 

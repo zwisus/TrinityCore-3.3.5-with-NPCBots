@@ -136,6 +136,9 @@ public:
             if (master->IsInCombat() || me->IsInCombat())
                 CheckDispel(diff);
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
                 return;
 

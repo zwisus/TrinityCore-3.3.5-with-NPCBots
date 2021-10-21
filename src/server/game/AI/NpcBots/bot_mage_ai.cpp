@@ -377,6 +377,9 @@ public:
                 if (doCast(me, GetSpell(SUMMON_WATER_ELEMENTAL_1)))
                     return;
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
                 return;
 

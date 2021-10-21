@@ -216,6 +216,9 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
 
     _lastZoneId = 0;
     _lastAreaId = 0;
+    _lastWMOAreaId = 0;
+
+    _wmoAreaUpdateTimer = 0;
 
     _ownerGuid = 0;
 
@@ -1992,7 +1995,9 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
         if (_botclass < BOT_CLASS_EX_START)
             botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_SPEC) << ": " << uint32(_spec);
 
-        //botstring << "\nBoot timer: %i", _bootTimer);
+        //debug
+        //botstring << "\n_lastWMOAreaId: " << uint32(_lastWMOAreaId);
+
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_MAIN) << ": " << uint32(_roleMask & BOT_ROLE_MASK_MAIN);
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_GATHERING) << ": " << uint32(_roleMask & BOT_ROLE_MASK_GATHERING);
 
@@ -3888,6 +3893,56 @@ bool bot_ai::CheckAttackTarget()
 
     return true;
 }
+//IMMEDIATE TARGETS
+bool bot_ai::ProcessImmediateNonAttackTarget()
+{
+    if ((me->GetMap()->GetEntry() && me->GetMap()->GetEntry()->IsWorldMap()) || IAmFree() || IsCasting())
+        return false;
+
+    static constexpr std::array<uint32, 2> WMOAreaGroupMuru = { 41736, 42759 }; // Shrine of the Eclipse
+
+    static auto isInWMOArea = [=](auto const& ids) {
+        for (auto wmoId : ids) {
+            if (wmoId == _lastWMOAreaId)
+                return true;
+        }
+        return false;
+    };
+
+    if (me->GetMapId() == 580 && isInWMOArea(WMOAreaGroupMuru)) // Sunwell - M'uru
+    {
+        static const uint32 SPELL_PURGE_1 = 370u;
+        static const uint32 SPELL_DISPEL_MAGIC_1 = 527u;
+        uint32 dspell = 0;
+        if (_botclass == BOT_CLASS_SHAMAN)
+            dspell = SPELL_PURGE_1;
+        else if (_botclass == BOT_CLASS_PRIEST)
+            dspell = SPELL_DISPEL_MAGIC_1;
+
+        if (dspell && IsSpellReady(dspell, lastdiff))
+        {
+            std::list<Creature*> cList;
+            Trinity::AllCreaturesOfEntryInRange check(me, 25744, 30.f); // Dark Fiend
+            Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, cList, check);
+            Cell::VisitAllObjects(me, searcher, 30.f);
+
+            //Dark Fiends do not die instantly, remove purged ones
+            if (!cList.empty())
+                cList.erase(std::remove_if(cList.begin(), cList.end(),  [=](Creature const* c) { return c->GetOwnedAuras().empty(); }),
+                    cList.end());
+
+            if (Unit* fiend = cList.empty() ? nullptr : cList.size() == 1u ? cList.front() :
+                Trinity::Containers::SelectRandomContainerElement(cList))
+            {
+                if (CheckBotCast(fiend, GetSpell(dspell)) == SPELL_CAST_OK)
+                    if (doCast(fiend, GetSpell(dspell)))
+                        return true;
+            }
+        }
+    }
+
+    return false;
+}
 //POSITION
 AoeSpotsVec const& bot_ai::GetAoeSpots() const
 {
@@ -5561,6 +5616,22 @@ void bot_ai::_OnManaRegenUpdate() const
 
     me->SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, power_regen_mp5 + CalculatePct(value, modManaRegenInterrupt));
     me->SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, power_regen_mp5 + value);
+}
+
+void bot_ai::_UpdateWMOArea()
+{
+    _wmoAreaUpdateTimer = urand(7000, 9000);
+
+    uint32 mogpFlags;
+    int32 adtId, rootId, groupId;
+    bool hasVmapArea = me->GetMap()->GetAreaInfo(me->GetPhaseMask(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+        mogpFlags, adtId, rootId, groupId);
+
+    if (WMOAreaTableEntry const* wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId))
+    {
+        _lastWMOAreaId = wmoEntry->ID;
+        //TC_LOG_ERROR("scripts", "_UpdateWMOArea(): bot %s: area %u, wmoarea %u", me->GetName().c_str(), _lastAreaId, _lastWMOAreaId);
+    }
 }
 
 void bot_ai::_OnZoneUpdate(uint32 zoneId, uint32 areaId)
@@ -14410,7 +14481,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         //    }
         //}
 
-        //Zone / Area
+        //Zone / Area / WMOArea
         if (me->IsInWorld())
         {
             uint32 newzone, newarea;
@@ -14420,6 +14491,9 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 _OnZoneUpdate(newzone, newarea); // also updates area
             else if (_lastAreaId != newarea)
                 _OnAreaUpdate(newarea);
+
+            if (_wmoAreaUpdateTimer <= diff)
+                _UpdateWMOArea();
         }
 
         //Gathering
@@ -14720,6 +14794,9 @@ void bot_ai::CommonTimers(uint32 diff)
 
     if (IAmFree())
         UpdateReviveTimer(diff);
+
+    if (me->IsInWorld() &&
+        _wmoAreaUpdateTimer > diff) _wmoAreaUpdateTimer -= diff;
 
     if (_updateTimerMedium > diff)  _updateTimerMedium -= diff;
     if (_updateTimerEx1 > diff)     _updateTimerEx1 -= diff;

@@ -373,6 +373,9 @@ public:
             if (IsCasting())
                 return;
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
             {
                 if (!me->IsInCombat() && stancetimer <= diff && Rand() < 5 && me->getAttackers().empty() && rage <= 250)

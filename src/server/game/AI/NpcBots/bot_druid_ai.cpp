@@ -624,6 +624,9 @@ public:
                 CureGroup(GetSpell(REMOVE_CURSE_1), diff);
             }
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             CheckTravelForm(diff);
 
             if (!CheckAttackTarget())

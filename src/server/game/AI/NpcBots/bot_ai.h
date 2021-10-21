@@ -445,6 +445,8 @@ class bot_ai : public CreatureAI
         float GetVehicleAttackDistanceOverride() const;
         uint8 LivingVehiclesCount(uint32 entry = 0) const;
 
+        bool ProcessImmediateNonAttackTarget();
+
         Player* master;
         Player* _prevRRobin;
         Unit* opponent;
@@ -467,6 +469,7 @@ class bot_ai : public CreatureAI
         void _OnManaUpdate() const;
         void _OnManaRegenUpdate() const;
 
+        void _UpdateWMOArea();
         void _OnZoneUpdate(uint32 zoneId, uint32 areaId);
         void _OnAreaUpdate(uint32 areaId);
 
@@ -570,11 +573,12 @@ class bot_ai : public CreatureAI
         //timers
         uint32 _reviveTimer, _powersTimer, _chaseTimer, _engageTimer, _potionTimer;
         uint32 lastdiff, checkAurasTimer, checkMasterTimer, roleTimer, ordersTimer, regenTimer, _updateTimerMedium, _updateTimerEx1;
+        uint32 _wmoAreaUpdateTimer;
         uint32 waitTimer;
         //save timers
         uint32 _saveDisabledSpellsTimer;
 
-        uint32 _lastZoneId, _lastAreaId;
+        uint32 _lastZoneId, _lastAreaId, _lastWMOAreaId;
 
         uint8 _jumpCount, _evadeCount;
         uint32 _roleMask;

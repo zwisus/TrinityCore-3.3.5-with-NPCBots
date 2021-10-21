@@ -725,6 +725,9 @@ public:
                 return;
             }
 
+            if (ProcessImmediateNonAttackTarget())
+                return;
+
             if (!CheckAttackTarget())
             {
                 me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
