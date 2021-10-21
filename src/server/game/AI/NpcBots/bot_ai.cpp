@@ -5624,7 +5624,7 @@ void bot_ai::_UpdateWMOArea()
 
     uint32 mogpFlags;
     int32 adtId, rootId, groupId;
-    bool hasVmapArea = me->GetMap()->GetAreaInfo(me->GetPhaseMask(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+    me->GetMap()->GetAreaInfo(me->GetPhaseMask(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
         mogpFlags, adtId, rootId, groupId);
 
     if (WMOAreaTableEntry const* wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId))
