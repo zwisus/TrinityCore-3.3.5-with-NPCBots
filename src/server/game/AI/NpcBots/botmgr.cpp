@@ -20,6 +20,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
+#include "World.h"
 /*
 Npc Bot Manager by Trickerer (onlysuffering@gmail.com)
 Player NpcBots management
