@@ -12,6 +12,7 @@
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "GameEventMgr.h"
+#include "GameObjectAI.h"
 #include "GridNotifiersImpl.h"
 #include "InstanceScript.h"
 #include "Item.h"
@@ -1996,7 +1997,7 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
             botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_SPEC) << ": " << uint32(_spec);
 
         //debug
-        //botstring << "\n_lastWMOAreaId: " << uint32(_lastWMOAreaId);
+        botstring << "\n_lastWMOAreaId: " << uint32(_lastWMOAreaId);
 
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_MAIN) << ": " << uint32(_roleMask & BOT_ROLE_MASK_MAIN);
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_GATHERING) << ": " << uint32(_roleMask & BOT_ROLE_MASK_GATHERING);
@@ -3900,6 +3901,7 @@ bool bot_ai::ProcessImmediateNonAttackTarget()
         return false;
 
     static constexpr std::array<uint32, 2> WMOAreaGroupMuru = { 41736, 42759 }; // Shrine of the Eclipse
+    static constexpr std::array<uint32, 2> WMOAreaGroupNajentus = { 41129, 41130 }; // Karabor Sewers
 
     static auto isInWMOArea = [=](auto const& ids) {
         for (auto wmoId : ids) {
@@ -3927,9 +3929,7 @@ bool bot_ai::ProcessImmediateNonAttackTarget()
             Cell::VisitAllObjects(me, searcher, 30.f);
 
             //Dark Fiends do not die instantly, remove purged ones
-            if (!cList.empty())
-                cList.erase(std::remove_if(cList.begin(), cList.end(),  [=](Creature const* c) { return c->GetOwnedAuras().empty(); }),
-                    cList.end());
+            cList.remove_if(Trinity::UnitAuraCheck(false, 45934)); // "Dark Fiend"
 
             if (Unit* fiend = cList.empty() ? nullptr : cList.size() == 1u ? cList.front() :
                 Trinity::Containers::SelectRandomContainerElement(cList))
@@ -3937,6 +3937,32 @@ bool bot_ai::ProcessImmediateNonAttackTarget()
                 if (CheckBotCast(fiend, GetSpell(dspell)) == SPELL_CAST_OK)
                     if (doCast(fiend, GetSpell(dspell)))
                         return true;
+            }
+        }
+    }
+    if (me->GetMapId() == 564 && isInWMOArea(WMOAreaGroupNajentus) && Rand() < 10) // Black Temple - High Warlord Naj'entus
+    {
+        if (Group* const gr = master->GetGroup())
+        {
+            std::vector<Player*> spines;
+            //Find and free impaled player (player gets the spine)
+            for (GroupReference const* itr = gr->GetFirstMember(); itr != nullptr; itr = itr->next())
+            {
+                Player* pl = itr->GetSource();
+                //We don't make bots run to player to "click" the spine, so range is rather big
+                if (pl && pl->IsInWorld() && pl->IsAlive() && me->GetMap() == pl->FindMap() && pl->HasUnitState(UNIT_STATE_STUNNED) &&
+                    me->GetDistance(pl) < 25.f && pl->HasAura(39837)) // "Impaling Spine"
+                    spines.push_back(pl);
+            }
+
+            if (Player* pl = spines.empty() ? nullptr : spines.size() == 1u ? spines.front() :
+                Trinity::Containers::SelectRandomContainerElement(spines))
+            {
+                if (GameObject const* spine = pl->GetFirstGameObjectById(185584)) // Naj'entus Spine
+                {
+                    if (spine->AI() && spine->AI()->OnGossipHello(pl))
+                        return true;
+                }
             }
         }
     }

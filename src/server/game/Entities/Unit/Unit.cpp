@@ -5252,6 +5252,17 @@ GameObject* Unit::GetGameObject(uint32 spellId) const
     return nullptr;
 }
 
+//npcbot
+GameObject* Unit::GetFirstGameObjectById(uint32 id) const
+{
+    for (GameObjectList::const_iterator i = m_gameObj.begin(); i != m_gameObj.end(); ++i)
+        if ((*i)->GetEntry() == id)
+            return *i;
+
+    return nullptr;
+}
+//end npcbot
+
 void Unit::AddGameObject(GameObject* gameObj)
 {
     if (!gameObj || gameObj->GetOwnerGUID())

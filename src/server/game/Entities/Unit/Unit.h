@@ -1203,6 +1203,7 @@ class TC_GAME_API Unit : public WorldObject
 
         //npcbot
         void SetControlledByPlayer(bool set) { m_ControlledByPlayer = set; }
+        GameObject* GetFirstGameObjectById(uint32 id) const;
         //end npcbot
 
         bool IsControlledByPlayer() const { return m_ControlledByPlayer; }
