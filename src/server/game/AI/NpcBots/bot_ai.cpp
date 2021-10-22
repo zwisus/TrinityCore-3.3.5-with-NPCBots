@@ -1997,7 +1997,7 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
             botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_SPEC) << ": " << uint32(_spec);
 
         //debug
-        botstring << "\n_lastWMOAreaId: " << uint32(_lastWMOAreaId);
+        //botstring << "\n_lastWMOAreaId: " << uint32(_lastWMOAreaId);
 
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_MAIN) << ": " << uint32(_roleMask & BOT_ROLE_MASK_MAIN);
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_GATHERING) << ": " << uint32(_roleMask & BOT_ROLE_MASK_GATHERING);
