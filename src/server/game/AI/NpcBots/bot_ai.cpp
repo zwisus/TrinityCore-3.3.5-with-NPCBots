@@ -3527,6 +3527,53 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
     if (mytar && me->HasAuraType(SPELL_AURA_MOD_TAUNT))
         return mytar;
 
+    //Immediate targets
+    if (!IAmFree() && !IsTank() && HasRole(BOT_ROLE_DPS) && me->GetMap()->GetEntry() && !me->GetMap()->GetEntry()->IsWorldMap())
+    {
+        static constexpr std::array<uint32, 1> WMOAreaGroupMarrowgar = { 47833 }; // The Spire
+
+        static auto isInWMOArea = [=](auto const& ids) {
+            for (auto wmoId : ids) {
+                if (wmoId == _lastWMOAreaId)
+                    return true;
+            }
+            return false;
+        };
+
+        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupMarrowgar) && me->IsInCombat() && // Icecrown Citadel - Lord Marrowgar
+            (!mytar || (mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE1 && mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE2 &&
+            mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE3)))
+        {
+            static constexpr std::array<uint32, 3> BoneSpikeIds = { CREATURE_ICC_BONE_SPIKE1, CREATURE_ICC_BONE_SPIKE2, CREATURE_ICC_BONE_SPIKE3 };
+
+            auto boneSpikeCheck = [=, mydist = 50.f](Unit* unit) mutable {
+                for (uint32 bsId : BoneSpikeIds) {
+                    if (unit->GetEntry() == bsId)  {
+                        if (HasRole(BOT_ROLE_RANGED))
+                            return true;
+                        float dist = me->GetDistance2d(unit);
+                        if (dist < mydist) {
+                            mydist = dist;
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
+            std::list<Creature*> cList;
+            Trinity::CreatureListSearcher searcher(me, cList, boneSpikeCheck);
+            Cell::VisitAllObjects(me, searcher, 50.f);
+
+            if (Creature* spike = cList.empty() ? nullptr : cList.size() == 1 ? cList.front() :
+                Trinity::Containers::SelectRandomContainerElement(cList))
+            {
+                // Bone spike is always attackable - no additional checks needed
+                return spike;
+            }
+        }
+    }
+
     Group const* gr = !IAmFree() ? master->GetGroup() : nullptr;
 
     if (gr && IsOffTank())
