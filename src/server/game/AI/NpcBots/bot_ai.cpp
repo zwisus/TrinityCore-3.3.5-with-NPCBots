@@ -5314,6 +5314,34 @@ bool bot_ai::HasSpell(uint32 basespell) const
     BotSpellMap::const_iterator itr = _spells.find(basespell);
     return itr != _spells.end() && (itr->second->spellId != 0);
 }
+//Using spell name as source, return first-rank spell if spell is inited
+uint32 bot_ai::GetBaseSpell(std::string_view spell_name, LocaleConstant locale) const
+{
+    uint32 basespell = 0;
+    std::wstring wname;
+    if (Utf8toWStr(spell_name, wname))
+    {
+        wstrToLower(wname);
+        for (BotSpellMap::const_iterator itr = _spells.begin(); itr != _spells.end(); ++itr)
+        {
+            //we ignore enabled state since this is exactly what we want
+            if (itr->second->spellId == 0) //not init'ed
+                continue;
+            spell_name = sSpellMgr->GetSpellInfo(itr->first)->SpellName[locale];
+            std::wstring wcname;
+            if (!Utf8toWStr(spell_name, wcname))
+                continue;
+            wstrToLower(wcname);
+            if (wcname == wname)
+            {
+                basespell = itr->first;
+                break;
+            }
+        }
+    }
+
+    return basespell;
+}
 //Using first-rank spell as source, return current spell id if inited and enabled
 uint32 bot_ai::GetSpell(uint32 basespell) const
 {

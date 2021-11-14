@@ -108,6 +108,8 @@ class BotMgr
 
         Creature* GetBot(ObjectGuid guid) const;
         Creature* GetBotByName(std::string_view name) const;
+        std::list<Creature*> GetAllBotsByClass(uint8 botclass) const;
+
         bool HaveBot() const { return !_bots.empty(); }
         uint8 GetNpcBotsCount() const;
         uint8 GetNpcBotsCountByRole(uint32 roles) const;
@@ -125,6 +127,7 @@ class BotMgr
 
         static uint32 GetNpcBotCost(uint8 level, uint8 botclass);
         static std::string GetNpcBotCostStr(uint8 level, uint8 botclass);
+        static uint8 BotClassByClassName(std::string const& className);
 
         void OnTeleportFar(uint32 mapId, float x, float y, float z, float ori = 0.f);
         void OnOwnerSetGameMaster(bool on);

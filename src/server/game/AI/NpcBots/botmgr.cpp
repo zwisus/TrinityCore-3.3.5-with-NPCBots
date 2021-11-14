@@ -667,6 +667,21 @@ Creature* BotMgr::GetBotByName(std::string_view name) const
     return nullptr;
 }
 
+std::list<Creature*> BotMgr::GetAllBotsByClass(uint8 botclass) const
+{
+    std::list<Creature*> foundBots;
+    for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->IsInWorld() || !itr->second->IsAlive())
+            continue;
+
+        if (itr->second->GetBotClass() == botclass)
+            foundBots.push_back(itr->second);
+    }
+
+    return foundBots;
+}
+
 void BotMgr::OnOwnerSetGameMaster(bool on)
 {
     Creature* bot;
@@ -1115,6 +1130,42 @@ std::string BotMgr::GetNpcBotCostStr(uint8 level, uint8 botclass)
     }
 
     return money.str();
+}
+
+uint8 BotMgr::BotClassByClassName(std::string const& className)
+{
+    static const std::map<std::string, uint8> BotClassNamesMap = {
+        { "warrior", BOT_CLASS_WARRIOR },
+        { "paladin", BOT_CLASS_PALADIN },
+        { "hunter", BOT_CLASS_HUNTER },
+        { "rogue", BOT_CLASS_ROGUE },
+        { "priest", BOT_CLASS_PRIEST },
+        { "deathknight", BOT_CLASS_DEATH_KNIGHT },
+        { "death_knight", BOT_CLASS_DEATH_KNIGHT },
+        { "shaman", BOT_CLASS_SHAMAN },
+        { "mage", BOT_CLASS_MAGE },
+        { "warlock", BOT_CLASS_WARLOCK },
+        { "druid", BOT_CLASS_DRUID },
+        { "blademaster", BOT_CLASS_BM },
+        { "blade_master", BOT_CLASS_BM },
+        { "sphynx", BOT_CLASS_SPHYNX },
+        { "obsidiandestroyer", BOT_CLASS_SPHYNX },
+        { "obsidian_destroyer", BOT_CLASS_SPHYNX },
+        { "destroyer", BOT_CLASS_SPHYNX },
+        { "archmage", BOT_CLASS_ARCHMAGE },
+        { "dreadlord", BOT_CLASS_DREADLORD },
+        { "spellbreaker", BOT_CLASS_SPELLBREAKER },
+        { "spell_breaker", BOT_CLASS_SPELLBREAKER },
+        { "darkranger", BOT_CLASS_DARK_RANGER },
+        { "dark_ranger", BOT_CLASS_DARK_RANGER }
+    };
+
+    //std::transform(className.begin(), className.end(), className.begin(), std::tolower);
+    auto iter = BotClassNamesMap.find(className);
+    if (iter != BotClassNamesMap.end())
+        return iter->second;
+
+    return BOT_CLASS_NONE;
 }
 
 void BotMgr::ReviveAllBots()

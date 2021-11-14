@@ -215,6 +215,7 @@ class bot_ai : public CreatureAI
         void ResetEngageTimer(uint32 delay);
 
         bool HasSpell(uint32 basespell) const;
+        uint32 GetBaseSpell(std::string_view spell_name, LocaleConstant locale) const;
         uint32 GetSpellCooldown(uint32 basespell) const;
         bool IsSpellReady(uint32 basespell, uint32 diff, bool checkGCD = true) const;
         void SetSpellCooldown(uint32 basespell, uint32 msCooldown);
@@ -660,6 +661,7 @@ class bot_ai : public CreatureAI
         };
 
         bool HasOrders() const { return !_orders.empty(); }
+        std::size_t GetOrdersCount() const { return _orders.size(); }
         bool AddOrder(BotOrder&& order);
         void CancelOrder(BotOrder const& order);
         void CompleteOrder(BotOrder const& order);

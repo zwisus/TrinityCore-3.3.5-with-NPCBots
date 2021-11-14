@@ -722,7 +722,7 @@ enum BotCommonValues
     //MAX_LOOT_ITEMS                      = 18 // Client limitation 3.3.5 code confirmed
 };
 
-enum BotClasses
+enum BotClasses : uint8
 {
     BOT_CLASS_NONE                      = CLASS_NONE,
     BOT_CLASS_WARRIOR                   = CLASS_WARRIOR,

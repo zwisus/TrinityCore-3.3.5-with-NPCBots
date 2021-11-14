@@ -346,52 +346,107 @@ public:
             if ((*spell_name)[i] == '_')
                 (*spell_name)[i] = ' ';
 
-        Creature* bot = owner->GetBotMgr()->GetBotByName(*bot_name);
-        if (!bot || !bot->IsInWorld())
-        {
-            handler->PSendSysMessage("Bot %s is not found!", *bot_name);
-            return true;
-        }
-        if (!bot->IsAlive())
-        {
-            handler->PSendSysMessage("%s is dead!", bot->GetName().c_str());
-            return true;
-        }
+        auto canBotUseSpell = [=](Creature const* tbot, uint32 bspell) {
+            //we ignore GCD for now
+            return bspell && (tbot->GetBotAI()->GetSpellCooldown(bspell) <= tbot->GetBotAI()->GetLastDiff());
+        };
 
-        uint32 basespell = 0;
-        std::string sname = *spell_name;
-        std::wstring wname;
-        if (Utf8toWStr(sname, wname))
+        uint32 base_spell = 0;
+        Creature* bot = owner->GetBotMgr()->GetBotByName(*bot_name);
+        if (bot)
         {
-            wstrToLower(wname);
-            bot_ai::BotSpellMap const& spellmap = bot->GetBotAI()->GetSpellMap();
-            for (bot_ai::BotSpellMap::const_iterator itr = spellmap.begin(); itr != spellmap.end(); ++itr)
+            if (!bot->IsInWorld())
             {
-                //we ignore enabled state since this is exactly what we want
-                if (itr->second->spellId == 0) //not init'ed
-                    continue;
-                sname = sSpellMgr->GetSpellInfo(itr->first)->SpellName[handler->GetSessionDbcLocale()];
-                std::wstring wcname;
-                if (!Utf8toWStr(sname, wcname))
-                    continue;
-                wstrToLower(wcname);
-                if (wcname == wname)
-                {
-                    basespell = itr->first;
-                    break;
-                }
+                handler->PSendSysMessage("Bot %s is not found!", *bot_name);
+                return true;
+            }
+            if (!bot->IsAlive())
+            {
+                handler->PSendSysMessage("%s is dead!", bot->GetName().c_str());
+                return true;
+            }
+
+            base_spell = bot->GetBotAI()->GetBaseSpell(*spell_name, handler->GetSessionDbcLocale());
+            if (!base_spell)
+            {
+                handler->PSendSysMessage("%s doesn't have spell named '%s'!", bot->GetName().c_str(), spell_name->c_str());
+                return true;
+            }
+            if (!canBotUseSpell(bot, base_spell))
+            {
+                handler->PSendSysMessage("%s's %s is not ready yet!", bot->GetName().c_str(), sSpellMgr->GetSpellInfo(base_spell)->SpellName[handler->GetSessionDbcLocale()]);
+                return true;
             }
         }
-        if (!basespell)
+        else
         {
-            handler->PSendSysMessage("%s doesn't have spell named '%s'!", bot->GetName().c_str(), spell_name->c_str());
-            return true;
-        }
-        //we ignore GCD for now
-        if (bot->GetBotAI()->GetSpellCooldown(basespell) > bot->GetBotAI()->GetLastDiff())
-        {
-            handler->PSendSysMessage("%s's %s is not ready yet!", bot->GetName().c_str(), sSpellMgr->GetSpellInfo(basespell)->SpellName[handler->GetSessionDbcLocale()]);
-            return true;
+            auto class_name = *bot_name;
+            for (auto const c : class_name)
+            {
+                if (!std::islower(c))
+                {
+                    handler->SendSysMessage("Bot class name must be in lower case!");
+                    return true;
+                }
+            }
+
+            uint8 bot_class = BotMgr::BotClassByClassName(std::string(class_name));
+            if (bot_class == BOT_CLASS_NONE)
+            {
+                handler->PSendSysMessage("Unknown bot class %s!", std::string(class_name).c_str());
+                return true;
+            }
+
+            std::list<Creature*> cBots = owner->GetBotMgr()->GetAllBotsByClass(bot_class);
+
+            if (cBots.empty())
+            {
+                handler->PSendSysMessage("No bots of class %u found!", bot_class);
+                return true;
+            }
+
+            for (Creature const* fbot : cBots)
+            {
+                base_spell = fbot->GetBotAI()->GetBaseSpell(*spell_name, handler->GetSessionDbcLocale());
+                if (base_spell)
+                    break;
+            }
+
+            if (!base_spell)
+            {
+                handler->PSendSysMessage("None of %u found bots have spell named '%s'!", cBots.size(), spell_name->c_str());
+                return true;
+            }
+
+            cBots.erase(std::remove_if(cBots.begin(), cBots.end(),
+                [=](Creature const* tbot) {
+                    if (tbot->GetBotAI()->GetOrdersCount() >= MAX_BOT_ORDERS_QUEUE_SIZE)
+                        return true;
+                    return !canBotUseSpell(tbot, base_spell);
+                }),
+                cBots.end());
+
+            decltype(cBots) ccBots;
+            for (decltype(cBots)::const_iterator it = cBots.begin(); it != cBots.end();)
+            {
+                if (!(*it)->GetCurrentSpell(CURRENT_CHANNELED_SPELL) && !(*it)->IsNonMeleeSpellCast(false, false, true, false, false))
+                {
+                    ccBots.push_back(*it);
+                    it = cBots.erase(it);
+                }
+                else
+                    ++it;
+            }
+
+            bot = ccBots.empty() ? nullptr : ccBots.size() == 1 ? ccBots.front() : Trinity::Containers::SelectRandomContainerElement(ccBots);
+            if (!bot)
+                bot = cBots.empty() ? nullptr : cBots.size() == 1 ? cBots.front() : Trinity::Containers::SelectRandomContainerElement(cBots);
+
+            if (!bot)
+            {
+                handler->PSendSysMessage("None of %u found bots can use %s yet!", cBots.size(), spell_name->c_str());
+                return true;
+            }
         }
 
         ObjectGuid target_guid;
@@ -418,20 +473,20 @@ public:
         }
 
         bot_ai::BotOrder order(BOT_ORDER_SPELLCAST);
-        order.params.spellCastParams.baseSpell = basespell;
+        order.params.spellCastParams.baseSpell = base_spell;
         order.params.spellCastParams.targetGuid = target_guid.GetRawValue();
 
         if (bot->GetBotAI()->AddOrder(std::move(order)))
         {
             if (DEBUG_BOT_ORDERS)
                 handler->PSendSysMessage("Order given: %s: %s on %s", bot->GetName().c_str(),
-                    sSpellMgr->GetSpellInfo(basespell)->SpellName[handler->GetSessionDbcLocale()], target ? target->GetName().c_str() : "unknown");
+                    sSpellMgr->GetSpellInfo(base_spell)->SpellName[handler->GetSessionDbcLocale()], target ? target->GetName().c_str() : "unknown");
         }
         else
         {
             if (DEBUG_BOT_ORDERS)
                 handler->PSendSysMessage("Order failed: %s: %s on %s", bot->GetName().c_str(),
-                    sSpellMgr->GetSpellInfo(basespell)->SpellName[handler->GetSessionDbcLocale()], target ? target->GetName().c_str() : "unknown");
+                    sSpellMgr->GetSpellInfo(base_spell)->SpellName[handler->GetSessionDbcLocale()], target ? target->GetName().c_str() : "unknown");
         }
 
         return true;
