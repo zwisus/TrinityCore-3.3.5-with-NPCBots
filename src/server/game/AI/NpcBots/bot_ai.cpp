@@ -1665,6 +1665,7 @@ bool bot_ai::_canCureTarget(Unit const* target, uint32 cureSpell) const
     if (me->GetLevel() < 10 || target->GetLevel() < 10) return false;
     if (target->HasUnitState(UNIT_STATE_ISOLATED)) return false;
     if (target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->IsTempBot()) return false;
+    if (target->HasAuraType(SPELL_AURA_MOD_POSSESS) && !IsInBotParty(target)) return false;
 
     SpellInfo const* info = sSpellMgr->GetSpellInfo(cureSpell);
     if (!info)
@@ -5203,7 +5204,7 @@ Unit* bot_ai::FindDrainTarget(float maxdist) const
 {
     Unit* unit = nullptr;
 
-    ManaDrainUnitCheck check(me, maxdist);
+    ManaDrainUnitCheck check(me, maxdist, this);
     Trinity::UnitLastSearcher <ManaDrainUnitCheck> searcher(me, unit, check);
     Cell::VisitAllObjects(me, searcher, maxdist);
     //me->VisitNearbyObject(maxdist, searcher);
@@ -5795,6 +5796,11 @@ void bot_ai::_OnAreaUpdate(uint32 areaId)
                 botPet->CastSpell(botPet, itr->second->spellId, true);
         }
     }
+}
+
+bool bot_ai::IsInHeroicOrRaid() const
+{
+    return me->FindMap() && (me->GetMap()->IsHeroic() || me->GetMap()->IsRaid());
 }
 
 //SpellHit()... OnSpellHit()

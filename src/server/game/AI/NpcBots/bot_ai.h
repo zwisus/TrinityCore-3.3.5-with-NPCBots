@@ -133,6 +133,7 @@ class bot_ai : public CreatureAI
         bool IsOffTank(Unit const* unit = nullptr) const;
 
         uint32 GetLastZoneId() const { return _lastZoneId; }
+        bool IsInHeroicOrRaid() const;
 
         bool IAmFree() const;
 
