@@ -427,6 +427,9 @@ class bot_ai : public CreatureAI
         void BotSay(const std::string &text, Player const* target = nullptr) const;
         void BotWhisper(const std::string &text, Player const* target = nullptr) const;
         void BotYell(const std::string &text, Player const* target = nullptr) const;
+        void BotSay(std::string&& text, Player const* target = nullptr) const;
+        void BotWhisper(std::string&& text, Player const* target = nullptr) const;
+        void BotYell(std::string&& text, Player const* target = nullptr) const;
 
         void ReportSpellCast(uint32 spellId, const std::string& followedByString, Player const* target) const;
 

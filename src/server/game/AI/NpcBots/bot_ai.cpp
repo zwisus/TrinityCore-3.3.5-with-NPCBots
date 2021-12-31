@@ -290,7 +290,7 @@ void bot_ai::BotSay(const std::string &text, Player const* target) const
     if (!target)
         return;
 
-    me->Say(text.c_str(), LANG_UNIVERSAL, target);
+    me->Say(text, LANG_UNIVERSAL, target);
 }
 void bot_ai::BotWhisper(const std::string &text, Player const* target) const
 {
@@ -301,7 +301,7 @@ void bot_ai::BotWhisper(const std::string &text, Player const* target) const
 
     Player* playerTarget = const_cast<Player*>(target);
 
-    me->Whisper(text.c_str(), LANG_UNIVERSAL, playerTarget);
+    me->Whisper(text, LANG_UNIVERSAL, playerTarget);
 }
 void bot_ai::BotYell(const std::string &text, Player const* /*target*/) const
 {
@@ -310,7 +310,31 @@ void bot_ai::BotYell(const std::string &text, Player const* /*target*/) const
     //if (!target)
     //    return;
 
-    me->Yell(text.c_str(), LANG_UNIVERSAL);
+    me->Yell(text, LANG_UNIVERSAL);
+}
+void bot_ai::BotSay(std::string&& text, Player const* target) const
+{
+    if (!target && master->GetTypeId() == TYPEID_PLAYER)
+        target = master;
+    if (!target)
+        return;
+
+    me->Say(text, LANG_UNIVERSAL, target);
+}
+void bot_ai::BotWhisper(std::string&& text, Player const* target) const
+{
+    if (!target && master->GetTypeId() == TYPEID_PLAYER)
+        target = master;
+    if (!target)
+        return;
+
+    Player* playerTarget = const_cast<Player*>(target);
+
+    me->Whisper(text, LANG_UNIVERSAL, playerTarget);
+}
+void bot_ai::BotYell(std::string&& text, Player const* /*target*/) const
+{
+    me->Yell(text, LANG_UNIVERSAL);
 }
 
 void bot_ai::ReportSpellCast(uint32 spellId, const std::string& followedByString, Player const* target) const
