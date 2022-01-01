@@ -1449,7 +1449,8 @@ public:
                         Creature* bot = itr->second;
                         if (!bot || !bot->IsInCombat() || !bot->IsAlive() || bot->IsTempBot()) continue;
                         if (bot->GetPowerType() != POWER_MANA) continue;
-                        if (bot->GetBotClass() == BOT_CLASS_HUNTER || bot->GetBotClass() == BOT_CLASS_WARLOCK || bot->GetBotClass() == BOT_CLASS_SPHYNX) continue;
+                        if (bot->GetBotClass() == BOT_CLASS_HUNTER || bot->GetBotClass() == BOT_CLASS_WARLOCK ||
+                            bot->GetBotClass() == BOT_CLASS_SPHYNX || bot->GetBotClass() == BOT_CLASS_SPELLBREAKER) continue;
                         if (me->GetExactDist(bot) > 30) continue;
                         if (GetManaPCT(bot) < minmanaval && !bot->GetAuraEffect(SPELL_AURA_PERIODIC_ENERGIZE, SPELLFAMILY_DRUID, 0x0, 0x1000, 0x0))
                         {
@@ -1487,7 +1488,8 @@ public:
                             Creature* bot = it->second;
                             if (!bot || !bot->IsInCombat() || !bot->IsAlive() || bot->IsTempBot()) continue;
                             if (bot->GetPowerType() != POWER_MANA) continue;
-                            if (bot->GetBotClass() == BOT_CLASS_HUNTER || bot->GetBotClass() == BOT_CLASS_WARLOCK || bot->GetBotClass() == BOT_CLASS_SPHYNX) continue;
+                            if (bot->GetBotClass() == BOT_CLASS_HUNTER || bot->GetBotClass() == BOT_CLASS_WARLOCK ||
+                                bot->GetBotClass() == BOT_CLASS_SPHYNX || bot->GetBotClass() == BOT_CLASS_SPELLBREAKER) continue;
                             if (me->GetExactDist(bot) > 30) continue;
                             if (GetManaPCT(bot) < minmanaval && !bot->GetAuraEffect(SPELL_AURA_PERIODIC_ENERGIZE, SPELLFAMILY_DRUID, 0x0, 0x1000, 0x0))
                             {
