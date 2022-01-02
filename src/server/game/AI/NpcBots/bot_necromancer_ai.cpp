@@ -28,7 +28,7 @@ fine-tune corpse explosion conditions
 enum NecromancerBaseSpells
 {
     MAIN_ATTACK_1           = SPELL_SHADOW_BOLT2,
-    RAISE_DEAD_1            = SPELL_RAISE_DEAD, //TODO: 
+    RAISE_DEAD_1            = SPELL_RAISE_DEAD,
     UNHOLY_FRENZY_1         = SPELL_UNHOLY_FRENZY,
     CRIPPLE_1               = SPELL_CRIPPLE,
 
@@ -365,7 +365,7 @@ public:
 
             //Cripple
             if (IsSpellReady(CRIPPLE_1, diff) && me->GetDistance(opponent) < 30 &&
-                me->GetLevel() >= 50 || me->GetPower(POWER_MANA) >= CRIPPLE_COST &&
+                me->GetLevel() >= 50 && me->GetPower(POWER_MANA) >= CRIPPLE_COST &&
                 opponent->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED) >= 0 &&
                 (opponent->GetTypeId() == TYPEID_PLAYER || opponent->GetHealth() > me->GetMaxHealth() * 3))
             {
