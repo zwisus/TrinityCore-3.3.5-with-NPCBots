@@ -380,10 +380,10 @@ public:
             }
         }
 
-        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
-            uint8 lvl = me->GetLevel();
+            //uint8 lvl = me->GetLevel();
             float fdamage = float(damage);
 
             //apply bonus damage mods
@@ -724,6 +724,7 @@ public:
         {
             static const uint32 ViableCreatureTypesMask =
                 (1 << (CREATURE_TYPE_BEAST-1)) | (1 << (CREATURE_TYPE_DRAGONKIN-1)) | (1 << (CREATURE_TYPE_HUMANOID-1));
+
             return !c->IsAlive() && c->GetDisplayId() == c->GetNativeDisplayId() &&
                 !c->IsVehicle() && !c->isWorldBoss() && !c->IsDungeonBoss() &&
                 ((1 << (c->GetCreatureType()-1)) & ViableCreatureTypesMask) &&
