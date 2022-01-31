@@ -187,8 +187,10 @@ enum BotCommonValues
     GOSSIP_SENDER_LEAVE_GROUP,
     GOSSIP_SENDER_FORMATION,
     GOSSIP_SENDER_FORMATION_FOLLOW_DISTANCE_SET,
-    GOSSIP_SENDER_FORMATION_ATTACK,
+    GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE,
     GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE_SET,
+    GOSSIP_SENDER_FORMATION_ATTACK_ANGLE,
+    GOSSIP_SENDER_FORMATION_ATTACK_ANGLE_SET,
     GOSSIP_SENDER_MODEL_UPDATE,
     GOSSIP_SENDER_HOLDPOSITION,
     GOSSIP_SENDER_DONOTHING,
@@ -553,7 +555,10 @@ enum BotCommonValues
     BOT_TEXT_TANK_OFF                   = 70645, //"Off-Tank"
     BOT_TEXT_CLASS_NECROMANCER_PLU      = 70646, //"Necromancers"
     BOT_TEXT_CLASS_NECROMANCER          = 70647, //"Necromancer"
-    //70648-70799 reserved for custom localization strings
+    BOT_TEXT_ATTACK_ANGLE               = 70648, //"Attack angle"
+    BOT_TEXT_NORMAL                     = 70649, //"Normal"
+    BOT_TEXT_AVOID_FRONTAL_AOE          = 70650, //"Avoid frontal AOE"
+    //70651-70799 reserved for custom localization strings
 //VEHICLE CREATURES
     CREATURE_NEXUS_SKYTALON_1           = 32535, // [Q] Aces High
     CREATURE_EOE_SKYTALON_N             = 30161, // Eye of Eternity

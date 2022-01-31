@@ -147,6 +147,7 @@ BotMgr::BotMgr(Player* const master) : _owner(master), _dpstracker(new DPSTracke
     _followdist = _basefollowdist;
     _exactAttackRange = 0;
     _attackRangeMode = BOT_ATTACK_RANGE_SHORT;
+    _attackAngleMode = BOT_ATTACK_ANGLE_NORMAL;
     _npcBotEngageDelayDPS = _npcBotEngageDelayDPS_default;
     _npcBotEngageDelayHeal = _npcBotEngageDelayHeal_default;
 

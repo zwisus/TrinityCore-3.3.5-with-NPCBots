@@ -29,7 +29,7 @@
 #include "World.h"
 /*
 NpcBot System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
-Version 4.14.5a
+Version 4.15.5a
 Original idea: https://bitbucket.org/lordpsyan/trinitycore-patches/src/3b8b9072280e/Individual/11185-BOTS-NPCBots.patch
 TODO:
 dk pets (garg, aod, rdw)
@@ -4284,6 +4284,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
     uint8 rangeMode = IAmFree() ? uint8(BOT_ATTACK_RANGE_LONG) : master->GetBotMgr()->GetBotAttackRangeMode();
     uint8 exactRange = rangeMode != BOT_ATTACK_RANGE_EXACT || IAmFree() ? 255 : master->GetBotMgr()->GetBotExactAttackRange();
+    uint8 angleMode = IAmFree() ? uint8(BOT_ATTACK_ANGLE_NORMAL) : master->GetBotMgr()->GetBotAttackAngleMode();
     Position ppos;
     float //x(0),y(0),z(0),
         dist = (rangeMode == BOT_ATTACK_RANGE_EXACT) ? exactRange :
@@ -4301,10 +4302,13 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
         dist = std::min<float>(dist + 10, 30);
 
     //if ranged try to acquire a position in the back (will be ignored if too far away from master)
-    static const float rangedAngleDelta = float(M_PI) * 0.62f;
-    if (HasRole(BOT_ROLE_RANGED) && !IAmFree() && !target->IsControlledByPlayer() && target->HasInArc(float(M_PI), me) &&
-        (IsTank(master) || master->GetDistance(target) < 2.5f || !target->HasInArc(float(M_PI), master)))
-        angle += (target->GetRelativeAngle(master) > 0.f) ? rangedAngleDelta : -rangedAngleDelta;
+    if (angleMode == BOT_ATTACK_ANGLE_AVOID_FRONTAL_AOE)
+    {
+        static const float rangedAngleDelta = float(M_PI) * 0.62f;
+        if (HasRole(BOT_ROLE_RANGED) && !IAmFree() && !target->IsControlledByPlayer() && target->HasInArc(float(M_PI), me) &&
+            (IsTank(master) || master->GetDistance(target) < 2.5f || !target->HasInArc(float(M_PI), master)))
+            angle += (target->GetRelativeAngle(master) > 0.f) ? rangedAngleDelta : -rangedAngleDelta;
+    }
 
     float clockwise = (me->GetEntry() % 2) ? 1.f : -1.f;
     float angleDelta1 = ((IsTank(master) && !IsTank(me)) ? frand(float(M_PI)*0.40f, float(M_PI)*0.60f) : frand(0.0f, float(M_PI)*0.15f)) * clockwise;
@@ -8467,12 +8471,15 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 GOSSIP_SENDER_FORMATION_FOLLOW_DISTANCE_SET, GOSSIP_ACTION_INFO_DEF + 1, "", 0, true);
 
             if (HasRole(BOT_ROLE_RANGED))
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ATTACK_DISTANCE) + "...", GOSSIP_SENDER_FORMATION_ATTACK, GOSSIP_ACTION_INFO_DEF + 2);
+            {
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ATTACK_DISTANCE) + "...", GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE, GOSSIP_ACTION_INFO_DEF + 2);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ATTACK_ANGLE) + "...", GOSSIP_SENDER_FORMATION_ATTACK_ANGLE, GOSSIP_ACTION_INFO_DEF + 3);
+            }
 
             if (!HasRole(BOT_ROLE_TANK) && HasRole(BOT_ROLE_DPS | BOT_ROLE_HEAL))
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ENGAGE_BEHAVIOR) + "...", GOSSIP_SENDER_ENGAGE_BEHAVIOR, GOSSIP_ACTION_INFO_DEF + 3);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ENGAGE_BEHAVIOR) + "...", GOSSIP_SENDER_ENGAGE_BEHAVIOR, GOSSIP_ACTION_INFO_DEF + 4);
 
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), 1, GOSSIP_ACTION_INFO_DEF + 4);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), 1, GOSSIP_ACTION_INFO_DEF + 5);
             break;
         }
         case GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE_SET:
@@ -8490,7 +8497,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             //break; //return to menu
         }
         [[fallthrough]];
-        case GOSSIP_SENDER_FORMATION_ATTACK:
+        case GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE:
         {
             subMenu = true;
 
@@ -8507,6 +8514,32 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 diststr.str(), GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE_SET, GOSSIP_ACTION_INFO_DEF + 3, "", 0, true);
 
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), 1, GOSSIP_ACTION_INFO_DEF + 4);
+            break;
+        }
+        case GOSSIP_SENDER_FORMATION_ATTACK_ANGLE_SET:
+        {
+            uint32 choice = action - GOSSIP_ACTION_INFO_DEF;
+            if (choice == 1) //normal
+            {
+                player->GetBotMgr()->SetBotAttackAngleMode(BOT_ATTACK_ANGLE_NORMAL);
+            }
+            if (choice == 2) //avoid frontal aoe
+            {
+                player->GetBotMgr()->SetBotAttackAngleMode(BOT_ATTACK_ANGLE_AVOID_FRONTAL_AOE);
+            }
+
+            //break; //return to menu
+        }
+        [[fallthrough]];
+        case GOSSIP_SENDER_FORMATION_ATTACK_ANGLE:
+        {
+            subMenu = true;
+
+            uint8 mode = master->GetBotMgr()->GetBotAttackAngleMode();
+            AddGossipItemFor(player, mode == BOT_ATTACK_ANGLE_NORMAL ? GOSSIP_ICON_BATTLE : GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_NORMAL), GOSSIP_SENDER_FORMATION_ATTACK_ANGLE_SET, GOSSIP_ACTION_INFO_DEF + 1);
+            AddGossipItemFor(player, mode == BOT_ATTACK_ANGLE_AVOID_FRONTAL_AOE ? GOSSIP_ICON_BATTLE : GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_AVOID_FRONTAL_AOE), GOSSIP_SENDER_FORMATION_ATTACK_ANGLE_SET, GOSSIP_ACTION_INFO_DEF + 2);
+
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_BACK), 1, GOSSIP_ACTION_INFO_DEF + 3);
             break;
         }
         case GOSSIP_SENDER_ENGAGE_BEHAVIOR:
@@ -8921,7 +8954,7 @@ bool bot_ai::OnGossipSelectCode(Player* player, Creature* creature/* == me*/, ui
             }
 
             player->PlayerTalkClass->SendCloseGossip();
-            return OnGossipSelect(player, creature, GOSSIP_SENDER_FORMATION_ATTACK, action);
+            return OnGossipSelect(player, creature, GOSSIP_SENDER_FORMATION_ATTACK_DISTANCE, action);
         }
         case GOSSIP_SENDER_ENGAGE_DELAY_SET_ATTACK:
         {
