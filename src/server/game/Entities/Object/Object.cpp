@@ -2887,7 +2887,7 @@ SpellCastResult WorldObject::CastSpell(CastSpellTargetArg const& targets, uint32
         TC_LOG_ERROR("entities.unit", "CastSpell: Invalid target passed to spell cast %u by %s", spellId, GetGUID().ToString().c_str());
         return SPELL_FAILED_BAD_TARGETS;
     }
-    
+
     //npcbot
     if (Creature::IsBotCustomSpell(spellId) && !(ToCreature() && (ToCreature()->IsNPCBot() || ToCreature()->IsNPCBotPet())))
     {
