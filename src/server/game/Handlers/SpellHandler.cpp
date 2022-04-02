@@ -680,16 +680,16 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
 
             WorldPacket data(SMSG_MIRRORIMAGE_DATA, 68);
             data << uint64(guid);
-            data << uint32(unit->GetDisplayId());                               // displayId
-            data << uint8(unit->GetRace());                                     // race
-            data << uint8(appearData ? appearData->gender : unit->GetGender()); // gender
-            data << uint8(bot->GetBotAI()->GetPlayerClass());                   // class
-            data << uint8(appearData ? appearData->skin : 0);                   // skin
-            data << uint8(appearData ? appearData->face : 0);                   // face
-            data << uint8(appearData ? appearData->hair : 0);                   // hair
-            data << uint8(appearData ? appearData->haircolor : 0);              // haircolor
-            data << uint8(appearData ? appearData->features : 0);               // facialhair
-            data << uint32(0);                                                  // guildId
+            data << uint32(unit->GetDisplayId());                                      // displayId
+            data << uint8(unit->GetRace());                                            // race
+            data << uint8(appearData ? appearData->gender : (uint8)unit->GetGender()); // gender
+            data << uint8(bot->GetBotAI()->GetPlayerClass());                          // class
+            data << uint8(appearData ? appearData->skin : 0);                          // skin
+            data << uint8(appearData ? appearData->face : 0);                          // face
+            data << uint8(appearData ? appearData->hair : 0);                          // hair
+            data << uint8(appearData ? appearData->haircolor : 0);                     // haircolor
+            data << uint8(appearData ? appearData->features : 0);                      // facialhair
+            data << uint32(0);                                                         // guildId
 
             static uint8 const botItemSlots[MAX_CREATURE_OUTFIT_DISPLAYS] =
             {
