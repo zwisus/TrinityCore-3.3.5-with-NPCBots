@@ -389,9 +389,9 @@ public:
                 return false;
             }
 
-            for (GroupReference const* itr = gr->GetFirstMember(); itr != nullptr; itr = itr->next())
+            for (GroupReference const* gitr = gr->GetFirstMember(); gitr != nullptr; gitr = gitr->next())
             {
-                Player* tPlayer = itr->GetSource();
+                Player* tPlayer = gitr->GetSource();
                 if (!tPlayer || me->GetMap() != tPlayer->FindMap() || tPlayer->isPossessed() || tPlayer->IsCharmed())
                     continue;
                 u = tPlayer;
@@ -901,9 +901,9 @@ public:
                 return;
 
             Group const* gr = master->GetGroup();
-            for (GroupReference const* itr = gr->GetFirstMember(); itr != nullptr; itr = itr->next())
+            for (GroupReference const* gitr = gr->GetFirstMember(); gitr != nullptr; gitr = gitr->next())
             {
-                Player* player = itr->GetSource();
+                Player* player = gitr->GetSource();
                 if (player && player->IsAlive() && !player->getAttackers().empty() &&
                     IsTank(player) && GetHealthPCT(player) < 85 && me->IsWithinDistInMap(player, 40) &&
                     !player->HasAuraType(SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE))
@@ -1028,9 +1028,9 @@ public:
                 if (!player || !player->IsInWorld() || me->GetMap() != player->FindMap() || !player->HaveBot())
                     continue;
                 map = master->GetBotMgr()->GetBotMap();
-                for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                 {
-                    u = itr->second;
+                    u = bitr->second;
                     if (u->IsAlive() && u->IsInWorld() && u->ToCreature()->GetBotAI()->HasRole(BOT_ROLE_HEAL) &&
                         !IsHeroExClass(u->ToCreature()->GetBotClass()) &&
                         GetManaPCT(u) < 70 && me->IsWithinDistInMap(u, 30) &&
@@ -1045,9 +1045,9 @@ public:
                 if (!player || !player->IsInWorld() || me->GetMap() != player->FindMap() || !player->HaveBot())
                     continue;
                 map = master->GetBotMgr()->GetBotMap();
-                for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                 {
-                    u = itr->second;
+                    u = bitr->second;
                     if (u->IsAlive() && u->IsInWorld() && u->GetPowerType() == POWER_MANA && u->GetVictim() && !IsTank(u) &&
                         !IsHeroExClass(u->ToCreature()->GetBotClass()) &&
                         GetManaPCT(u) < 70 && me->IsWithinDistInMap(u, 30) &&
@@ -1206,7 +1206,7 @@ public:
                 crit_chance += 4.f;
         }
 
-        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             uint8 lvl = me->GetLevel();
@@ -1214,7 +1214,7 @@ public:
 
             //apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!spell damage is not yet critical and will be multiplied by 1.5
                 //so we should put here bonus damage mult /1.5
@@ -1819,7 +1819,7 @@ public:
             myPet->SetFaction(master->GetFaction());
             myPet->SetControlledByPlayer(!IAmFree());
             myPet->SetPvP(me->IsPvP());
-            myPet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            myPet->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             myPet->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
             myPet->SetUInt32Value(UNIT_CREATED_BY_SPELL, SHADOWFIEND_1);
 

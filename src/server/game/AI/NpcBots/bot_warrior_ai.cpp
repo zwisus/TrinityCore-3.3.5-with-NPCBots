@@ -431,7 +431,7 @@ public:
 
             //SelfHeal
             if (IsSpellReady(ENRAGED_REGENERATION_1, diff) && Rand() < 80 && GetHealthPCT(me) < 40 &&
-                rage >= rcost(ENRAGED_REGENERATION_1) && me->HasAuraWithMechanic(1<<MECHANIC_ENRAGED))
+                rage >= rcost(ENRAGED_REGENERATION_1) && me->HasAuraWithMechanic(1u<<MECHANIC_ENRAGED))
             {
                 if (doCast(me, GetSpell(ENRAGED_REGENERATION_1)))
                     return;
@@ -1331,7 +1331,7 @@ public:
                 crit_chance += 10.f;
         }
 
-        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType attackType, bool crit) const override
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType attackType, bool iscrit) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             uint8 lvl = me->GetLevel();
@@ -1339,7 +1339,7 @@ public:
 
             // apply bonus damage mods
             float pctbonus = 1.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!Melee spell damage is not yet critical, all reduced by half
                 //Impale: 20% crit damage bonus for all abilities
@@ -2153,7 +2153,7 @@ public:
                 case DEATH_WISH_1:
                     return true;
                 case ENRAGED_REGENERATION_1:
-                    return me->HasAuraWithMechanic(1<<MECHANIC_ENRAGED);
+                    return me->HasAuraWithMechanic(1u<<MECHANIC_ENRAGED);
                 case BATTLE_STANCE_1:
                     return !_inStance(1);
                 case DEFENSIVE_STANCE_1:

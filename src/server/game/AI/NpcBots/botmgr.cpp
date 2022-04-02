@@ -505,7 +505,7 @@ void BotMgr::Update(uint32 diff)
         {
             if (bot->IsInWorld() && !bot->IsAlive() && _owner->IsAlive() && !_owner->IsInCombat() &&
                 !_owner->IsBeingTeleported() && !_owner->InArena() && !_owner->IsInFlight() &&
-                !_owner->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH) &&
+                !_owner->HasUnitFlag2(UNIT_FLAG2_FEIGN_DEATH) &&
                 !_owner->HasInvisibilityAura() && !_owner->HasStealthAura())
             {
                 _reviveBot(bot);
@@ -621,11 +621,11 @@ void BotMgr::_reviveBot(Creature* bot, WorldLocation* dest)
     }
 
     bot->SetDisplayId(bot->GetNativeDisplayId());
-    bot->SetUInt32Value(UNIT_NPC_FLAGS, bot->GetCreatureTemplate()->npcflag);
+    bot->ReplaceAllNpcFlags(NPCFlags(bot->GetCreatureTemplate()->npcflag));
     bot->ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
-    bot->RemoveFlag(UNIT_FIELD_FLAGS, uint32(-1));
+    bot->ReplaceAllUnitFlags(UnitFlags(0));
     bot->SetPvP(bot->GetBotOwner()->IsPvP());
-    bot->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    bot->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
     bot->setDeathState(ALIVE);
     //bot->GetBotAI()->Reset();
     bot->GetBotAI()->SetShouldUpdateStats();
@@ -827,7 +827,7 @@ void BotMgr::CleanupsBeforeBotDelete(ObjectGuid guid, uint8 /*removetype*/)
     bot->SetOwnerGUID(ObjectGuid::Empty);
     //_owner->m_Controlled.erase(bot);
     bot->SetControlledByPlayer(false);
-    //bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+    //bot->RemoveUnitFlag(UNIT_FLAG_PVP_ATTACKABLE);
     bot->SetByteValue(UNIT_FIELD_BYTES_2, 1, 0);
     bot->SetCreatorGUID(ObjectGuid::Empty);
 
@@ -986,7 +986,7 @@ BotAddResult BotMgr::AddBot(Creature* bot, bool takeMoney)
     bot->SetCreatorGUID(_owner->GetGUID()); //needed in case of FFAPVP
     //_owner->m_Controlled.insert(bot);
     bot->SetControlledByPlayer(true);
-    bot->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    bot->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
     bot->SetByteValue(UNIT_FIELD_BYTES_2, 1, _owner->GetByteValue(UNIT_FIELD_BYTES_2, 1));
     bot->SetFaction(_owner->GetFaction());
     bot->SetPhaseMask(_owner->GetPhaseMask(), true);
@@ -1305,14 +1305,14 @@ int32 BotMgr::GetHPSTaken(Unit const* unit) const
         }
         if (Bots)
         {
-            for (GroupReference const* itr = gr->GetFirstMember(); itr != nullptr; itr = itr->next())
+            for (GroupReference const* gitr = gr->GetFirstMember(); gitr != nullptr; gitr = gitr->next())
             {
-                if (itr->GetSource() == nullptr) continue;
-                if (_owner->GetMap() != itr->GetSource()->FindMap()) continue;
+                if (gitr->GetSource() == nullptr) continue;
+                if (_owner->GetMap() != gitr->GetSource()->FindMap()) continue;
 
-                if (itr->GetSource()->HaveBot())
+                if (gitr->GetSource()->HaveBot())
                 {
-                    BotMap const* map = itr->GetSource()->GetBotMgr()->GetBotMap();
+                    BotMap const* map = gitr->GetSource()->GetBotMgr()->GetBotMap();
                     for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
                         if (itr->second->GetTarget() == unit->GetGUID() && itr->second->HasUnitState(UNIT_STATE_CASTING))
                             unitList.push_back(itr->second);

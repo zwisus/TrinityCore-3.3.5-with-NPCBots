@@ -88,7 +88,7 @@ public:
             StartAttack(opponent, IsPetMelee());
         }
 
-        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool /*crit*/) const override
+        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool /*iscrit*/) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             float fdamage = float(damage);

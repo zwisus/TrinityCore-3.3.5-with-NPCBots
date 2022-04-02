@@ -191,9 +191,9 @@ bot_ai::bot_ai(Creature* creature) : CreatureAI(creature)
     doHealth = false;
     doMana = false;
     //shouldUpdateStats = true;
-    pos.m_positionX = 0.f;
-    pos.m_positionY = 0.f;
-    pos.m_positionZ = 0.f;
+    movepos.m_positionX = 0.f;
+    movepos.m_positionY = 0.f;
+    movepos.m_positionZ = 0.f;
     aftercastTargetGuid = ObjectGuid::Empty;
 
     shouldEnterVehicle = false;
@@ -403,7 +403,7 @@ bool bot_ai::SetBotOwner(Player* newowner)
     spawned = false;
 
     (const_cast<CreatureTemplate*>(me->GetCreatureTemplate()))->unit_flags2 &= ~(UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
-    me->SetUInt32Value(UNIT_FIELD_FLAGS_2, me->GetCreatureTemplate()->unit_flags2);
+    me->ReplaceAllUnitFlags2(UnitFlags2(me->GetCreatureTemplate()->unit_flags2));
 
     //recursive
     if (master->GetGUID() == newowner->GetGUID())
@@ -511,7 +511,7 @@ void bot_ai::InitUnitFlags()
     if (BotMgr::DisplayEquipment() == true && (_botclass < BOT_CLASS_EX_START || _botclass == BOT_CLASS_ARCHMAGE))
     {
         (const_cast<CreatureTemplate*>(me->GetCreatureTemplate()))->unit_flags2 |= UNIT_FLAG2_MIRROR_IMAGE;
-        me->SetFlag(UNIT_FIELD_FLAGS_2, me->GetCreatureTemplate()->unit_flags2);
+        me->ReplaceAllUnitFlags2(UnitFlags2(me->GetCreatureTemplate()->unit_flags2));
     }
 }
 
@@ -530,7 +530,7 @@ void bot_ai::ResetBotAI(uint8 resetType)
         _saveStats();
 
     (const_cast<CreatureTemplate*>(me->GetCreatureTemplate()))->unit_flags2 |= (UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
-    me->SetUInt32Value(UNIT_FIELD_FLAGS_2, me->GetCreatureTemplate()->unit_flags2);
+    me->ReplaceAllUnitFlags2(UnitFlags2(me->GetCreatureTemplate()->unit_flags2));
 
     if (resetType == BOTAI_RESET_DISMISS)
         EnableAllSpells();
@@ -1056,18 +1056,18 @@ void bot_ai::SetBotCommandState(uint8 st, bool force, Position* newpos)
             if (CCed(mover, true)/* || master->HasUnitState(UNIT_STATE_FLEEING)*/) return;
             if (mover->isMoving() && Rand() > 10) return;
             if (!newpos)
-                _calculatePos(pos);
+                _calculatePos(movepos);
             else
             {
-                pos.m_positionX = newpos->m_positionX;
-                pos.m_positionY = newpos->m_positionY;
-                pos.m_positionZ = newpos->m_positionZ;
+                movepos.m_positionX = newpos->m_positionX;
+                movepos.m_positionY = newpos->m_positionY;
+                movepos.m_positionZ = newpos->m_positionZ;
             }
             if (me->GetStandState() == UNIT_STAND_STATE_SIT && !Feasting())
                 me->SetStandState(UNIT_STAND_STATE_STAND);
             if (IsShootingWand())
                 me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-            BotMovement(BOT_MOVE_POINT, &pos);
+            BotMovement(BOT_MOVE_POINT, &movepos);
             //me->GetMotionMaster()->MovePoint(master->GetMapId(), pos);
             //me->GetMotionMaster()->MoveFollow(master, mydist, angle);
             RemoveBotCommandState(BOT_COMMAND_STAY | BOT_COMMAND_FULLSTOP | BOT_COMMAND_ATTACK | BOT_COMMAND_COMBATRESET);
@@ -1309,28 +1309,28 @@ void bot_ai::BuffAndHealGroup(uint32 diff)
                 if (tPlayer->HaveBot())
                 {
                     map = tPlayer->GetBotMgr()->GetBotMap();
-                    for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                    for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                     {
-                        Unit* u = itr->second;
+                        Unit* u = bitr->second;
                         if (!(!u->IsInWorld() || me->GetMap() != u->FindMap() || !u->IsAlive() || u->HasUnitState(UNIT_STATE_ISOLATED) ||
                             u->ToCreature()->IsTempBot() || me->GetDistance(u) > 40 ||
                             (GetHealthPCT(u) > 95 && !IsTank(u))))
                             targets5.push_back(u);
 
-                        u = itr->second->GetBotsPet();
+                        u = bitr->second->GetBotsPet();
 
                         if (!(!u || !u->IsAlive() || u->HasUnitState(UNIT_STATE_ISOLATED) || me->GetDistance(u) > 40 || GetHealthPCT(u) > 95))
                             targets5.push_back(u);
 
-                        u = itr->second->GetVehicleBase();
+                        u = bitr->second->GetVehicleBase();
                         if (u && !(u->GetTypeId() == TYPEID_UNIT && u->ToCreature()->GetCreatureTemplate()->type == CREATURE_TYPE_MECHANICAL) &&
                             !u->HasUnitState(UNIT_STATE_ISOLATED) && GetHealthPCT(u) < 95 && me->GetDistance(u) < 40)
                             targets5.push_back(u);
                     }
                 }
-                for (Unit::ControlList::const_iterator itr = master->m_Controlled.begin(); itr != master->m_Controlled.end(); ++itr)
+                for (Unit::ControlList::const_iterator bitr = master->m_Controlled.begin(); bitr != master->m_Controlled.end(); ++bitr)
                 {
-                    Unit* u = *itr;
+                    Unit* u = *bitr;
                     if (!u || !u->IsInWorld() || me->GetMap() != u->FindMap() || !u->IsAlive() || u->HasUnitState(UNIT_STATE_ISOLATED) ||
                         u->IsTotem() || u->GetEntry() == SHAMAN_EARTH_ELEMENTAL || me->GetDistance(u) > 40 ||
                         (GetHealthPCT(u) > 95 && !IsTank(u)))
@@ -1389,22 +1389,22 @@ void bot_ai::BuffAndHealGroup(uint32 diff)
             if (tPlayer->HaveBot())
             {
                 map = tPlayer->GetBotMgr()->GetBotMap();
-                for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                 {
-                    Unit* u = itr->second;
+                    Unit* u = bitr->second;
                     if (!(!u->IsInWorld() || me->GetMap() != u->FindMap() || !u->IsAlive() || u->HasUnitState(UNIT_STATE_ISOLATED) ||
                         u->IsTotem() || me->GetDistance(u) > 30))
                         targets6.push_back(u);
 
-                    //u = itr->second->GetBotsPet();
+                    //u = bitr->second->GetBotsPet();
 
                     //if (!(!u || !u->IsAlive() || u->HasUnitState(UNIT_STATE_ISOLATED) || me->GetDistance(u) > 30))
                     //    targets6.push_back(u);
                 }
             }
-            for (Unit::ControlList::const_iterator itr = master->m_Controlled.begin(); itr != master->m_Controlled.end(); ++itr)
+            for (Unit::ControlList::const_iterator bitr = master->m_Controlled.begin(); bitr != master->m_Controlled.end(); ++bitr)
             {
-                Unit* u = *itr;
+                Unit* u = *bitr;
                 if (!u || !u->IsPet() || me->GetMap() != u->FindMap() || !u->IsAlive() || u->HasUnitState(UNIT_STATE_ISOLATED) ||
                     u->IsTotem() || me->GetDistance(u) > 30) continue;
 
@@ -1528,11 +1528,11 @@ void bot_ai::RezGroup(uint32 REZZ)
         if (!player || player->FindMap() != me->GetMap() || !player->HaveBot()) continue;
 
         map = player->GetBotMgr()->GetBotMap();
-        for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+        for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
         {
-            target = itr->second;
+            target = bitr->second;
             if (!target || !target->IsInWorld() || target->IsAlive()) continue;
-            if (itr->second->GetBotAI()->GetReviveTimer() < 15000) continue;
+            if (bitr->second->GetBotAI()->GetReviveTimer() < 15000) continue;
             if (me->GetDistance(target) < 30 && target->IsWithinLOSInMap(me))
                 targets.push_back(target);
         }
@@ -1625,7 +1625,7 @@ void bot_ai::CureGroup(uint32 cureSpell, uint32 diff)
 
         for (Unit::ControlList::const_iterator itr = master->m_Controlled.begin(); itr != master->m_Controlled.end(); ++itr)
         {
-            Unit* u = *itr;
+            u = *itr;
             if (!u || !u->IsPet() || !u->IsAlive() || me->GetDistance(u) > 30) continue;
 
             if (_canCureTarget(u, cureSpell))
@@ -1657,18 +1657,18 @@ void bot_ai::CureGroup(uint32 cureSpell, uint32 diff)
             if (tPlayer->HaveBot())
             {
                 map = tPlayer->GetBotMgr()->GetBotMap();
-                for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                 {
-                    u = itr->second;
+                    u = bitr->second;
                     if (!u || !u->IsInWorld() || me->GetMap() != u->FindMap() || !u->IsAlive()) continue;
                     if (_canCureTarget(u, cureSpell))
                         targets.push_back(u);
                 }
             }
 
-            for (Unit::ControlList::const_iterator itr = tPlayer->m_Controlled.begin(); itr != tPlayer->m_Controlled.end(); ++itr)
+            for (Unit::ControlList::const_iterator bitr = tPlayer->m_Controlled.begin(); bitr != tPlayer->m_Controlled.end(); ++bitr)
             {
-                Unit* u = *itr;
+                u = *bitr;
                 if (!u || !u->IsPet() || !u->IsAlive() || me->GetDistance(u) > 30) continue;
 
                 if (_canCureTarget(u, cureSpell))
@@ -2877,7 +2877,7 @@ void bot_ai::SetStats(bool force)
         if (mylevel >= 10)
         {
             //67 PR = 1% parry at 80
-            float tempval = _getTotalBotStat(BOT_STAT_MOD_PARRY_RATING);
+            tempval = _getTotalBotStat(BOT_STAT_MOD_PARRY_RATING);
             tempval += me->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_RATING, (1 << CR_PARRY));
 
             //Forceful Deflection: 25% of strength goes to parry rating
@@ -2917,7 +2917,7 @@ void bot_ai::SetStats(bool force)
         if (mylevel >= 10)
         {
             //53 DR = 1% dodge at 80
-            float tempval = _getTotalBotStat(BOT_STAT_MOD_DODGE_RATING);
+            tempval = _getTotalBotStat(BOT_STAT_MOD_DODGE_RATING);
             tempval += me->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_RATING, (1 << CR_DODGE));
             value += tempval * _getRatingMultiplier(CR_DODGE);
             //125 DR = 1% block/parry/dodge at 80
@@ -2960,7 +2960,7 @@ void bot_ai::SetStats(bool force)
         value = 5.0f + (IAmFree() ? mylevel / 4 : 0); // +20%/+0% at 80
 
         //16.5 BR = 1% block at 80
-        float tempval = _getTotalBotStat(BOT_STAT_MOD_BLOCK_RATING);
+        tempval = _getTotalBotStat(BOT_STAT_MOD_BLOCK_RATING);
         tempval += me->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_RATING, (1 << CR_BLOCK));
         value += tempval * _getRatingMultiplier(CR_BLOCK);
         //125 DR = 1% block/parry/dodge at 80
@@ -3170,23 +3170,23 @@ void bot_ai::ReceiveEmote(Player* player, uint32 emote)
             if (master != player)
                 break;
 
-            if ((me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED) || me->HasUnitState(UNIT_STATE_STUNNED)) &&
+            if ((me->HasUnitFlag(UNIT_FLAG_STUNNED) || me->HasUnitState(UNIT_STATE_STUNNED)) &&
                 !me->HasAuraType(SPELL_AURA_MOD_STUN))
             {
                 me->ClearUnitState(UNIT_STATE_STUNNED);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                me->RemoveUnitFlag(UNIT_FLAG_STUNNED);
             }
-            if ((me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED) || me->HasUnitState(UNIT_STATE_CONFUSED)) &&
+            if ((me->HasUnitFlag(UNIT_FLAG_CONFUSED) || me->HasUnitState(UNIT_STATE_CONFUSED)) &&
                 !me->HasAuraType(SPELL_AURA_MOD_CONFUSE))
             {
                 me->ClearUnitState(UNIT_STATE_CONFUSED);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+                me->RemoveUnitFlag(UNIT_FLAG_CONFUSED);
             }
-            if ((me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) || me->HasUnitState(UNIT_STATE_FLEEING)) &&
+            if ((me->HasUnitFlag(UNIT_FLAG_FLEEING) || me->HasUnitState(UNIT_STATE_FLEEING)) &&
                 !me->HasAuraType(SPELL_AURA_MOD_FEAR))
             {
                 me->ClearUnitState(UNIT_STATE_FLEEING);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+                me->RemoveUnitFlag(UNIT_FLAG_FLEEING);
             }
             me->BotStopMovement();
 
@@ -6137,15 +6137,15 @@ void bot_ai::ApplyBotDamageMultiplierMelee(uint32& damage, CalcDamageInfo& damag
     //WHITE ATTACKS damage bonus
     ApplyClassDamageMultiplierMelee(damage, damageinfo);
 }
-void bot_ai::ApplyBotDamageMultiplierMelee(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool crit) const
+void bot_ai::ApplyBotDamageMultiplierMelee(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool iscrit) const
 {
     //MELEE ABILITIES damage bonus (DMG_CLASS != DMG_CLASS_MAGIC)
-    ApplyClassDamageMultiplierMeleeSpell(damage, damageinfo, spellInfo, attackType, crit);
+    ApplyClassDamageMultiplierMeleeSpell(damage, damageinfo, spellInfo, attackType, iscrit);
 }
-void bot_ai::ApplyBotDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool crit) const
+void bot_ai::ApplyBotDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool iscrit) const
 {
     //DAMAGE SPELLS damage bonus (DMG_CLASS_MAGIC)
-    ApplyClassDamageMultiplierSpell(damage, damageinfo, spellInfo, attackType, crit);
+    ApplyClassDamageMultiplierSpell(damage, damageinfo, spellInfo, attackType, iscrit);
 }
 void bot_ai::ApplyBotDamageMultiplierHeal(Unit const* victim, float& heal, SpellInfo const* spellInfo, DamageEffectType damagetype, uint32 stack) const
 {
@@ -6718,10 +6718,10 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                                         if (!lockInfo)
                                             continue;
 
-                                        for (uint8 j = 0; j != MAX_LOCK_CASE; ++j)
+                                        for (uint8 k = 0; k != MAX_LOCK_CASE; ++k)
                                         {
-                                            if (lockInfo->Type[j] == LOCK_KEY_SKILL && lockInfo->Index[j] == LOCKTYPE_PICKLOCK &&
-                                                lockInfo->Skill[j] <= uint32(15 + creature->GetLevel() * 5))
+                                            if (lockInfo->Type[k] == LOCK_KEY_SKILL && lockInfo->Index[k] == LOCKTYPE_PICKLOCK &&
+                                                lockInfo->Skill[k] <= uint32(15 + creature->GetLevel() * 5))
                                             {
                                                 std::ostringstream name;
                                                 _AddItemLink(player, item, name, false);
@@ -7383,7 +7383,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             //s2.2: add gossips
 
             //s2.2.0 add current item (with return)
-            uint8 slot = action - GOSSIP_ACTION_INFO_DEF;
+            uint8 const slot = action - GOSSIP_ACTION_INFO_DEF;
             std::ostringstream str;
             str << LocalizedNpcText(player, BOT_TEXT_EQUIPPED) << ": ";
             if (Item const* item = _equips[slot])
@@ -7425,7 +7425,6 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             {
                 uint32 counter = 0;
                 uint32 maxcounter = BOT_GOSSIP_MAX_ITEMS - 4; //unequip, reset, current, back
-                uint32 slot = action - GOSSIP_ACTION_INFO_DEF;
                 Item const* item;
                 //s2.2.3b: add items as gossip options
                 for (std::set<uint32>::const_iterator itr = itemList.begin(); itr != itemList.end() && counter < maxcounter; ++itr)
@@ -8622,12 +8621,12 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 //    if (me->HasUnitState(UNIT_STATE_STUNNED) && !me->HasAuraType(SPELL_AURA_MOD_STUN))
                 //    {
                 //        me->ClearUnitState(UNIT_STATE_STUNNED);
-                //        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                //        me->RemoveUnitFlag(UNIT_FLAG_STUNNED);
                 //    }
                 //    if (me->HasUnitState(UNIT_STATE_CONFUSED) && !me->HasAuraType(SPELL_AURA_MOD_CONFUSE))
                 //    {
                 //        me->ClearUnitState(UNIT_STATE_CONFUSED);
-                //        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+                //        me->RemoveUnitFlag(UNIT_FLAG_CONFUSED);
                 //    }
                 //    break;
                 //}
@@ -9504,7 +9503,7 @@ void bot_ai::_autoLootCreatureGold(Creature* creature) const
     {
         //TC_LOG_ERROR("scripts", "creature gold is looted, releasing");
         creature->AllLootRemovedFromCorpse();
-        creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+        creature->RemoveDynamicFlag(UNIT_DYNFLAG_LOOTABLE);
         loot->clear();
     }
 }
@@ -9571,7 +9570,7 @@ void bot_ai::_autoLootCreatureItems(Player* receiver, Creature* creature, uint32
     {
         //TC_LOG_ERROR("scripts", "creature items is looted, releasing");
         creature->AllLootRemovedFromCorpse();
-        creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+        creature->RemoveDynamicFlag(UNIT_DYNFLAG_LOOTABLE);
         creature->loot.clear();
     }
 }
@@ -11983,7 +11982,7 @@ void bot_ai::DefaultInit()
 
     //bot needs to be either directly controlled by player of have pvp flag to be a valid assist target (buffs, heals, etc.)
     me->SetPvP(master->IsPvP());
-    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
     if (sWorld->IsFFAPvPRealm())
         me->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
     else if (IAmFree())
@@ -13060,8 +13059,8 @@ void bot_ai::JustEnteredCombat(Unit* u)
     _atHome = false;
 
     //clear gossip during combat. See CheckAuras() for restore
-    if (me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
-        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    if (me->HasNpcFlag(UNIT_NPC_FLAG_GOSSIP))
+        me->RemoveNpcFlag(UNIT_NPC_FLAG_GOSSIP);
 
     _evadeMode = false;
     AbortTeleport();
@@ -13665,11 +13664,11 @@ void bot_ai::DoSkytalonVehicleStrats(uint32 diff)
                                 if (!p || me->GetMap() != p->FindMap() || !p->HaveBot()) continue;
 
                                 map = p->GetBotMgr()->GetBotMap();
-                                for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                                for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                                 {
-                                    if (itr->second && itr->second->GetVehicle() &&
-                                        GetHealthPCT(itr->second->GetVehicleBase()) < 90 &&
-                                        itr->second->GetVehicleBase()->GetDistance(drake) < 60)
+                                    if (bitr->second && bitr->second->GetVehicle() &&
+                                        GetHealthPCT(bitr->second->GetVehicleBase()) < 90 &&
+                                        bitr->second->GetVehicleBase()->GetDistance(drake) < 60)
                                     {
                                         cast = true;
                                         break;
@@ -13726,11 +13725,11 @@ void bot_ai::DoSkytalonVehicleStrats(uint32 diff)
                         if (!p || me->GetMap() != p->FindMap() || !p->HaveBot()) continue;
 
                         map = p->GetBotMgr()->GetBotMap();
-                        for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                        for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                         {
-                            Unit* u = itr->second ? itr->second->GetVehicleBase() : nullptr;
+                            Unit* u = bitr->second ? bitr->second->GetVehicleBase() : nullptr;
                             if (u && u->IsAlive() && !u->HasUnitState(UNIT_STATE_ISOLATED) && drake->GetDistance(u) < 60.f &&
-                                !(GetHealthPCT(u) > 95 && !IsTank(itr->second)) &&
+                                !(GetHealthPCT(u) > 95 && !IsTank(bitr->second)) &&
                                 (GetHealthPCT(u) < 95 || (u->IsInCombat() && !u->getAttackers().empty())))
                                 targets1.push_back(u);
                         }
@@ -13933,11 +13932,11 @@ void bot_ai::DoEmeraldDrakeVehicleStrats(uint32 diff)
                     if (!p || me->GetMap() != p->FindMap() || !p->HaveBot()) continue;
 
                     map = p->GetBotMgr()->GetBotMap();
-                    for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                    for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                     {
-                        Unit* u = itr->second ? itr->second->GetVehicleBase() : nullptr;
+                        Unit* u = bitr->second ? bitr->second->GetVehicleBase() : nullptr;
                         if (u && u != drake && u->IsAlive() && !u->HasUnitState(UNIT_STATE_ISOLATED) && drake->GetDistance(u) < 60.f &&
-                            GetHealthPCT(u) <= (IsTank(itr->second) ? 50 : 35) + (rift ? 15 : 0))
+                            GetHealthPCT(u) <= (IsTank(bitr->second) ? 50 : 35) + (rift ? 15 : 0))
                             targets1.push_back(u);
                     }
                 }
@@ -14775,12 +14774,12 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                     me->CastSpell(wo->GetTypeId() == TYPEID_UNIT ? wo->ToUnit() : me, SPELL_COMBAT_SPECIAL_2H_ATTACK, args);
 
                     if (wo->GetTypeId() == TYPEID_UNIT)
-                        wo->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                        wo->ToUnit()->SetDynamicFlag(UNIT_DYNFLAG_LOOTABLE);
 
                     master->SendLoot(wo->GetGUID(), LOOT_SKINNING);
 
                     if (wo->GetTypeId() == TYPEID_UNIT)
-                        wo->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+                        wo->ToUnit()->RemoveUnitFlag(UNIT_FLAG_SKINNABLE);
 
                     _updateTimerEx1 = urand(1500, 2100);
                 }
@@ -14876,10 +14875,10 @@ bool bot_ai::GlobalUpdate(uint32 diff)
     //update flags
     if (!me->IsInCombat() && !_evadeMode && _atHome)
     {
-        if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
-            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT))
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+        if (!me->HasNpcFlag(UNIT_NPC_FLAG_GOSSIP))
+            me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
+        if (me->HasUnitFlag(UNIT_FLAG_PET_IN_COMBAT))
+            me->RemoveUnitFlag(UNIT_FLAG_PET_IN_COMBAT);
     }
 
     if (!me->GetVictim())
@@ -14987,19 +14986,19 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         }
         else if (!IsCasting(mover) && (!IsShootingWand(mover) || Rand() < 10))
         {
-            _calculatePos(pos);
+            _calculatePos(movepos);
             float maxdist = std::max<float>(master->GetBotMgr()->GetBotFollowDist() * (master->isMoving() ? 0.02f : 0.35f), 4.f);
             if (!me->isMoving())
             {
-                if (me->GetExactDist(&pos) > maxdist)
-                    SetBotCommandState(BOT_COMMAND_FOLLOW, true, &pos);
+                if (me->GetExactDist(&movepos) > maxdist)
+                    SetBotCommandState(BOT_COMMAND_FOLLOW, true, &movepos);
             }
             else
             {
                 Position destPos;
                 me->GetMotionMaster()->GetDestination(destPos.m_positionX, destPos.m_positionY, destPos.m_positionZ);
-                if (destPos.GetExactDist(&pos) > maxdist)
-                    SetBotCommandState(BOT_COMMAND_FOLLOW, true, &pos);
+                if (destPos.GetExactDist(&movepos) > maxdist)
+                    SetBotCommandState(BOT_COMMAND_FOLLOW, true, &movepos);
             }
         }
     }
@@ -15299,8 +15298,8 @@ void bot_ai::OnBotEnterVehicle(Vehicle const* vehicle)
             vehicle->GetBase()->SetFaction(master->GetFaction());
             vehicle->GetBase()->SetOwnerGUID(master->GetGUID());
             vehicle->GetBase()->SetCreatorGUID(master->GetGUID());
-            vehicle->GetBase()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
-            vehicle->GetBase()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            vehicle->GetBase()->SetUnitFlag(UNIT_FLAG_POSSESSED);
+            vehicle->GetBase()->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             vehicle->GetBase()->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
             ASSERT(vehicle->GetBase()->SetCharmedBy(me, CHARM_TYPE_VEHICLE));
             vehicle->GetBase()->SetControlledByPlayer(true);
@@ -15366,9 +15365,9 @@ void bot_ai::OnBotExitVehicle(Vehicle const* vehicle)
             vehicle->GetBase()->RestoreFaction();
             vehicle->GetBase()->SetOwnerGUID(ObjectGuid::Empty);
             vehicle->GetBase()->SetCreatorGUID(ObjectGuid::Empty);
-            vehicle->GetBase()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            vehicle->GetBase()->RemoveUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             if (vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
-                vehicle->GetBase()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
+                vehicle->GetBase()->RemoveUnitFlag(UNIT_FLAG_POSSESSED);
             vehicle->GetBase()->SetByteValue(UNIT_FIELD_BYTES_2, 1, 0);
 
             curVehStrat = BOT_VEH_STRAT_NONE;

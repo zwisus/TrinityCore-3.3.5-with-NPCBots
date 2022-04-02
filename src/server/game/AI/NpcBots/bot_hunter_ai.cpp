@@ -643,14 +643,14 @@ public:
                     continue;
 
                 BotMap const* map = player->GetBotMgr()->GetBotMap();
-                for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                 {
-                    if (itr->second == me)
+                    if (bitr->second == me)
                         continue;
-                    if (!gr->IsMember(itr->second->GetGUID()))
+                    if (!gr->IsMember(bitr->second->GetGUID()))
                         continue;
 
-                    Unit* u = itr->second;
+                    Unit* u = bitr->second;
                     if (u->IsInWorld() && u->IsAlive() && u->IsInCombat() && IsTank(u) &&
                         (u->GetVictim() || !u->getAttackers().empty()))
                         tanks.push_back(u);
@@ -718,7 +718,7 @@ public:
                 CheckScare(diff);
 
             //Deterrence check
-            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && !IsCasting())
+            if (me->HasUnitFlag(UNIT_FLAG_PACIFIED) && !IsCasting())
             {
                 if (!me->isMoving())
                     GetInPosition(true, nullptr);
@@ -1120,9 +1120,9 @@ public:
                 if (p_attackers.empty())
                     continue;
 
-                for (Unit::AttackerSet::const_iterator itr = p_attackers.begin(); itr != p_attackers.end(); ++itr)
+                for (Unit::AttackerSet::const_iterator bitr = p_attackers.begin(); bitr != p_attackers.end(); ++bitr)
                 {
-                    attacker = *itr;
+                    attacker = *bitr;
                     if (tPlayer->GetDistance(attacker) > 15 || me->GetDistance(attacker) > 30)
                         continue;
 
@@ -1146,9 +1146,9 @@ public:
                     continue;
 
                 BotMap const* map = gPlayer->GetBotMgr()->GetBotMap();
-                for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                 {
-                    Unit* u = itr->second;
+                    Unit* u = bitr->second;
                     if (!u || !u->IsInWorld() || me->GetMap() != u->FindMap() || !u->IsAlive() ||
                         u->IsTotem() || me->GetDistance(u) > 30)
                         continue;
@@ -1168,9 +1168,9 @@ public:
                     if (u_attackers.empty())
                         continue;
 
-                    for (Unit::AttackerSet::const_iterator itr = u_attackers.begin(); itr != u_attackers.end(); ++itr)
+                    for (Unit::AttackerSet::const_iterator aitr = u_attackers.begin(); aitr != u_attackers.end(); ++aitr)
                     {
-                        attacker = *itr;
+                        attacker = *aitr;
                         if (u->GetDistance(attacker) > 15 || me->GetDistance(attacker) > 30)
                             continue;
 
@@ -1235,7 +1235,7 @@ public:
                 crit_chance += 20.f;
         }
 
-        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
 
@@ -1248,7 +1248,7 @@ public:
 
             //apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!Melee spell damage is not yet critical, all reduced by half
                 //Mortal Shots: 30% crit damage bonus for all ranged abilities
@@ -1330,7 +1330,7 @@ public:
             damage = int32(fdamage * (1.0f + pctbonus));
         }
 
-        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool /*crit*/) const override
+        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool /*iscrit*/) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             uint8 lvl = me->GetLevel();
@@ -1339,7 +1339,7 @@ public:
 
             //2) apply bonus damage mods
             float pctbonus = 0.0f;
-            //if (crit)
+            //if (iscrit)
             //{
             //    //!!!spell damage is not yet critical and will be multiplied by 1.5
             //    //so we should put here bonus damage mult /1.5
@@ -1986,7 +1986,7 @@ public:
             myPet->SetFaction(master->GetFaction());
             myPet->SetControlledByPlayer(!IAmFree());
             myPet->SetPvP(me->IsPvP());
-            myPet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            myPet->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             myPet->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
 
             //fix scale

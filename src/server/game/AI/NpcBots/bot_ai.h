@@ -107,8 +107,8 @@ class bot_ai : public CreatureAI
         bool CanBotAttack(Unit const* target, int8 byspell = 0) const;
         bool CanBotAttackOnVehicle() const;
         void ApplyBotDamageMultiplierMelee(uint32& damage, CalcDamageInfo& damageinfo) const;
-        void ApplyBotDamageMultiplierMelee(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool crit) const;
-        void ApplyBotDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool crit) const;
+        void ApplyBotDamageMultiplierMelee(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool iscrit) const;
+        void ApplyBotDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool iscrit) const;
         void ApplyBotDamageMultiplierHeal(Unit const* victim, float& heal, SpellInfo const* spellInfo, DamageEffectType damagetype, uint32 stack) const;
         void ApplyBotCritMultiplierAll(Unit const* victim, float& crit_chance, SpellInfo const* spellInfo, SpellSchoolMask schoolMask, WeaponAttackType attackType) const;
         void ApplyBotSpellCostMods(SpellInfo const* spellInfo, int32& cost) const;
@@ -569,7 +569,7 @@ class bot_ai : public CreatureAI
 
         PlayerClassLevelInfo* _classinfo;
         SpellInfo const* m_botSpellInfo;
-        Position pos, attackpos;
+        Position movepos, attackpos;
 
         uint8 m_botCommandState;
 

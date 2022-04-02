@@ -1723,7 +1723,7 @@ public:
             damageinfo.Damages[0].Damage = uint32(damageinfo.Damages[0].Damage * (1.0f + pctbonus));
         }
 
-        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             //uint32 spellId = spellInfo->Id;
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
@@ -1732,7 +1732,7 @@ public:
 
             //apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!Melee spell damage is not yet critical, all reduced by half
                 ////Elemental Fury (part 2): 50% additional crit damage bonus for Nature, Fire and Frost (all) spells
@@ -1765,12 +1765,12 @@ public:
 
             //Primal Fury (yellow attacks): 100% to gain 5 rage at crit in (Dire) Bear Form
             //Primal Fury (yellow attacks): 100% to gain 1 combo point at crit in Cat Form
-            if (_form == DRUID_BEAR_FORM && crit && lvl >= 25)
+            if (_form == DRUID_BEAR_FORM && iscrit && lvl >= 25)
                 me->CastSpell(me, PRIMAL_FURY_EFFECT_ENERGIZE, true);
             if (_form == DRUID_CAT_FORM &&
                 (baseId == CLAW_1 || baseId == MANGLE_CAT_1 || baseId == POUNCE_1 ||
                 baseId == RAKE_1 || baseId == RAVAGE_1 || baseId == SHRED_1))
-                primalFuryProc = crit && lvl >= 25;
+                primalFuryProc = iscrit && lvl >= 25;
 
             damage = int32(fdamage * (1.0f + pctbonus));
         }
@@ -1801,7 +1801,7 @@ public:
                 crit_chance += 3.f;
         }
 
-        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             //uint32 spellId = spellInfo->Id;
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
@@ -1810,7 +1810,7 @@ public:
 
             //apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!spell damage is not yet critical and will be multiplied by 1.5
                 //so we should put here bonus damage mult /1.5
@@ -2538,7 +2538,7 @@ public:
                 myPet->SetFaction(master->GetFaction());
                 myPet->SetControlledByPlayer(!IAmFree());
                 myPet->SetPvP(me->IsPvP());
-                myPet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+                myPet->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
                 myPet->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
                 myPet->SetUInt32Value(UNIT_CREATED_BY_SPELL, FORCE_OF_NATURE_1);
                 //botPet = myPet;

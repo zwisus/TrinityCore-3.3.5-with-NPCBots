@@ -1424,7 +1424,7 @@ public:
                         crit_chance += 20.f * eff->GetBase()->GetStackAmount();
         }
 
-        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             uint32 spellId = spellInfo->Id;
             uint8 lvl = me->GetLevel();
@@ -1432,7 +1432,7 @@ public:
 
             //apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!Melee spell damage is not yet critical, all reduced by half
                 //Elemental Fury (part 2): 50% additional crit damage bonus for Nature, Fire and Frost (all) spells
@@ -1452,7 +1452,7 @@ public:
             damage = int32(fdamage * (1.0f + pctbonus));
         }
 
-        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             uint32 spellId = spellInfo->Id;
             uint8 lvl = me->GetLevel();
@@ -1461,7 +1461,7 @@ public:
 
             //2) apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!spell damage is not yet critical and will be multiplied by 1.5
                 //so we should put here bonus damage mult /1.5
@@ -2074,7 +2074,7 @@ public:
                 myPet->SetFaction(master->GetFaction());
                 myPet->SetControlledByPlayer(!IAmFree());
                 myPet->SetPvP(me->IsPvP());
-                myPet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+                myPet->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
                 myPet->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
                 myPet->SetUInt32Value(UNIT_CREATED_BY_SPELL, FERAL_SPIRIT_1);
 
@@ -2298,7 +2298,7 @@ public:
             summon->SetPvP(me->IsPvP());
             summon->SetOwnerGUID(master->GetGUID());
             summon->SetControlledByPlayer(!IAmFree());
-            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            summon->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             // totem will claim master's summon slot
             // free it to avoid conflicts with other shaman bots and master
             // if master is a shaman his totem will despawn
@@ -2736,7 +2736,7 @@ public:
             uint32 sumonSpell;
             uint32 baseId;
             bool isTotem;
-            int8 mytype;
+            int8 mytype = -1;
             Unit::AuraApplicationMap const& aurapps = me->GetAppliedAuras();
             for (Unit::AuraApplicationMap::const_iterator itr = aurapps.begin(); itr != aurapps.end(); ++itr)
             {

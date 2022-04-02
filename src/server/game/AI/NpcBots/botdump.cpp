@@ -534,13 +534,13 @@ BotDataDumpResult NPCBotsDump::LoadDump(std::ifstream& input)
             }
 
             //check values conflicts, abort on existing values
-            size_t checkOffset;
+            size_t checkOffset = 0;
             bool needCheckVal = false;
             switch (curImportDataTableType)
             {
                 case TABLE_TYPE_CHARACTERS_NPCBOT:
                     //entry
-                    checkOffset = 0;
+                    //checkOffset = 0;
                     needCheckVal = true;
                     break;
                 default:

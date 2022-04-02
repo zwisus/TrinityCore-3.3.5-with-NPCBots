@@ -161,14 +161,14 @@ void bot_pet_ai::SetBotCommandState(uint8 st, bool force, Position* newpos)
         else
         {
             if (!newpos)
-                _calculatePos(pos);
+                _calculatePos(movepos);
             else
             {
-                pos.m_positionX = newpos->m_positionX;
-                pos.m_positionY = newpos->m_positionY;
-                pos.m_positionZ = newpos->m_positionZ;
+                movepos.m_positionX = newpos->m_positionX;
+                movepos.m_positionY = newpos->m_positionY;
+                movepos.m_positionZ = newpos->m_positionZ;
             }
-            me->GetMotionMaster()->MovePoint(petOwner->GetMapId(), pos);
+            me->GetMotionMaster()->MovePoint(petOwner->GetMapId(), movepos);
         }
         RemoveBotCommandState(BOT_COMMAND_STAY | BOT_COMMAND_FULLSTOP | BOT_COMMAND_ATTACK | BOT_COMMAND_COMBATRESET);
     }
@@ -247,7 +247,7 @@ void bot_pet_ai::CureGroup(uint32 cureSpell, uint32 diff)
 
         for (Unit::ControlList::const_iterator itr = petOwner->GetBotOwner()->m_Controlled.begin(); itr != petOwner->GetBotOwner()->m_Controlled.end(); ++itr)
         {
-            Unit* u = *itr;
+            u = *itr;
             if (!u || !u->IsPet() || !u->IsAlive() || me->GetDistance(u) > 30) continue;
 
             if (_canCureTarget(u, cureSpell))
@@ -279,18 +279,18 @@ void bot_pet_ai::CureGroup(uint32 cureSpell, uint32 diff)
             if (tPlayer->HaveBot())
             {
                 map = tPlayer->GetBotMgr()->GetBotMap();
-                for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                 {
-                    u = itr->second;
+                    u = bitr->second;
                     if (!u || !u->IsInWorld() || me->GetMap() != u->FindMap() || !u->IsAlive()) continue;
                     if (_canCureTarget(u, cureSpell))
                         targets.push_back(u);
                 }
             }
 
-            for (Unit::ControlList::const_iterator itr = tPlayer->m_Controlled.begin(); itr != tPlayer->m_Controlled.end(); ++itr)
+            for (Unit::ControlList::const_iterator citr = tPlayer->m_Controlled.begin(); citr != tPlayer->m_Controlled.end(); ++citr)
             {
-                Unit* u = *itr;
+                u = *citr;
                 if (!u || !u->IsPet() || !u->IsAlive() || me->GetDistance(u) > 30) continue;
 
                 if (_canCureTarget(u, cureSpell))
@@ -1179,7 +1179,7 @@ void bot_pet_ai::SetPetStats(bool force)
         float m_totalmana = intValue * intMult/* + me->GetCreatePowerValue(POWER_MANA)*/ + (IAmFree() ? level * 25.f : 0); //+2000/+0 mana at 80
         //TC_LOG_ERROR("entities.player", "SetPetStat(): mana intValue %.1f, intMult %.1f, base %u, total %.2f", intValue, intMult, botPet->GetCreatePowerValue(POWER_MANA), m_totalmana);
         bool fullmana = me->GetPower(POWER_MANA) == me->GetMaxPower(POWER_MANA);
-        float pct = fullmana ? 100.f : (float(me->GetPower(POWER_MANA)) * 100.f) / float(me->GetMaxPower(POWER_MANA));
+        pct = fullmana ? 100.f : (float(me->GetPower(POWER_MANA)) * 100.f) / float(me->GetMaxPower(POWER_MANA));
         me->SetStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, m_totalmana);
         me->UpdateMaxPower(POWER_MANA);
         me->SetPower(POWER_MANA, fullmana ? me->GetMaxPower(POWER_MANA) :
@@ -1881,8 +1881,8 @@ void bot_pet_ai::AdjustTankingPosition() const
     float z = me->GetPositionZ();
     float ori = me->GetOrientation();
     float const moveDist = -1.f * std::max<float>(opponent->GetCombatReach() * 0.6f, 3.f);
-    float moveX;
-    float moveY;
+    float moveX = 0.f;
+    float moveY = 0.f;
     for (uint8 i = 0; i != 3; ++i)
     {
         if (i)
@@ -1904,8 +1904,8 @@ void bot_pet_ai::AdjustTankingPosition() const
         }
     }
 
-    x+= moveX;
-    y+= moveY;
+    x += moveX;
+    y += moveY;
 
     me->UpdateAllowedPositionZ(x, y, z);
     if (me->GetPositionZ() < z)
@@ -2257,19 +2257,19 @@ bool bot_pet_ai::GlobalUpdate(uint32 diff)
     //update flags
     if (!me->IsInCombat())
     {
-        if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT))
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+        if (me->HasUnitFlag(UNIT_FLAG_PET_IN_COMBAT))
+            me->RemoveUnitFlag(UNIT_FLAG_PET_IN_COMBAT);
     }
 
     //update movement orders if near owner, otherwise get close
     bool closeToOwner = false;
     if (!opponent && !HasBotCommandState(BOT_COMMAND_STAY) && !IsCasting())
     {
-        _calculatePos(pos);
+        _calculatePos(movepos);
         if (!petOwner->isMoving())
         {
-            if (me->GetExactDist(&pos) > 5.f)
-                SetBotCommandState(BOT_COMMAND_FOLLOW, true, &pos);
+            if (me->GetExactDist(&movepos) > 5.f)
+                SetBotCommandState(BOT_COMMAND_FOLLOW, true, &movepos);
             else
                 closeToOwner = true;
         }
@@ -2277,8 +2277,8 @@ bool bot_pet_ai::GlobalUpdate(uint32 diff)
         {
             Position destPos;
             me->GetMotionMaster()->GetDestination(destPos.m_positionX, destPos.m_positionY, destPos.m_positionZ);
-            if (destPos.GetExactDist(&pos) > 5.f)
-                SetBotCommandState(BOT_COMMAND_FOLLOW, true, &pos);
+            if (destPos.GetExactDist(&movepos) > 5.f)
+                SetBotCommandState(BOT_COMMAND_FOLLOW, true, &movepos);
             else
                 closeToOwner = true;
         }

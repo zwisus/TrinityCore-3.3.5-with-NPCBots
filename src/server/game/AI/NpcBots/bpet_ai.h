@@ -146,7 +146,7 @@ class bot_pet_ai : public CreatureAI
         bool _checkImmunities(Unit const* target, SpellInfo const* spellInfo) const;
         static inline float _getAttackDistance(float distance) { return distance*0.72f; }
 
-        Position pos, attackpos;
+        Position movepos, attackpos;
         uint8 m_botCommandState;
 
         //timers

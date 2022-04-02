@@ -3349,7 +3349,7 @@ void Creature::ReleaseSpellFocus(Spell const* focusSpell, bool withDelay)
     //npcbot: bots and botpets do not use delay
     else if (IsNPCBot() || IsNPCBotPet())
     {
-        if (!HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_CANNOT_TURN))
+        if (!HasUnitFlag2(UNIT_FLAG2_CANNOT_TURN))
             ReacquireSpellFocusTarget();
     }
     //end npcbot

@@ -387,10 +387,10 @@ void BotDataMgr::UpdateNpcBotData(uint32 entry, NpcBotDataUpdateType updateType,
         }
         case NPCBOT_UPDATE_ERASE:
         {
-            NpcBotDataMap::iterator itr = _botsData.find(entry);
-            ASSERT(itr != _botsData.end());
-            delete itr->second;
-            _botsData.erase(itr);
+            NpcBotDataMap::iterator bitr = _botsData.find(entry);
+            ASSERT(bitr != _botsData.end());
+            delete bitr->second;
+            _botsData.erase(bitr);
             bstmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_NPCBOT);
             //"DELETE FROM characters_npcbot WHERE entry = ?", CONNECTION_ASYNC
             bstmt->setUInt32(0, entry);

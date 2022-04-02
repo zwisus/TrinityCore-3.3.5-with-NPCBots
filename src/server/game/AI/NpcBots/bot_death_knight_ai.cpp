@@ -988,7 +988,7 @@ public:
                 crit_chance += 8.f;
         }
 
-        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             uint8 lvl = me->GetLevel();
@@ -996,7 +996,7 @@ public:
 
             //apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!Melee spell damage is not yet critical, all reduced by half
 
@@ -1100,7 +1100,7 @@ public:
             damage = int32(fdamage * (1.0f + pctbonus));
         }
 
-        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             uint8 lvl = me->GetLevel();
@@ -1108,7 +1108,7 @@ public:
 
             //apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!spell damage is not yet critical and will be multiplied by 1.5
                 //so we should put here bonus damage mult /1.5
@@ -1678,7 +1678,7 @@ public:
             myPet->SetFaction(master->GetFaction());
             myPet->SetControlledByPlayer(!IAmFree());
             myPet->SetPvP(me->IsPvP());
-            myPet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            myPet->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
             myPet->SetByteValue(UNIT_FIELD_BYTES_2, 1, master->GetByteValue(UNIT_FIELD_BYTES_2, 1));
 
             botPet = myPet;
@@ -2091,10 +2091,10 @@ public:
             for (AuraType const* itr = botDiseaseAuraTypes; *itr != SPELL_AURA_NONE; ++itr)
             {
                 Unit::AuraEffectList const& disAuras = unit->GetAuraEffectsByType(*itr);
-                for (Unit::AuraEffectList::const_iterator itr = disAuras.begin(); itr != disAuras.end(); ++itr)
+                for (Unit::AuraEffectList::const_iterator ditr = disAuras.begin(); ditr != disAuras.end(); ++ditr)
                 {
                     // Get auras with disease dispel type by caster
-                    if ((*itr)->GetSpellInfo()->Dispel == DISPEL_DISEASE)
+                    if ((*ditr)->GetSpellInfo()->Dispel == DISPEL_DISEASE)
                         return true;
                 }
             }

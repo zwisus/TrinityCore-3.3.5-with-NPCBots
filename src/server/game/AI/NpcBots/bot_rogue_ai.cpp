@@ -1024,7 +1024,7 @@ public:
                     crit_chance += 40.f;
         }
 
-        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool crit) const override
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* spellInfo, WeaponAttackType /*attackType*/, bool iscrit) const override
         {
             //uint32 spellId = spellInfo->Id;
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
@@ -1033,7 +1033,7 @@ public:
 
             //apply bonus damage mods
             float pctbonus = 0.0f;
-            if (crit)
+            if (iscrit)
             {
                 //!!!Melee spell damage is not yet critical, all reduced by half
                 //Lethality: 30% crit damage bonus for non-stealth combo-generating abilities (on 25 lvl)
@@ -1089,7 +1089,7 @@ public:
 
             //Glyph of Sinister Strike: 50% chance to add 1 cp on crit
             if (baseId == SINISTER_STRIKE_1)
-                glyphSSProc = crit && lvl >= 15 && urand(1,100) <= 50;
+                glyphSSProc = iscrit && lvl >= 15 && urand(1,100) <= 50;
 
             damage = int32(fdamage * (1.0f + pctbonus));
         }

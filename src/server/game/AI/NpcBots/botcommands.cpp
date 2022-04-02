@@ -500,7 +500,7 @@ public:
 
         bool hasBotsInVehicles = false;
         bool botsInSelVehicle = 0;
-        BotMap const* bmap;
+        BotMap const* bmap = nullptr;
         if (owner->HaveBot())
         {
             bmap = owner->GetBotMgr()->GetBotMap();
@@ -518,7 +518,7 @@ public:
             }
         }
 
-        if (hasBotsInVehicles)
+        if (bmap && hasBotsInVehicles)
         {
             for (BotMap::const_iterator ci = bmap->begin(); ci != bmap->end(); ++ci)
             {
