@@ -808,7 +808,7 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
 
     if (me->GetStandState() == UNIT_STAND_STATE_SIT && !(m_botSpellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_SITTING))
     {
-        if (!doMana && (me->GetInterruptMask() & AURA_INTERRUPT_FLAG_NOT_SEATED))
+        if (!doMana && me->HasInterruptFlag(AURA_INTERRUPT_FLAG_NOT_SEATED))
             UpdateMana();
 
         feast_health = false;
@@ -4725,7 +4725,7 @@ void bot_ai::_updateStandState() const
                 }
             }
         }
-        else if (me->IsSitState() && !(me->GetInterruptMask() & AURA_INTERRUPT_FLAG_NOT_SEATED))
+        else if (me->IsSitState() && !me->HasInterruptFlag(AURA_INTERRUPT_FLAG_NOT_SEATED))
             me->SetStandState(UNIT_STAND_STATE_STAND);
 
         return;
@@ -4736,10 +4736,10 @@ void bot_ai::_updateStandState() const
 
     if ((master->GetStandState() == UNIT_STAND_STATE_STAND || !CanSit()) &&
         me->GetStandState() == UNIT_STAND_STATE_SIT &&
-        !(me->GetInterruptMask() & AURA_INTERRUPT_FLAG_NOT_SEATED))
+        !me->HasInterruptFlag(AURA_INTERRUPT_FLAG_NOT_SEATED))
         me->SetStandState(UNIT_STAND_STATE_STAND);
     if (CanSit() && !me->IsInCombat() && !me->isMoving() &&
-        (master->GetStandState() == UNIT_STAND_STATE_SIT || (me->GetInterruptMask() & AURA_INTERRUPT_FLAG_NOT_SEATED)) &&
+        (master->GetStandState() == UNIT_STAND_STATE_SIT || me->HasInterruptFlag(AURA_INTERRUPT_FLAG_NOT_SEATED)) &&
         me->GetStandState() == UNIT_STAND_STATE_STAND)
         me->SetStandState(UNIT_STAND_STATE_SIT);
 }
@@ -4922,7 +4922,7 @@ void bot_ai::RegenerateEnergy()
 
 bool bot_ai::Feasting() const
 {
-    if (!(me->GetInterruptMask() & AURA_INTERRUPT_FLAG_NOT_SEATED))
+    if (!me->HasInterruptFlag(AURA_INTERRUPT_FLAG_NOT_SEATED))
         return false;
 
     return

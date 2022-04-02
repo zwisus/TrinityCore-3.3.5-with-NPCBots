@@ -1079,7 +1079,7 @@ public:
     bool operator()(GameObject* go)
     {
         if (go->GetGOInfo()->GetLockId() &&
-            !go->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE) &&
+            !go->HasFlag(GO_FLAG_IN_USE) &&
             //go->getLootState() == GO_READY &&
             _unit->IsWithinDistInMap(go, _range))
         {
