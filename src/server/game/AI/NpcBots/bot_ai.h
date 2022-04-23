@@ -125,7 +125,7 @@ class bot_ai : public CreatureAI
         virtual uint8 GetBotStance() const;
         uint32 GetBotRoles() const { return _roleMask; }
         bool HasRole(uint32 role) const { return _roleMask & role; }
-        uint8 GetRoleIcon(uint32 role) const;
+        GossipOptionIcon GetRoleIcon(uint32 role) const;
         static uint32 GetRoleString(uint32 role);
         void ToggleRole(uint32 role, bool force);
         static uint32 DefaultRolesForClass(uint8 m_class);

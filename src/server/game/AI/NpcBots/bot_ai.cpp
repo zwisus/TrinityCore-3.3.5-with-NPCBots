@@ -40,6 +40,10 @@ Methods may have null arg1 (Unit*):
 DamageTaken(Unit*, ), JustDied(Unit*, ), OwnerAttackedBy(Unit*, ), HealReceived(Unit*, )
 Possibly others
 */
+
+static constexpr GossipOptionIcon BOT_ICON_ON = GOSSIP_ICON_BATTLE;
+static constexpr GossipOptionIcon BOT_ICON_OFF = GOSSIP_ICON_CHAT;
+
 #define MAX_AMMO_LEVEL 13
 uint8 const AmmoDPSForLevel[MAX_AMMO_LEVEL][2] =
 {
@@ -8041,7 +8045,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 std::ostringstream name;
                 _AddSpellLink(player, spellInfo, name);
 
-                uint8 icon = (GetSpell(*itr) != 0) ? BOT_ICON_ON : BOT_ICON_OFF;
+                GossipOptionIcon icon = (GetSpell(*itr) != 0) ? BOT_ICON_ON : BOT_ICON_OFF;
                 AddGossipItemFor(player, icon, name.str().c_str(), toggleSender, GOSSIP_ACTION_INFO_DEF + *itr);
                 if (++counter >= BOT_GOSSIP_MAX_ITEMS - 1) //back
                 {
@@ -8107,7 +8111,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             for (uint8 i = specIndex; i < specIndex + 3; ++i)
             {
-                uint8 icon = (_spec == i) ? BOT_ICON_ON : BOT_ICON_OFF;
+                GossipOptionIcon icon = (_spec == i) ? BOT_ICON_ON : BOT_ICON_OFF;
                 AddGossipItemFor(player, icon, LocalizedNpcText(player, TextForSpec(i)), GOSSIP_SENDER_SPEC_SET, GOSSIP_ACTION_INFO_DEF + i);
             }
 
@@ -11840,7 +11844,7 @@ float bot_ai::GetAverageItemLevel() const
 /////////
 //ROLES//
 /////////
-uint8 bot_ai::GetRoleIcon(uint32 role) const
+GossipOptionIcon bot_ai::GetRoleIcon(uint32 role) const
 {
     return HasRole(role) ? BOT_ICON_ON : BOT_ICON_OFF;
 }

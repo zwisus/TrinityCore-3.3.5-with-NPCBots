@@ -26,8 +26,6 @@ enum BotCommonValues
     BOT_PET_ENTRY_BEGIN                 = 70501,
     BOT_PET_ENTRY_END                   = 70550,
     BOT_ENTRY_MIRROR_IMAGE_BM           = 70552,
-    BOT_ICON_ON                         = 9,    //GOSSIP_ICON_BATTLE,
-    BOT_ICON_OFF                        = 0,    //GOSSIP_ICON_CHAT,
     BOT_MAX_CHASE_RANGE                 = 120,  //yds
     //BOT_EVADE_TIME                      = 3000, //ms
 //COMMON SPELLS
