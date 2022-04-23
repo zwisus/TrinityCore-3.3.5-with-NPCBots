@@ -5,6 +5,7 @@
 
 #include "CreatureAI.h"
 #include "EventProcessor.h"
+#include "GossipDef.h"
 #include "ItemDefines.h"
 #include "Position.h"
 
