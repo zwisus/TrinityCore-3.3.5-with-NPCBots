@@ -13,6 +13,7 @@
 #include "DBCStores.h"
 #include "GameEventMgr.h"
 #include "GameObjectAI.h"
+#include "GossipDef.h"
 #include "GridNotifiersImpl.h"
 #include "InstanceScript.h"
 #include "Item.h"

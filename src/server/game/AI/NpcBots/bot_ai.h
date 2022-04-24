@@ -5,7 +5,6 @@
 
 #include "CreatureAI.h"
 #include "EventProcessor.h"
-#include "GossipDef.h"
 #include "ItemDefines.h"
 #include "Position.h"
 
@@ -17,6 +16,7 @@ class TeleportHomeEvent;
 class TeleportFinishEvent;
 
 enum CombatRating : uint8;
+enum GossipOptionIcon : uint8;
 enum MeleeHitOutcome : uint8;
 
 struct CleanDamage;
