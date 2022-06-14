@@ -30,7 +30,7 @@
 #include "World.h"
 /*
 NpcBot System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
-Version 4.15.5a
+Version 4.15.22a
 Original idea: https://bitbucket.org/lordpsyan/trinitycore-patches/src/3b8b9072280e/Individual/11185-BOTS-NPCBots.patch
 TODO:
 dk pets (garg, aod, rdw)
@@ -45,8 +45,8 @@ Possibly others
 static constexpr GossipOptionIcon BOT_ICON_ON = GOSSIP_ICON_BATTLE;
 static constexpr GossipOptionIcon BOT_ICON_OFF = GOSSIP_ICON_CHAT;
 
-#define MAX_AMMO_LEVEL 13
-uint8 const AmmoDPSForLevel[MAX_AMMO_LEVEL][2] =
+static constexpr uint32 MAX_AMMO_LEVEL = 13;
+uint8 constexpr AmmoDPSForLevel[MAX_AMMO_LEVEL][2] =
 {
     {  1,  1 },
     {  5,  2 },
@@ -62,9 +62,9 @@ uint8 const AmmoDPSForLevel[MAX_AMMO_LEVEL][2] =
     { 72, 67 },
     { 80, 91 }
 };
-#define MAX_POTION_SPELLS 8
-#define MAX_FEAST_SPELLS 11
-uint32 const ManaPotionSpells[MAX_POTION_SPELLS][2] =
+static constexpr uint32 MAX_POTION_SPELLS = 8;
+static constexpr uint32 MAX_FEAST_SPELLS = 11;
+uint32 constexpr ManaPotionSpells[MAX_POTION_SPELLS][2] =
 {
     {  5,   437 },
     { 14,   438 },
@@ -75,7 +75,7 @@ uint32 const ManaPotionSpells[MAX_POTION_SPELLS][2] =
     { 55, 28499 },
     { 70, 43186 }
 };
-uint32 const HealingPotionSpells[MAX_POTION_SPELLS][2] =
+uint32 constexpr HealingPotionSpells[MAX_POTION_SPELLS][2] =
 {
     {  1,   439 },
     {  3,   440 },
@@ -86,7 +86,7 @@ uint32 const HealingPotionSpells[MAX_POTION_SPELLS][2] =
     { 55, 28495 },
     { 70, 43185 }
 };
-uint32 const DrinkSpells[MAX_FEAST_SPELLS][2] =
+uint32 constexpr DrinkSpells[MAX_FEAST_SPELLS][2] =
 {
     {  1,   430 },
     {  5,   431 },
@@ -100,7 +100,7 @@ uint32 const DrinkSpells[MAX_FEAST_SPELLS][2] =
     { 75, 43183 },
     { 80, 57073 }
 };
-uint32 const EatSpells[MAX_FEAST_SPELLS][2] =
+uint32 constexpr EatSpells[MAX_FEAST_SPELLS][2] =
 {
     {  1,   433 },
     {  5,   434 },
@@ -351,8 +351,8 @@ void bot_ai::ReportSpellCast(uint32 spellId, const std::string& followedByString
 
 bool bot_ai::SetBotOwner(Player* newowner)
 {
-    ASSERT(newowner && "Trying to set NULL owner!!!");
-    ASSERT(newowner->GetGUID().IsPlayer() && "Trying to set a non-player as owner!!!");
+    ASSERT(newowner, "Trying to set NULL owner!!!");
+    ASSERT(newowner->GetGUID().IsPlayer(), "Trying to set a non-player as owner!!!");
     //ASSERT(master->GetGUID() == me->GetGUID());
     //ASSERT(IAmFree());
 
@@ -428,10 +428,10 @@ void bot_ai::CheckOwnerExpiry()
         return; //disabled
 
     NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
-    ASSERT(npcBotData && "bot_ai::CheckOwnerExpiry(): data not found!");
+    ASSERT(npcBotData, "bot_ai::CheckOwnerExpiry(): data not found!");
 
     NpcBotExtras const* npcBotExtra = BotDataMgr::SelectNpcBotExtras(me->GetEntry());
-    ASSERT(npcBotExtra && "bot_ai::CheckOwnerExpiry(): extra data not found!");
+    ASSERT(npcBotExtra, "bot_ai::CheckOwnerExpiry(): extra data not found!");
 
     if (npcBotData->owner == 0)
         return;
@@ -7276,7 +7276,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             int8 id = 1;
             EquipmentInfo const* einfo = sObjectMgr->GetEquipmentInfo(me->GetEntry(), id);
-            ASSERT(einfo && "Trying to send equipment list for bot with no equip info!");
+            ASSERT(einfo, "Trying to send equipment list for bot with no equip info!");
 
             for (uint8 i = BOT_SLOT_MAINHAND; i != BOT_INVENTORY_SIZE; ++i)
             {
@@ -7300,7 +7300,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             int8 id = 1;
             EquipmentInfo const* einfo = sObjectMgr->GetEquipmentInfo(me->GetEntry(), id);
-            ASSERT(einfo && "Trying to send equipment info for bot with no equip info!");
+            ASSERT(einfo, "Trying to send equipment info for bot with no equip info!");
 
             uint8 slot = action - GOSSIP_ACTION_INFO_DEF;
             Item const* item = _equips[slot];
@@ -7323,7 +7323,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             int8 id = 1;
             EquipmentInfo const* einfo = sObjectMgr->GetEquipmentInfo(me->GetEntry(), id);
-            ASSERT(einfo && "Trying to send equipment show for bot with no equip info!");
+            ASSERT(einfo, "Trying to send equipment show for bot with no equip info!");
 
             std::set<uint32> itemList, idsList;
 
@@ -7585,7 +7585,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             int8 id = 1;
             EquipmentInfo const* einfo = sObjectMgr->GetEquipmentInfo(me->GetEntry(), id);
-            ASSERT(einfo && "Trying to send auto-equip for bot with no equip info!");
+            ASSERT(einfo, "Trying to send auto-equip for bot with no equip info!");
 
             std::set<uint32> itemList, idsList;
 
@@ -10324,7 +10324,7 @@ bool bot_ai::_unequip(uint8 slot, ObjectGuid::LowType receiver)
 {
     int8 id = 1;
     EquipmentInfo const* einfo = sObjectMgr->GetEquipmentInfo(me->GetEntry(), id);
-    ASSERT(einfo && "Trying to unequip item for bot with no equip info!");
+    ASSERT(einfo, "Trying to unequip item for bot with no equip info!");
 
     Item* item = _equips[slot];
     if (!item)
@@ -10414,7 +10414,7 @@ bool bot_ai::_equip(uint8 slot, Item* newItem, ObjectGuid::LowType receiver)
 
     int8 id = 1;
     EquipmentInfo const* einfo = sObjectMgr->GetEquipmentInfo(me->GetEntry(), id);
-    ASSERT(einfo && "Trying to equip item for bot with no equip info!");
+    ASSERT(einfo, "Trying to equip item for bot with no equip info!");
 
     ItemTemplate const* proto = newItem->GetTemplate();
 
@@ -10540,7 +10540,7 @@ bool bot_ai::_resetEquipment(uint8 slot, ObjectGuid::LowType receiver)
 
     int8 id = 1;
     EquipmentInfo const* einfo = sObjectMgr->GetEquipmentInfo(me->GetEntry(), id);
-    ASSERT(einfo && "Trying to reset equipment for bot with no equip info!");
+    ASSERT(einfo, "Trying to reset equipment for bot with no equip info!");
 
     uint32 itemId = einfo->ItemEntry[slot];
     if (!itemId)
@@ -10566,7 +10566,7 @@ bool bot_ai::_resetEquipment(uint8 slot, ObjectGuid::LowType receiver)
 
     //we have our standard weapon itemId which we should use to create new item
     Item* stItem = Item::CreateItem(itemId, 1, nullptr);
-    ASSERT(stItem && "Failed to create standard Item for bot!");
+    ASSERT(stItem, "Failed to create standard Item for bot!");
 
     if (!_equip(slot, stItem, receiver))
     {
@@ -12099,7 +12099,7 @@ void bot_ai::ApplyRacials()
 void bot_ai::InitFaction()
 {
     NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
-    ASSERT(npcBotData && "bot_ai::InitFaction(): data not found!");
+    ASSERT(npcBotData, "bot_ai::InitFaction(): data not found!");
 
     uint32 faction = npcBotData->faction;
 
@@ -12115,7 +12115,7 @@ void bot_ai::InitFaction()
 void bot_ai::InitRace()
 {
     NpcBotExtras const* npcBotExtras = BotDataMgr::SelectNpcBotExtras(me->GetEntry());
-    ASSERT(npcBotExtras && "bot_ai::InitRace: extra data not found!");
+    ASSERT(npcBotExtras, "bot_ai::InitRace: extra data not found!");
 
     me->SetByteValue(UNIT_FIELD_BYTES_0, 0, npcBotExtras->race); //set race
 }
@@ -12123,7 +12123,7 @@ void bot_ai::InitRace()
 void bot_ai::InitOwner()
 {
     NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
-    ASSERT(npcBotData && "bot_ai::InitOwner(): data not found!");
+    ASSERT(npcBotData, "bot_ai::InitOwner(): data not found!");
 
     _ownerGuid = npcBotData->owner;
 }
@@ -12151,7 +12151,7 @@ void bot_ai::InitRoles()
     }
 
     NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
-    ASSERT(npcBotData && "bot_ai::InitRoles(): data not found!");
+    ASSERT(npcBotData, "bot_ai::InitRoles(): data not found!");
 
     _roleMask = npcBotData->roles;
 }
@@ -12222,12 +12222,12 @@ void bot_ai::InitSpec()
                 spec = rand <= 33 ? specs[0] : rand <= 67 ? specs[1] : specs[2];
         }
         else
-            ASSERT(false && "bot_ai::InitSpec(): FIXME more than 3 specs to choose from!");
+            ASSERT(false, "bot_ai::InitSpec(): FIXME more than 3 specs to choose from!");
     }
     else
     {
         NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
-        ASSERT(npcBotData && "bot_ai::InitSpec(): data not found!");
+        ASSERT(npcBotData, "bot_ai::InitSpec(): data not found!");
 
         spec = npcBotData->spec;
     }
@@ -12471,10 +12471,10 @@ void bot_ai::InitEquips()
 {
     int8 id = 1;
     EquipmentInfo const* einfo = sObjectMgr->GetEquipmentInfo(me->GetEntry(), id);
-    ASSERT(einfo && "Trying to spawn bot with no equip info!");
+    ASSERT(einfo, "Trying to spawn bot with no equip info!");
 
     NpcBotData const* npcBotData = BotDataMgr::SelectNpcBotData(me->GetEntry());
-    ASSERT(npcBotData && "bot_ai::InitEquips(): data not found!");
+    ASSERT(npcBotData, "bot_ai::InitEquips(): data not found!");
 
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NPCBOT_EQUIP_BY_ITEM_INSTANCE);
     //        0            1                2      3         4        5      6             7                 8           9           10    11    12         13
@@ -12500,7 +12500,7 @@ void bot_ai::InitEquips()
                 continue;
 
             item = Item::CreateItem(itemId, 1, nullptr);
-            ASSERT(item && "Failed to init standard Item for bot!");
+            ASSERT(item, "Failed to init standard Item for bot!");
             _equips[i] = item;
         }
     }
@@ -12606,7 +12606,7 @@ void bot_ai::InitEquips()
 
             //if bot has no equips but equip template then use those
             item = Item::CreateItem(einfo->ItemEntry[i], 1, nullptr);
-            ASSERT(item && "Failed to init standard Item for bot point 2!");
+            ASSERT(item, "Failed to init standard Item for bot point 2!");
             _equips[i] = item;
 
             me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, einfo->ItemEntry[i]);

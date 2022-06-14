@@ -11,23 +11,23 @@
 NpcBot Pet System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
 */
 
-#define SHAMAN_MAX_PET_POSITIONS 2
-#define DRUID_MAX_PET_POSITIONS 3
-#define DK_MAX_PET_POSITIONS 10
-#define DARK_RANGER_MAX_PET_POSITIONS 5
-#define NECROMANCER_MAX_PET_POSITIONS 6
-float const ShamanPetPositionAnglesByPosNumber[SHAMAN_MAX_PET_POSITIONS] =
+static constexpr uint32 SHAMAN_MAX_PET_POSITIONS = 2;
+static constexpr uint32 DRUID_MAX_PET_POSITIONS = 3;
+static constexpr uint32 DK_MAX_PET_POSITIONS = 10;
+static constexpr uint32 DARK_RANGER_MAX_PET_POSITIONS = 5;
+static constexpr uint32 NECROMANCER_MAX_PET_POSITIONS = 6;
+float constexpr ShamanPetPositionAnglesByPosNumber[SHAMAN_MAX_PET_POSITIONS] =
 {
     0.f,//left
     float(M_PI)//right
 };
-float const DruidPetPositionAnglesByPosNumber[DRUID_MAX_PET_POSITIONS] =
+float constexpr DruidPetPositionAnglesByPosNumber[DRUID_MAX_PET_POSITIONS] =
 {
     0.f,//left
     float(M_PI)/2,//back
     float(M_PI)//right
 };
-float const DKPetPositionAnglesByPosNumber[DK_MAX_PET_POSITIONS] =
+float constexpr DKPetPositionAnglesByPosNumber[DK_MAX_PET_POSITIONS] =
 {
     0.f,
     float(M_PI),
@@ -40,7 +40,7 @@ float const DKPetPositionAnglesByPosNumber[DK_MAX_PET_POSITIONS] =
     2.4434609f,//7*M_PI/9
     2.7925268f //8*M_PI/9
 };
-float const DarkRangerPetPositionAnglesByPosNumber[DARK_RANGER_MAX_PET_POSITIONS] =
+float constexpr DarkRangerPetPositionAnglesByPosNumber[DARK_RANGER_MAX_PET_POSITIONS] =
 {
     0.f,
     float(M_PI),
@@ -48,7 +48,7 @@ float const DarkRangerPetPositionAnglesByPosNumber[DARK_RANGER_MAX_PET_POSITIONS
     1.5707963f,//2*M_PI/4
     2.3561944f //3*M_PI/4
 };
-float const NecromancerPetPositionAnglesByPosNumber[NECROMANCER_MAX_PET_POSITIONS] =
+float constexpr NecromancerPetPositionAnglesByPosNumber[NECROMANCER_MAX_PET_POSITIONS] =
 {
     0.f,
     float(M_PI),

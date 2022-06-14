@@ -181,8 +181,8 @@ void BotDataMgr::LoadNpcBots(bool spawn)
 
         CellCoord c = Trinity::ComputeCellCoord(pos_x, pos_y);
         GridCoord g = Trinity::ComputeGridCoord(pos_x, pos_y);
-        ASSERT(c.IsCoordValid() && "Invalid Cell coord!");
-        ASSERT(g.IsCoordValid() && "Invalid Grid coord!");
+        ASSERT(c.IsCoordValid(), "Invalid Cell coord!");
+        ASSERT(g.IsCoordValid(), "Invalid Grid coord!");
         Map* map = sMapMgr->CreateBaseMap(mapId);
         map->LoadGrid(pos_x, pos_y);
 

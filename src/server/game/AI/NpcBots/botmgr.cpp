@@ -729,7 +729,7 @@ void BotMgr::OnTeleportFar(uint32 mapId, float x, float y, float z, float ori)
     for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
     {
         bot = itr->second;
-        ASSERT(bot && "BotMgr::OnTeleportFar(): bot does not exist!!!");
+        ASSERT(bot, "BotMgr::OnTeleportFar(): bot does not exist!!!");
 
         if (bot->IsTempBot())
             continue;
@@ -806,8 +806,8 @@ void BotMgr::TeleportBot(Creature* bot, Map* newMap, Position* pos)
 void BotMgr::CleanupsBeforeBotDelete(ObjectGuid guid, uint8 /*removetype*/)
 {
     BotMap::const_iterator itr = _bots.find(guid);
-    ASSERT(itr != _bots.end() && "Trying to remove bot which does not belong to this botmgr(b)!!");
-    ASSERT(_owner->IsInWorld() && "Trying to remove bot while not in world(b)!!");
+    ASSERT(itr != _bots.end(), "Trying to remove bot which does not belong to this botmgr(b)!!");
+    ASSERT(_owner->IsInWorld(), "Trying to remove bot while not in world(b)!!");
 
     Creature* bot = itr->second;
 
@@ -850,8 +850,8 @@ void BotMgr::RemoveAllBots(uint8 removetype)
 void BotMgr::RemoveBot(ObjectGuid guid, uint8 removetype)
 {
     BotMap::const_iterator itr = _bots.find(guid);
-    ASSERT(itr != _bots.end() && "Trying to remove bot which does not belong to this botmgr(a)!!");
-    ASSERT(_owner->IsInWorld() && "Trying to remove bot while not in world(a)!!");
+    ASSERT(itr != _bots.end(), "Trying to remove bot which does not belong to this botmgr(a)!!");
+    ASSERT(_owner->IsInWorld(), "Trying to remove bot while not in world(a)!!");
 
     //trying to remove temp bot second time means removing all bots
     //just erase from bots because already cleaned up

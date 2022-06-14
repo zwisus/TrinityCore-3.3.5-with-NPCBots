@@ -1363,7 +1363,7 @@ public:
                     itemSlot = BOT_SLOT_OFFHAND;
                 }
                 else
-                    ASSERT(false && "rogue bot attempted to enchant his weapons but cannot find a weapon to apply it!");
+                    ASSERT(false, "rogue bot attempted to enchant his weapons but cannot find a weapon to apply it!");
 
                 if (!IAmFree())
                     master->GetSession()->SendEnchantmentLog(me->GetGUID(), me->GetGUID(), item->GetEntry(), enchant_id);
