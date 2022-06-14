@@ -20,6 +20,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
+#include "Transport.h"
 #include "World.h"
 /*
 Npc Bot Manager by Trickerer (onlysuffering@gmail.com)
@@ -748,6 +749,12 @@ void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z,
 
     if (bot->GetVehicle())
         bot->ExitVehicle();
+
+    if (bot->GetTransport())
+    {
+        bot->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+        bot->GetTransport()->RemovePassenger(bot);
+    }
 
     if (bot->IsInWorld())
         bot->CastSpell(bot, COSMETIC_TELEPORT_EFFECT, true);

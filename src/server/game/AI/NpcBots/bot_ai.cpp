@@ -27,6 +27,7 @@
 #include "ScriptedGossip.h"
 #include "SpellAuraEffects.h"
 #include "TemporarySummon.h"
+#include "Transport.h"
 #include "World.h"
 /*
 NpcBot System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
@@ -14714,6 +14715,23 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         //    me->GetVehicleBase()->SetSpeed(MOVE_FLIGHT, master->GetVehicleBase()->GetSpeedRate(MOVE_FLIGHT) * 1.37f);
         //    me->GetVehicleBase()->SetSpeed(MOVE_RUN, master->GetVehicleBase()->GetSpeedRate(MOVE_FLIGHT) * 1.37f);
         //}
+        //Transport state
+        if (me->GetTransport() != master->GetTransport())
+        {
+            if (master->GetTransport())
+            {
+                if (me->GetDistance2d(master) < 20.f)
+                {
+                    master->GetTransport()->AddPassenger(me);
+                    me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                }
+            }
+            else
+            {
+                me->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                me->GetTransport()->RemovePassenger(me);
+            }
+        }
         //Model size / Combat reach
         if (me->GetDisplayId() == me->GetNativeDisplayId())
         {
@@ -15251,6 +15269,11 @@ bool bot_ai::FinishTeleport(/*uint32 mapId, uint32 instanceId, float x, float y,
     }
 
     me->SetMap(map);
+    if (master->GetTransport())
+    {
+        master->GetTransport()->AddPassenger(me);
+        me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+    }
     me->Relocate(master);
     map->AddToMap(me);
     me->BotStopMovement();
