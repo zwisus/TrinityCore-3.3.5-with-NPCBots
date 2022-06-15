@@ -273,6 +273,15 @@ uint8 BotMgr::GetNpcBotsCountByRole(uint32 roles) const
     return count;
 }
 
+uint8 BotMgr::GetNpcBotsCountByVehicleEntry(uint32 creEntry) const
+{
+    uint8 count = 0;
+    for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
+        if (itr->second && itr->second->GetVehicle() && itr->second->GetVehicleBase()->GetEntry() == creEntry)
+            ++count;
+    return count;
+}
+
 uint8 BotMgr::GetNpcBotSlot(Creature const* bot) const
 {
     uint8 count = 0;

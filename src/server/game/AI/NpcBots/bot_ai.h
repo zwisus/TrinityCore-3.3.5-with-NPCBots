@@ -72,7 +72,9 @@ class bot_ai : public CreatureAI
         virtual void OnBotOwnerExitVehicle(Vehicle const* /*vehicle*/);
 
         Unit* SpawnVehicle(uint32 creEntry, uint32 vehEntry);
-        void ChooseVehicleForEncounter(Player const* owner, uint32 &creEntry, uint32 &vehEntry) const;
+        void ChooseVehicleForEncounter(uint32 &creEntry, uint32 &vehEntry) const;
+
+        static Position GetAbsoluteTransportPosition(WorldObject const* object);
 
         static const std::string& LocalizedNpcText(Player const* forPlayer, uint32 textId);
 

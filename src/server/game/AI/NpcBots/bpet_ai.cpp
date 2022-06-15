@@ -6,6 +6,7 @@
 #include "MotionMaster.h"
 #include "ObjectMgr.h"
 #include "SpellAuraEffects.h"
+#include "Transport.h"
 #include "World.h"
 /*
 NpcBot Pet System by Trickerer (https://github.com/trickerer/Trinity-Bots; onlysuffering@gmail.com)
@@ -110,7 +111,7 @@ void bot_pet_ai::_calculatePos(Position& pos) const
 {
     float x,y,z;
     //destination
-    if (!petOwner->GetMotionMaster()->GetDestination(x, y, z))
+    if (petOwner->GetTransport() || !petOwner->GetMotionMaster()->GetDestination(x, y, z))
         petOwner->GetPosition(x, y, z);
     //relative angle
     float o = petOwner->GetOrientation() + PET_FOLLOW_ANGLE;
@@ -130,7 +131,8 @@ void bot_pet_ai::_calculatePos(Position& pos) const
     //distance
     x += (PET_FOLLOW_DIST + me->GetCombatReach()) * std::cos(o);
     y += (PET_FOLLOW_DIST + me->GetCombatReach()) * std::sin(o);
-    me->UpdateGroundPositionZ(x, y, z);
+    if (!petOwner->GetTransport())
+        me->UpdateGroundPositionZ(x, y, z);
     if (me->GetPositionZ() < z)
         z += 0.5f; //prevent going underground
 
@@ -2091,6 +2093,13 @@ void bot_pet_ai::IsSummonedBy(WorldObject* summoner)
     ASSERT(!me->GetBotPetAI());
     me->SetBotPetAI(this);
     SetPetStats(true);
+    if (petOwner->GetTransport())
+    {
+        petOwner->GetTransport()->AddPassenger(me);
+        me->m_movementInfo.transport.pos.Relocate(petOwner->GetTransOffset());
+        me->Relocate(bot_ai::GetAbsoluteTransportPosition(petOwner));
+        me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+    }
 }
 //This function is called after Spell::SendSpellCooldown() and Spell::DoAllEffects...() call
 void bot_pet_ai::OnBotPetSpellGo(Spell const* spell, bool ok)
@@ -2248,6 +2257,24 @@ bool bot_pet_ai::GlobalUpdate(uint32 diff)
         {
             //BotWhisper("Somehow we are not is same phase! Fixing that...");
             me->SetPhaseMask(petOwner->GetBotOwner()->GetPhaseMask(), true);
+        }
+        if (me->GetTransport() != petOwner->GetBotOwner()->GetTransport())
+        {
+            if (petOwner->GetBotOwner()->GetTransport())
+            {
+                if (me->GetDistance2d(petOwner->GetBotOwner()) < 20.f)
+                {
+                    petOwner->GetBotOwner()->GetTransport()->AddPassenger(me);
+                    me->m_movementInfo.transport.pos.Relocate(petOwner->GetBotOwner()->GetTransOffset());
+                    me->Relocate(bot_ai::GetAbsoluteTransportPosition(petOwner->GetBotOwner()));
+                    me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                }
+            }
+            else
+            {
+                me->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                me->GetTransport()->RemovePassenger(me);
+            }
         }
         //end DEBUG
     }

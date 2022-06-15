@@ -13240,9 +13240,12 @@ void bot_ai::OnBotOwnerSpellGo(Spell const* spell, bool ok)
             {
                 targets.SetDst(spell->m_targets);
                 veh->GetBase()->ToCreature()->BotStopMovement();
-                veh->GetBase()->SetFacingTo(me->GetAbsoluteAngle(spell->m_targets.GetDstPos()));
+                float destangle = me->GetAbsoluteAngle(spell->m_targets.GetDstPos());
+                if (veh->GetBase()->GetTransport())
+                    destangle = Position::NormalizeOrientation(destangle + veh->GetBase()->GetTransport()->GetOrientation());
+                veh->GetBase()->SetFacingTo(destangle);
                 //force orientation (inconsistent with SetFacingTo)
-                veh->GetBase()->SetOrientation(me->GetAbsoluteAngle(spell->m_targets.GetDstPos()));
+                veh->GetBase()->SetOrientation(destangle);
             }
             if (spell->m_targets.GetSpeed() != 0)
                 targets.SetSpeed(spell->m_targets.GetSpeed());
@@ -14337,7 +14340,7 @@ void bot_ai::DoVehicleActions(uint32 diff)
         default:
             strat = BOT_VEH_STRAT_GENERIC;
             if (curVehStrat != strat)
-                TC_LOG_ERROR("scripts", "bot_ai DoVehicleActions: %s has to use generic strat for vehicle creature %s (%u)",
+                TC_LOG_DEBUG("scripts", "bot_ai DoVehicleActions: %s has to use generic strat for vehicle creature %s (%u)",
                 me->GetName().c_str(), me->GetVehicleBase()->GetName().c_str(), me->GetVehicleBase()->GetEntry());
             break;
     }
@@ -14723,6 +14726,8 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 if (me->GetDistance2d(master) < 20.f)
                 {
                     master->GetTransport()->AddPassenger(me);
+                    me->m_movementInfo.transport.pos.Relocate(master->GetTransOffset());
+                    me->Relocate(GetAbsoluteTransportPosition(master));
                     me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 }
             }
@@ -15272,9 +15277,12 @@ bool bot_ai::FinishTeleport(/*uint32 mapId, uint32 instanceId, float x, float y,
     if (master->GetTransport())
     {
         master->GetTransport()->AddPassenger(me);
+        me->m_movementInfo.transport.pos.Relocate(master->GetTransOffset());
+        me->Relocate(GetAbsoluteTransportPosition(master));
         me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
     }
-    me->Relocate(master);
+    else
+        me->Relocate(master);
     map->AddToMap(me);
     me->BotStopMovement();
     //bot->SetAI(oldAI);
@@ -15430,10 +15438,10 @@ void bot_ai::AfterBotOwnerEnterVehicle()
             uint32 creEntry = 0;
             uint32 vehEntry;
 
-            ChooseVehicleForEncounter(master, creEntry, vehEntry);
+            ChooseVehicleForEncounter(creEntry, vehEntry);
             if (!creEntry)
             {
-                TC_LOG_ERROR("scripts", "OnBotOwnerEnterVehicle: no vehicle selected for bot master veh %s!",
+                TC_LOG_DEBUG("scripts", "OnBotOwnerEnterVehicle: no vehicle selected for bot master veh %s!",
                     master->GetVehicleCreatureBase()->GetName().c_str());
                 return;
             }
@@ -15521,23 +15529,57 @@ Unit* bot_ai::SpawnVehicle(uint32 creEntry, uint32 vehEntry)
         ASSERT(sVehicleStore.LookupEntry(vehEntry));
 
     Map* map = me->GetMap();
-    float x, y, z, o = master->GetOrientation();
-    me->GetClosePoint(x, y, z, me->GetCombatReach());
+    float x, y, z, o;
+    TempSummon* vc;
+    if (!me->GetTransport())
+    {
+        o = master->GetOrientation();
+        me->GetClosePoint(x, y, z, me->GetCombatReach());
+        vc = new TempSummon(nullptr, me, false);
+        ASSERT(vc->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, master->GetPhaseMask(), creEntry, Position(x,y,z,o), nullptr, vehEntry, true));
+        vc->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
+        vc->InitStats(0);
+        ASSERT(map->AddToMap(vc->ToCreature()));
+        vc->InitSummon(); //not needed really
+    }
+    else
+    {
+        if (master->GetVehicle())
+            o = master->GetVehicleBase()->GetTransOffsetO();
+        else
+            o = master->GetTransOffsetO();
+        x = me->GetTransOffsetX();
+        y = me->GetTransOffsetY();
+        z = me->GetTransOffsetZ();
+        Position vehpos(x, y, z, o);
+        me->GetTransport()->CalculatePassengerPosition(x, y, z, &o);
+        vc = new TempSummon(nullptr, me, false);
+        ASSERT(vc->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, master->GetPhaseMask(), creEntry, Position(x,y,z,o), nullptr, vehEntry, true));
 
-    //TempSummon* vc = map->SummonCreature(creEntry, vpos, nullptr, 0, nullptr, 0, vehEntry);
-    TempSummon* vc = new TempSummon(nullptr, me, false);
-    ASSERT(vc->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, master->GetPhaseMask(), creEntry, Position(x, y, z, o), nullptr, vehEntry, true));
-    vc->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
-    vc->InitStats(0);
-    map->AddToMap(vc->ToCreature());
-    vc->InitSummon(); //not needed really
+        //vc->SetTransport(me->GetTransport());
+        //vc->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
+        //vc->m_movementInfo.transport.guid = GetGUID();
+        me->GetTransport()->AddPassenger(vc);
+
+        vc->m_movementInfo.transport.pos.Relocate(vehpos);
+        vc->Relocate(x, y, z, o);
+        vc->SetHomePosition(x, y, z, o);
+        vc->SetTransportHomePosition(vehpos);
+
+        vc->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+        vc->InitStats(0);
+        ASSERT(map->AddToMap(vc->ToCreature()));
+        vc->InitSummon(); //not needed really
+        vc->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
+        //vc = me->GetTransport()->SummonPassenger(creEntry, vehpos, TEMPSUMMON_CORPSE_DESPAWN);
+    }
 
     return vc;
 }
 
-void bot_ai::ChooseVehicleForEncounter(Player const* owner, uint32 &creEntry, uint32 &vehEntry) const
+void bot_ai::ChooseVehicleForEncounter(uint32 &creEntry, uint32 &vehEntry) const
 {
-    Vehicle* mVeh = owner->GetVehicle();
+    Vehicle* mVeh = master->GetVehicle();
     ASSERT_NODEBUGINFO(mVeh);
     ASSERT_NODEBUGINFO(mVeh->GetBase()->GetTypeId() == TYPEID_UNIT);
 
@@ -15590,8 +15632,22 @@ void bot_ai::ChooseVehicleForEncounter(Player const* owner, uint32 &creEntry, ui
         //        default:                 creEntry = CREATURE_TOC_STEED_QUELDOREI;        break;
         //    }
         //    break;
+        case CREATURE_ICC_GUNSHIPCANNON_ALLIANCE:
+        case CREATURE_ICC_GUNSHIPCANNON_HORDE:
+            //limited amount of cannons
+            if (!IsTank() && HasRole(BOT_ROLE_DPS) &&
+                master->GetBotMgr()->GetNpcBotsCountByVehicleEntry(mVeh->GetBase()->GetEntry()) <
+                std::max<uint8>(master->GetBotMgr()->GetNpcBotsCount() / 2, 8))
+                creEntry = mVeh->GetBase()->GetEntry();
+            break;
+        case CREATURE_ICC_ABOMINATION_10_N:
+        case CREATURE_ICC_ABOMINATION_25_N:
+        case CREATURE_ICC_ABOMINATION_10_H:
+        case CREATURE_ICC_ABOMINATION_25_H:
+            //no abomination bots
+            break;
         default:
-            if (VehicleSeatEntry const* seat = mVeh->GetSeatForPassenger(owner))
+            if (VehicleSeatEntry const* seat = mVeh->GetSeatForPassenger(master))
             {
                 if (seat->Flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
                 {
@@ -15602,17 +15658,32 @@ void bot_ai::ChooseVehicleForEncounter(Player const* owner, uint32 &creEntry, ui
             }
 
             TC_LOG_ERROR("scripts", "ChooseVehicleForEncounter: unhandled master vehicle creature %s (%u)",
-                owner->GetVehicleBase()->GetName().c_str(), owner->GetVehicleBase()->GetEntry());
+                master->GetVehicleBase()->GetName().c_str(), master->GetVehicleBase()->GetEntry());
             return;
     }
 
-    if (creEntry != mVeh->GetBase()->GetEntry())
+    if (creEntry && creEntry != mVeh->GetBase()->GetEntry())
     {
         CreatureTemplate const* cProto = sObjectMgr->GetCreatureTemplate(creEntry);
         ASSERT_NODEBUGINFO(cProto);
         vehEntry = cProto->VehicleId;
         ASSERT_NODEBUGINFO(sVehicleStore.LookupEntry(vehEntry));
     }
+}
+
+Position bot_ai::GetAbsoluteTransportPosition(WorldObject const* object)
+{
+    if (!object->GetTransport())
+        return object->GetPosition();
+
+    Position p = object->GetTransport()->GetPosition();
+    Position t = object->GetTransOffset();
+    t.m_positionX += p.m_positionX;
+    t.m_positionY += p.m_positionY;
+    t.m_positionZ += p.m_positionZ;
+    t.SetOrientation(Position::NormalizeOrientation(t.GetOrientation() + p.GetOrientation()));
+
+    return t;
 }
 
 int32 bot_ai::GetBotResistanceBonus(SpellSchoolMask mask) const

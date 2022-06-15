@@ -120,6 +120,7 @@ class BotMgr
         bool HaveBot() const { return !_bots.empty(); }
         uint8 GetNpcBotsCount() const;
         uint8 GetNpcBotsCountByRole(uint32 roles) const;
+        uint8 GetNpcBotsCountByVehicleEntry(uint32 creEntry) const;
         uint8 GetNpcBotSlot(Creature const* bot) const;
         uint8 GetNpcBotSlotByRole(uint32 roles, Creature const* bot) const;
         uint32 GetAllNpcBotsClassMask() const;
