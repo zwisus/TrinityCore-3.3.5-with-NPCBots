@@ -34,6 +34,7 @@ uint8 _maxNpcBots;
 uint8 _maxClassNpcBots;
 uint8 _xpReductionNpcBots;
 uint8 _healTargetIconFlags;
+uint8 _tankingTargetIconFlags;
 uint8 _offTankingTargetIconFlags;
 uint8 _dpsTargetIconFlags;
 uint8 _rangedDpsTargetIconFlags;
@@ -191,7 +192,8 @@ void BotMgr::LoadConfig(bool reload)
     _filterRaces                    = sConfigMgr->GetBoolDefault("NpcBot.Botgiver.FilterRaces", false);
     _basefollowdist                 = sConfigMgr->GetIntDefault("NpcBot.BaseFollowDistance", 30);
     _xpReductionNpcBots             = sConfigMgr->GetIntDefault("NpcBot.XpReduction", 0);
-    _healTargetIconFlags            = sConfigMgr->GetIntDefault("NpcBot.HealTargetIconsMask", 0);
+    _healTargetIconFlags            = sConfigMgr->GetIntDefault("NpcBot.HealTargetIconMask", 0);
+    _tankingTargetIconFlags         = sConfigMgr->GetIntDefault("NpcBot.TankTargetIconMask", 0);
     _offTankingTargetIconFlags      = sConfigMgr->GetIntDefault("NpcBot.OffTankTargetIconMask", 0);
     _dpsTargetIconFlags             = sConfigMgr->GetIntDefault("NpcBot.DPSTargetIconMask", 0);
     _rangedDpsTargetIconFlags       = sConfigMgr->GetIntDefault("NpcBot.RangedDPSTargetIconMask", 0);
@@ -240,7 +242,7 @@ void BotMgr::LoadConfig(bool reload)
     _mult_healing                   = std::min<float>(_mult_healing,   10.f);
 
     //exclusions
-    uint8 dpsFlags = /*_offTankingTargetIconFlags | */_dpsTargetIconFlags | _rangedDpsTargetIconFlags;
+    uint8 dpsFlags = /*_tankingTargetIconFlags | _offTankingTargetIconFlags | */_dpsTargetIconFlags | _rangedDpsTargetIconFlags;
     if (uint8 interFlags = (_noDpsTargetIconFlags & dpsFlags))
     {
         _noDpsTargetIconFlags &= ~interFlags;
@@ -395,6 +397,10 @@ uint8 BotMgr::GetMaxClassBots()
 uint8 BotMgr::GetHealTargetIconFlags()
 {
     return _healTargetIconFlags;
+}
+uint8 BotMgr::GetTankTargetIconFlags()
+{
+    return _tankingTargetIconFlags;
 }
 uint8 BotMgr::GetOffTankTargetIconFlags()
 {

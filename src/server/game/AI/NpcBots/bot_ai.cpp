@@ -3647,7 +3647,48 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
                         if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
                             unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
                         {
-                            //TC_LOG_ERROR("entities.unit", "_getTarget: %s found new tanking icon target %s", me->GetName().c_str(), unit->GetName().c_str());
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: %s found new offtanking icon target %s", me->GetName().c_str(), unit->GetName().c_str());
+                            Unit* tempTar = tankTar ? tankTar : unit;
+                            tankTar = unit;
+                            Unit* tVic = unit->GetVictim();
+                            if (!tVic || (tVic != me && tVic->GetVictim() == unit && IsTank(tVic) && IsInBotParty(tVic)))
+                            {
+                                //TC_LOG_ERROR("entities.unit", "_getTarget: %s skipped %s (%s)", me->GetName().c_str(), unit->GetName().c_str(), tVic->GetName().c_str());
+                                tankTar = tempTar;
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (tankTar)
+        {
+            //TC_LOG_ERROR("entities.unit", "_getTarget: %s returning %s", me->GetName().c_str(), tankTar->GetName().c_str());
+            return tankTar;
+        }
+    }
+    if (gr && IsTank())
+    {
+        Unit* tankTar = nullptr;
+        for (int8 i = TARGETICONCOUNT - 1; i >= 0; --i)
+        {
+            if (BotMgr::GetTankTargetIconFlags() & GroupIconsFlags[i])
+            {
+                if (ObjectGuid guid = gr->GetTargetIcons()[i])
+                {
+                    if (mytar && mytar->GetGUID() == guid && mytar->GetVictim() == me)
+                    {
+                        //TC_LOG_ERROR("entities.unit", "_getTarget: %s continues %s", me->GetName().c_str(), mytar->GetName().c_str());
+                        return mytar;
+                    }
+
+                    if (Unit* unit = ObjectAccessor::GetUnit(*me, guid))
+                    {
+                        if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
+                            unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
+                        {
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: %s found new mtanking icon target %s", me->GetName().c_str(), unit->GetName().c_str());
                             Unit* tempTar = tankTar ? tankTar : unit;
                             tankTar = unit;
                             Unit* tVic = unit->GetVictim();
@@ -3684,7 +3725,7 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
                         if (unit->IsVisible() && unit->isTargetableForAttack(false) && me->IsValidAttackTarget(unit) &&
                             unit->IsInCombat() && (CanSeeEveryone() || (me->CanSeeOrDetect(unit) && unit->InSamePhase(me))))
                         {
-                            //TC_LOG_ERROR("entities.unit", "_getTarget: found dps icon target %s", unit->GetName().c_str());
+                            //TC_LOG_ERROR("entities.unit", "_getTarget: found rdps icon target %s", unit->GetName().c_str());
                             return unit;
                         }
                     }
