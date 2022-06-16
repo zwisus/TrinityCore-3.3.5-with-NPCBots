@@ -2028,14 +2028,14 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
         if (_botclass < BOT_CLASS_EX_START)
             botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_SPEC) << ": " << uint32(_spec);
 
-        //debug
-        //botstring << "\n_lastWMOAreaId: " << uint32(_lastWMOAreaId);
-
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_MAIN) << ": " << uint32(_roleMask & BOT_ROLE_MASK_MAIN);
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_GATHERING) << ": " << uint32(_roleMask & BOT_ROLE_MASK_GATHERING);
 
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_PVP_KILLS) << ": " << uint32(_pvpKillsCount) << ", " << LocalizedNpcText(player, BOT_TEXT_PLAYERS) << ": " << uint32(_playerKillsCount) << ", " << LocalizedNpcText(player, BOT_TEXT_TOTAL) << ": " << uint32(_killsCount);
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_DIED_) << uint32(_deathsCount) << LocalizedNpcText(player, BOT_TEXT__TIMES);
+
+        //debug
+        botstring << "\n_lastWMOAreaId: " << uint32(_lastWMOAreaId);
 
         //debug
         //botstring << "\ncurrent Engage timer: " << GetEngageTimer();
@@ -3579,9 +3579,10 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
         return mytar;
 
     //Immediate targets
-    if (!IAmFree() && !IsTank() && HasRole(BOT_ROLE_DPS) && me->GetMap()->GetEntry() && !me->GetMap()->GetEntry()->IsWorldMap())
+    if (!IAmFree() && me->GetMap()->GetEntry() && !me->GetMap()->GetEntry()->IsWorldMap())
     {
-        static constexpr std::array<uint32, 1> WMOAreaGroupMarrowgar = { 47833 }; // The Spire
+        static constexpr std::array WMOAreaGroupMarrowgar = { 47833u }; // The Spire
+        static constexpr std::array WMOAreaGroupSindragosa = { 48066u }; // Frost Queen's Lair
 
         static auto isInWMOArea = [=](auto const& ids) {
             for (auto wmoId : ids) {
@@ -3591,13 +3592,15 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
             return false;
         };
 
-        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupMarrowgar) && me->IsInCombat() && // Icecrown Citadel - Lord Marrowgar
+        // Icecrown Citadel - Lord Marrowgar
+        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupMarrowgar) && me->IsInCombat() && HasRole(BOT_ROLE_DPS) &&
+            (!IsTank() || (!mytar && !me->IsInCombat())) &&
             (!mytar || (mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE1 && mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE2 &&
             mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE3)))
         {
-            static constexpr std::array<uint32, 3> BoneSpikeIds = { CREATURE_ICC_BONE_SPIKE1, CREATURE_ICC_BONE_SPIKE2, CREATURE_ICC_BONE_SPIKE3 };
+            static constexpr std::array BoneSpikeIds = { CREATURE_ICC_BONE_SPIKE1, CREATURE_ICC_BONE_SPIKE2, CREATURE_ICC_BONE_SPIKE3 };
 
-            auto boneSpikeCheck = [=, mydist = 50.f](Unit* unit) mutable {
+            auto boneSpikeCheck = [=, mydist = 50.f](Unit const* unit) mutable {
                 for (uint32 bsId : BoneSpikeIds) {
                     if (unit->GetEntry() == bsId)  {
                         if (HasRole(BOT_ROLE_RANGED))
@@ -3621,6 +3624,79 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
             {
                 // Bone spike is always attackable - no additional checks needed
                 return spike;
+            }
+        }
+
+        // Icecrown Citadel - Sindragosa
+        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupSindragosa)/* &&
+            (!mytar || (mytar->GetEntry() != CREATURE_ICC_ICE_TOMB1 && mytar->GetEntry() != CREATURE_ICC_ICE_TOMB2 &&
+            mytar->GetEntry() != CREATURE_ICC_ICE_TOMB3 && mytar->GetEntry() != CREATURE_ICC_ICE_TOMB4))*/)
+        {
+            static constexpr std::array IceTombIds = { CREATURE_ICC_ICE_TOMB1, CREATURE_ICC_ICE_TOMB2, CREATURE_ICC_ICE_TOMB3, CREATURE_ICC_ICE_TOMB4 };
+            static constexpr std::array SindragosaIds = { CREATURE_ICC_SINDRAGOSA1, CREATURE_ICC_SINDRAGOSA2, CREATURE_ICC_SINDRAGOSA3, CREATURE_ICC_SINDRAGOSA4 };
+
+            static auto SiItCheck = [=](Unit const* unit) {
+                if (unit->IsAlive())
+                {
+                    for (uint32 itId : IceTombIds)
+                        if (unit->GetEntry() == itId)
+                            return true;
+                    for (uint32 siId : SindragosaIds)
+                        if (unit->GetEntry() == siId)
+                            return true;
+                }
+                return false;
+            };
+
+            std::list<Creature*> cList;
+            Trinity::CreatureListSearcher searcher(master, cList, SiItCheck);
+            Cell::VisitAllObjects(me, searcher, 200.f);
+
+            if (!cList.empty())
+            {
+                Creature* sindragosa = nullptr;
+                Creature* icetomb = nullptr;
+                for (Creature* siit : cList)
+                {
+                    if (!icetomb)
+                    {
+                        for (uint32 itId : IceTombIds)
+                        {
+                            if (siit->GetEntry() == itId)
+                            {
+                                icetomb = siit;
+                                break;
+                            }
+                        }
+                    }
+                    if (!sindragosa)
+                    {
+                        for (uint32 siId : SindragosaIds)
+                        {
+                            if (siit->GetEntry() == siId)
+                            {
+                                sindragosa = siit;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                        break;
+                }
+
+                if (icetomb)
+                {
+                    bool air_phase = sindragosa && sindragosa->GetReactState() == REACT_PASSIVE;
+                    bool above35 = GetHealthPCT(icetomb) > 35;
+                    if (!air_phase || above35)
+                        return icetomb;
+                    else if (mytar == icetomb || !master->GetVictim())
+                    {
+                        if (botPet && botPet->GetVictim())
+                            botPet->AttackStop();
+                        return nullptr;
+                    }
+                }
             }
         }
     }
@@ -15681,10 +15757,14 @@ void bot_ai::ChooseVehicleForEncounter(uint32 &creEntry, uint32 &vehEntry) const
                 std::max<uint8>(master->GetBotMgr()->GetNpcBotsCount() / 2, 8))
                 creEntry = mVeh->GetBase()->GetEntry();
             break;
-        case CREATURE_ICC_ABOMINATION_10_N:
-        case CREATURE_ICC_ABOMINATION_25_N:
-        case CREATURE_ICC_ABOMINATION_10_H:
-        case CREATURE_ICC_ABOMINATION_25_H:
+        case CREATURE_ICC_MUTATED_ABOMINATION1:
+        case CREATURE_ICC_MUTATED_ABOMINATION2:
+        case CREATURE_ICC_MUTATED_ABOMINATION3:
+        case CREATURE_ICC_MUTATED_ABOMINATION4:
+        case CREATURE_ICC_MUTATED_ABOMINATION5:
+        case CREATURE_ICC_MUTATED_ABOMINATION6:
+        case CREATURE_ICC_MUTATED_ABOMINATION7:
+        case CREATURE_ICC_MUTATED_ABOMINATION8:
             //no abomination bots
             break;
         default:

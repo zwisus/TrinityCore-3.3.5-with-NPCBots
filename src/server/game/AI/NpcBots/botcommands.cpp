@@ -394,7 +394,7 @@ public:
             uint8 bot_class = BotMgr::BotClassByClassName(std::string(class_name));
             if (bot_class == BOT_CLASS_NONE)
             {
-                handler->PSendSysMessage("Unknown bot class %s!", std::string(class_name).c_str());
+                handler->PSendSysMessage("Unknown bot name or class %s!", std::string(class_name).c_str());
                 return true;
             }
 
@@ -455,6 +455,10 @@ public:
             target_guid = bot->GetGUID();
         else if (target_token == "me" || target_token == "master")
             target_guid = owner->GetGUID();
+        else if (target_token == "mypet")
+            target_guid = owner->GetPetGUID();
+        else if (target_token == "myvehicle")
+            target_guid = owner->GetVehicle() ? owner->GetVehicleBase()->GetGUID() : ObjectGuid::Empty;
         else if (target_token == "target")
             target_guid = bot->GetTarget();
         else if (target_token == "mytarget")
@@ -462,11 +466,11 @@ public:
         else
         {
             handler->PSendSysMessage("Invalid target token '%s'!", *target_token);
-            handler->SendSysMessage("Valid target tokens:\n    '','bot','self', 'me','master', 'target', 'mytarget'");
+            handler->SendSysMessage("Valid target tokens:\n    '','bot','self', 'me','master', 'mypet', 'myvehicle', 'target', 'mytarget'");
             return true;
         }
 
-        Unit* target = ObjectAccessor::GetUnit(*owner, target_guid);
+        Unit* target = target_guid ? ObjectAccessor::GetUnit(*owner, target_guid) : nullptr;
         if (!target || !bot->FindMap() || target->FindMap() != bot->FindMap())
         {
             handler->PSendSysMessage("Invalid target '%s'!", target ? target->GetName().c_str() : "unknown");
