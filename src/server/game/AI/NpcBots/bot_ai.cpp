@@ -13413,9 +13413,9 @@ void bot_ai::OnBotOwnerSpellGo(Spell const* spell, bool ok)
             {
                 targets.SetDst(spell->m_targets);
                 veh->GetBase()->ToCreature()->BotStopMovement();
-                float destangle = me->GetAbsoluteAngle(spell->m_targets.GetDstPos());
+                float destangle = veh->GetBase()->GetAbsoluteAngle(spell->m_targets.GetDstPos());
                 if (veh->GetBase()->GetTransport())
-                    destangle = Position::NormalizeOrientation(destangle + veh->GetBase()->GetTransport()->GetOrientation());
+                    destangle = Position::NormalizeOrientation(destangle - veh->GetBase()->GetTransport()->GetOrientation());
                 veh->GetBase()->SetFacingTo(destangle);
                 //force orientation (inconsistent with SetFacingTo)
                 veh->GetBase()->SetOrientation(destangle);
