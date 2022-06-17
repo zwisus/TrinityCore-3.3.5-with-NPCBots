@@ -3583,6 +3583,7 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
     {
         static constexpr std::array WMOAreaGroupMarrowgar = { 47833u }; // The Spire
         static constexpr std::array WMOAreaGroupSindragosa = { 48066u }; // Frost Queen's Lair
+        static constexpr std::array WMOAreaGroupLichKing = { 50038u, 50040u }; // The Frozen Throne
 
         static auto isInWMOArea = [=](auto const& ids) {
             for (auto wmoId : ids) {
@@ -3698,6 +3699,49 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
                     }
                 }
             }
+        }
+
+        // Icecrown Citadel - The Lich King
+        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupLichKing) && me->IsInCombat() && HasRole(BOT_ROLE_DPS) && !IsTank())
+        {
+            static constexpr std::array IceSphereIds = { CREATURE_ICC_ICE_SPHERE1, CREATURE_ICC_ICE_SPHERE2, CREATURE_ICC_ICE_SPHERE3, CREATURE_ICC_ICE_SPHERE4 };
+            static constexpr std::array ValkyrShadowguardIds = { CREATURE_ICC_VALKYR_LK1, CREATURE_ICC_VALKYR_LK2, CREATURE_ICC_VALKYR_LK3, CREATURE_ICC_VALKYR_LK4 };
+
+            static auto valkyrCheck = [=](Unit const* unit) {
+                for (uint32 vsId : ValkyrShadowguardIds) {
+                    if (unit->IsAlive() && unit->GetEntry() == vsId && !unit->HasUnitFlag(UNIT_FLAG_UNINTERACTIBLE))
+                        return true;
+                }
+                return false;
+            };
+
+            Creature* valkyr = nullptr;
+            Trinity::CreatureSearcher searcher(me, valkyr, valkyrCheck);
+            Cell::VisitAllObjects(me, searcher, 50.f);
+
+            if (valkyr)
+                return valkyr;
+
+            Unit const* usearcher = master->IsAlive() ? master->ToUnit() : me->ToUnit();
+            auto iceSphereCheck = [=, mydist = 30.f](Unit const* unit) mutable {
+                for (uint32 isId : IceSphereIds) {
+                    if (unit->IsAlive() && unit->GetEntry() == isId) {
+                        float dist = usearcher->GetDistance2d(unit);
+                        if (dist < mydist && (HasRole(BOT_ROLE_RANGED) || dist < 7.f)) {
+                            mydist = dist;
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
+            Creature* sphere = nullptr;
+            Trinity::CreatureLastSearcher searcher2(usearcher, sphere, iceSphereCheck);
+            Cell::VisitAllObjects(usearcher, searcher2, 30.f);
+
+            if (sphere)
+                return sphere;
         }
     }
 
