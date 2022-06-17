@@ -16705,7 +16705,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->CastTimeEntry = nullptr;//sSpellCastTimesStore.LookupEntry(2); //250ms
     sinfo->SchoolMask = SPELL_SCHOOL_MASK_SHADOW | SPELL_SCHOOL_MASK_ARCANE;
     sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
-    sinfo->MaxAffectedTargets = 10;
+    sinfo->MaxAffectedTargets = 100;
     sinfo->Attributes |= SPELL_ATTR0_ABILITY | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR0_IS_REPLENISHMENT | SPELL_ATTR0_HIDE_IN_COMBAT_LOG;
     sinfo->AttributesEx |= SPELL_ATTR1_DRAIN_ALL_POWER/* | SPELL_ATTR1_CANT_TARGET_SELF*/;
     sinfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
@@ -16715,7 +16715,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_POSSESSED_FRIENDS;
 
     sinfo->_effects[0].Effect = SPELL_EFFECT_TRIGGER_SPELL;
-    sinfo->_effects[0].BasePoints = 2;
+    sinfo->_effects[0].BasePoints = 3;
     sinfo->_effects[0].DieSides = 0;
     sinfo->_effects[0].RealPointsPerLevel = 0.f;
     sinfo->_effects[0].ValueMultiplier = 0.f;
@@ -16739,7 +16739,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->CastTimeEntry = nullptr;//sSpellCastTimesStore.LookupEntry(2); //250ms
     sinfo->SchoolMask = SPELL_SCHOOL_MASK_SHADOW | SPELL_SCHOOL_MASK_ARCANE;
     sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
-    sinfo->MaxAffectedTargets = 10;
+    sinfo->MaxAffectedTargets = 100;
     sinfo->Attributes |= SPELL_ATTR0_ABILITY | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR0_IS_REPLENISHMENT | SPELL_ATTR0_HIDE_IN_COMBAT_LOG;
     sinfo->AttributesEx |= SPELL_ATTR1_DRAIN_ALL_POWER/* | SPELL_ATTR1_CANT_TARGET_SELF*/;
     sinfo->AttributesEx &= ~(SPELL_ATTR1_CANT_TARGET_SELF);
