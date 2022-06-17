@@ -4278,7 +4278,7 @@ void bot_ai::CalculateAoeSpots(Unit const* unit, AoeSpotsVec& spots)
     if (unit->GetMapId() == 616 && unit->GetVehicle())
     {
         std::list<Creature*> cList;
-        Trinity::AllCreaturesOfEntryInRange check2(unit->GetVehicleBase(), 30592, 60.f); //Static Field
+        Trinity::AllCreaturesOfEntryInRange check2(unit->GetVehicleBase(), CREATURE_EOE_STATIC_FIELD, 60.f);
         Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher2(unit->GetVehicleBase(), cList, check2);
         //unit->GetVehicleBase()->VisitNearbyObject(60.f, searcher2);
         Cell::VisitAllObjects(unit->GetVehicleBase(), searcher2, 60.f);
@@ -4294,7 +4294,7 @@ void bot_ai::CalculateAoeSpots(Unit const* unit, AoeSpotsVec& spots)
     else if (unit->GetMapId() == 568)
     {
         std::list<Creature*> cList;
-        Trinity::AllCreaturesOfEntryInRange check2(unit, 23920, 40.f); //Fire Bomb (Zul'Aman)
+        Trinity::AllCreaturesOfEntryInRange check2(unit, CREATURE_ZA_FIRE_BOMB, 40.f);
         Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher2(unit, cList, check2);
         //unit->VisitNearbyObject(40.f, searcher2);
         Cell::VisitAllObjects(unit, searcher2, 40.f);
@@ -4303,6 +4303,21 @@ void bot_ai::CalculateAoeSpots(Unit const* unit, AoeSpotsVec& spots)
         for (std::list<Creature*>::const_iterator ci = cList.begin(); ci != cList.end(); ++ci)
         {
             float radius = spellInfo->_effects[0].CalcRadius() + DEFAULT_PLAYER_COMBAT_REACH * 1.2f;
+            spots.push_back(AoeSpotsVec::value_type(*(*ci), radius));
+        }
+    }
+    //Icecrown Citadel
+    else if (unit->GetMapId() == 631)
+    {
+        std::list<Creature*> cList;
+        Trinity::AllCreaturesOfEntryInRange check2(unit, CREATURE_ICC_OOZE_PUDDLE, 50.f);
+        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher2(unit, cList, check2);
+        //unit->VisitNearbyObject(50.f, searcher2);
+        Cell::VisitAllObjects(unit, searcher2, 50.f);
+
+        for (std::list<Creature*>::const_iterator ci = cList.begin(); ci != cList.end(); ++ci)
+        {
+            float radius = (*ci)->GetObjectScale() * 2.5f + DEFAULT_PLAYER_COMBAT_REACH * 3.f; //grows
             spots.push_back(AoeSpotsVec::value_type(*(*ci), radius));
         }
     }
@@ -4318,10 +4333,10 @@ void bot_ai::CalculateAoeSafeSpots(Unit* target, float maxdist, AoeSafeSpotsVec&
         float angledelta = float(M_PI) / 20.f;
         float aoedist = 0.f;
         float aoeangle;
-        for (uint8 i = 0; i < 5; ++i)
+        for (uint8 i = 0; i < 8; ++i)
         {
             aoeangle = 0.0f;
-            for (uint8 j = 0; j < 40; ++j)
+            for (uint8 j = 0; j < 25; ++j)
             {
                 aoedist += distdelta;
                 aoeangle += angledelta;
