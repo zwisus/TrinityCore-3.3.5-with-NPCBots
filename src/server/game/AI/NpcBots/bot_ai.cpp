@@ -3594,10 +3594,7 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
         };
 
         // Icecrown Citadel - Lord Marrowgar
-        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupMarrowgar) && me->IsInCombat() && HasRole(BOT_ROLE_DPS) &&
-            (!IsTank() || (!mytar && !me->IsInCombat())) &&
-            (!mytar || (mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE1 && mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE2 &&
-            mytar->GetEntry() != CREATURE_ICC_BONE_SPIKE3)))
+        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupMarrowgar) && me->IsInCombat() && HasRole(BOT_ROLE_DPS) && !IsTank())
         {
             static constexpr std::array BoneSpikeIds = { CREATURE_ICC_BONE_SPIKE1, CREATURE_ICC_BONE_SPIKE2, CREATURE_ICC_BONE_SPIKE3 };
 
@@ -3623,7 +3620,7 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
             if (Creature* spike = cList.empty() ? nullptr : cList.size() == 1 ? cList.front() :
                 Trinity::Containers::SelectRandomContainerElement(cList))
             {
-                // Bone spike is always attackable - no additional checks needed
+                // Bone Spike is always attackable - no additional checks needed
                 return spike;
             }
         }
