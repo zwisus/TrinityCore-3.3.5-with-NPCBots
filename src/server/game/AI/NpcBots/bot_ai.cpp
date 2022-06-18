@@ -4371,7 +4371,7 @@ void bot_ai::CalculateAoeSafeSpots(Unit* target, float maxdist, AoeSafeSpotsVec&
         //find 200 safe spots
         Position ppos;
         float distdelta = maxdist / 200.f;
-        float angledelta = float(M_PI) / 20.f;
+        float angledelta = float(M_PI) / 12.5f;
         float aoedist = 0.f;
         float aoeangle;
         for (uint8 i = 0; i < 8; ++i)
@@ -4599,18 +4599,24 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     if (!safespots.empty())
     {
         //find closest safe spot
-        Position& optimalPos = safespots.front();
+        Position const* closestPos = nullptr;
+        Position const* optimalPos = nullptr;
         float mindist = 100.f;
-        float curdist;
-        for (std::vector<Position>::const_iterator ci = safespots.begin(); ci != safespots.end(); ++ci)
+        for (AoeSafeSpotsVec::const_iterator ci = safespots.begin(); ci != safespots.end(); ++ci)
         {
-            curdist = ppos.GetExactDist2d(&(*ci));
+            float curdist = ppos.GetExactDist2d(*ci);
             if (curdist < mindist)
             {
-                optimalPos = *ci;
+                closestPos = &(*ci);
+                if (HasRole(BOT_ROLE_RANGED) ?
+                    (target->GetDistance(*closestPos) - me->GetCombatReach()) < dist :
+                    target->IsWithinMeleeRangeAt(*closestPos, me))
+                    optimalPos = closestPos;
                 mindist = curdist;
             }
         }
+        if (!optimalPos)
+            optimalPos = closestPos ? closestPos : me;
 
         //TC_LOG_ERROR("scripts", "CalculateAttackPos %u safe spots, chosen at dist %.2f", uint32(safespots.size()), mindist);
         pos.Relocate(optimalPos);
