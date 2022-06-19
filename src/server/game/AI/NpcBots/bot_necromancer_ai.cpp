@@ -61,7 +61,7 @@ enum NecromancerSpecial
 };
 
 static const uint32 Necromancer_spells_damage_arr[] =
-{ MAIN_ATTACK_1, CORPSE_EXPLOSION_1/*, ATTRACT_1*/ };
+{ /*MAIN_ATTACK_1, */CORPSE_EXPLOSION_1/*, ATTRACT_1*/ };
 
 static const uint32 Necromancer_spells_support_arr[] =
 { RAISE_DEAD_1, UNHOLY_FRENZY_1, CRIPPLE_1/*, ATTRACT_1*/ };
@@ -366,7 +366,7 @@ public:
             //Cripple
             if (IsSpellReady(CRIPPLE_1, diff) && me->GetDistance(opponent) < 30 &&
                 me->GetLevel() >= 50 && me->GetPower(POWER_MANA) >= CRIPPLE_COST &&
-                opponent->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED) >= 0 &&
+                opponent->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) >= 0 &&
                 (opponent->GetTypeId() == TYPEID_PLAYER || opponent->GetHealth() > me->GetMaxHealth() * 3))
             {
                 if (doCast(opponent, GetSpell(CRIPPLE_1)))
@@ -463,6 +463,7 @@ public:
             {
                 if (baseId == CORPSE_EXPLOSION_1)
                 {
+                    ASSERT(!IsInBotParty(target));
                     target->CastSpell(target, CORPSE_EXPLOSION_VISUAL, true);
                     target->CastSpell(target, SPELL_BLOODY_EXPLOSION, true);
                     target->SetDisplayId(MODEL_BLOODY_BONES);
@@ -478,6 +479,7 @@ public:
 
                 if (baseId == RAISE_DEAD_1)
                 {
+                    ASSERT(!IsInBotParty(target));
                     //Two skeletons
                     for (uint8 i = 0; i < 2; ++i)
                         SummonBotPet(target);

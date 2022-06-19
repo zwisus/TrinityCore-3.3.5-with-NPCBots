@@ -17355,6 +17355,7 @@ void bot_ai::InitBotCustomSpells()
 
     sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
     sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+    sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(0);
     sinfo->_effects[1].Effect = SPELL_EFFECT_NONE;
     sinfo->_effects[2].Effect = SPELL_EFFECT_NONE;
     //30) END RAISE DEAD
