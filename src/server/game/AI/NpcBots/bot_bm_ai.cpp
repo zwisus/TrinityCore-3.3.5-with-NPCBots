@@ -55,22 +55,6 @@ public:
 
     struct blademaster_botAI : public bot_ai
     {
-/*
-        bool GossipHello(Player* player) override
-        {
-            return OnGossipHello(player, 0);
-        }
-
-        bool GossipSelect(Player* player, uint32 sender, uint32 action) override
-        {
-            return OnGossipSelect(player, me, sender, action);
-        }
-
-        bool GossipSelectCode(Player* player, uint32 sender, uint32 action, char const* code) override
-        {
-            return OnGossipSelectCode(player, me, sender, action, code);
-        }
-*/
     private:
         //DelayedMeleeDamageEvent - Blademaster
         //deals critical damage, resets attack timer and sends fake log

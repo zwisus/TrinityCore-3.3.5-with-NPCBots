@@ -86,7 +86,9 @@ enum BotCommonValues
     GOSSIP_NORMAL_CUSTOM_DREADLORD      = 70007,
     GOSSIP_GREET_CUSTOM_DARKRANGER      = 70008,
     GOSSIP_NORMAL_CUSTOM_DARKRANGER     = 70009,
-    //70010-70100 reserved for bot gossip texts (not selectable)
+    GOSSIP_GREET_CUSTOM_SEAWITCH        = 70010,
+    GOSSIP_NORMAL_CUSTOM_SEAWITCH       = 70011,
+    //70012-70100 reserved for bot gossip texts (not selectable)
     GOSSIP_CLASSDESC_BM                 = 70101,
     GOSSIP_CLASSDESC_SPHYNX             = 70102,
     GOSSIP_CLASSDESC_ARCHMAGE           = 70103,
@@ -94,7 +96,8 @@ enum BotCommonValues
     GOSSIP_CLASSDESC_SPELLBREAKER       = 70105,
     GOSSIP_CLASSDESC_DARKRANGER         = 70106,
     GOSSIP_CLASSDESC_NECROMANCER        = 70107,
-    //70108-70200 reserved for bot class descriptions gossip texts (not selectable)
+    GOSSIP_CLASSDESC_SEAWITCH           = 70108,
+    //70109-70200 reserved for bot class descriptions gossip texts (not selectable)
     GOSSIP_BOTGIVER_GREET               = 70201,
     GOSSIP_BOTGIVER_HIRE                = 70202,
     GOSSIP_BOTGIVER_HIRE_CLASS          = 70203,
@@ -556,7 +559,12 @@ enum BotCommonValues
     BOT_TEXT_ATTACK_ANGLE               = 70648, //"Attack angle"
     BOT_TEXT_NORMAL                     = 70649, //"Normal"
     BOT_TEXT_AVOID_FRONTAL_AOE          = 70650, //"Avoid frontal AOE"
-    //70651-70799 reserved for custom localization strings
+    BOT_TEXT_HIREDENY_SEAWITCH          = 70651, //NIY
+    BOT_TEXT_HIREWARN_SEAWITCH          = 70652, //"Are you sure this is gonna work? It's better be the best water in the world..."
+    BOT_TEXT_HIREOPTION_SEAWITCH        = 70653, //"Seems like you could really use a drink of fresh water."
+    BOT_TEXT_CLASS_SEAWITCH_PLU         = 70654, //"Sea Witches"
+    BOT_TEXT_CLASS_SEAWITCH             = 70655, //"Sea Witch"
+    //70655-70799 reserved for custom localization strings
 //VEHICLE CREATURES
     CREATURE_NEXUS_SKYTALON_1           = 32535, // [Q] Aces High
     CREATURE_EOE_SKYTALON_N             = 30161, // Eye of Eternity
@@ -746,6 +754,20 @@ enum BotCommonValues
     //SPELL_BLOOD_CURSE                   = 29933, //NIY for Attract //NO VIABLE SPELLS
   //unmodify
     CORPSE_EXPLOSION_VISUAL             = 60081, //explosion
+//NAGA SEA WITCH
+  //modify
+    SPELL_FORKED_LIGHTNING              = 63541,
+    SPELL_FORKED_LIGHTNING_EFFECT       = 50900, // "Lightning Shock"
+    SPELL_FROST_ARROW                   = 38942,
+    SPELL_FROST_ARROW_EFFECT            = 56095,
+    SPELL_MANA_SHIELD                   = 35064,
+    SPELL_TORNADO                       = 34695,
+    SPELL_TORNADO_EFFECT                = 21990, // stun, -resistances
+    SPELL_TORNADO_EFFECT2               = 34683, // aoe damage
+    //SPELL_TORNADO_EFFECT3               = 61572, // used by Frostworg 29358 (Sons of Hodir)
+    SPELL_TORNADO_EFFECT3               = 39261,
+  //unmodify
+    SPELL_TORNADO_LIGHTNING_VISUAL      = 45869, //periodic, 1 sec
 
   //SOUNDS
     SOUND_FREEZE_IMPACT_WINDWALK        = 29,
@@ -765,11 +787,14 @@ enum BotCommonValues
     BASE_MANA_10_ARCHMAGE               = 705 * 5,
     BASE_MANA_10_DREADLORD              = 600 * 5,
     BASE_MANA_10_DARK_RANGER            = 570 * 5,
+    BASE_MANA_10_SEA_WITCH              = 735 * 5,
     //base mana at 1
     BASE_MANA_1_BM                      = 240 * 5,
     BASE_MANA_1_ARCHMAGE                = 285 * 5,
     BASE_MANA_1_DREADLORD               = 270 * 5,
     BASE_MANA_1_DARK_RANGER             = 225 * 5,
+    BASE_MANA_1_SEA_WITCH               = 330 * 5,
+
     //MAX_LOOT_ITEMS                      = 18 // Client limitation 3.3.5 code confirmed
 };
 
@@ -794,10 +819,12 @@ enum BotClasses : uint8
     BOT_CLASS_SPELLBREAKER,
     BOT_CLASS_DARK_RANGER,
     BOT_CLASS_NECROMANCER,
-    BOT_CLASS_END
-};
+    BOT_CLASS_SEA_WITCH,
 
-#define BOT_CLASS_EX_START BOT_CLASS_BM
+    BOT_CLASS_END,
+
+    BOT_CLASS_EX_START                  = BOT_CLASS_BM
+};
 
 enum BotStances
 {
@@ -988,6 +1015,8 @@ enum BotPetTypes
 
     //Necromancer
     BOT_PET_NECROSKELETON               = 70580,
+
+    BOT_PET_TORNADO                     = 70586,
 
     BOT_PET_INVALID                     = 99999
 };

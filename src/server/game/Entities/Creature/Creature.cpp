@@ -3662,6 +3662,8 @@ void Creature::ApplyCreatureSpellRadiusMods(SpellInfo const* spellInfo, float& r
 {
     if (bot_AI)
         bot_AI->ApplyBotSpellRadiusMods(spellInfo, radius);
+    else if (bot_pet_AI)
+        bot_pet_AI->ApplyBotPetSpellRadiusMods(spellInfo, radius);
 }
 void Creature::ApplyCreatureSpellRangeMods(SpellInfo const* spellInfo, float& maxrange) const
 {

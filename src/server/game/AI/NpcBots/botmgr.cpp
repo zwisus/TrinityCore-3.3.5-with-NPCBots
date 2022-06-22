@@ -67,6 +67,7 @@ bool _enableclass_dreadlord;
 bool _enableclass_spellbreaker;
 bool _enableclass_darkranger;
 bool _enableclass_necromancer;
+bool _enableclass_seawitch;
 bool _botStatLimits;
 float _botStatLimits_dodge;
 float _botStatLimits_parry;
@@ -95,10 +96,12 @@ void AddSC_dreadlord_bot();
 void AddSC_spellbreaker_bot();
 void AddSC_dark_ranger_bot();
 void AddSC_necromancer_bot();
+void AddSC_sea_witch_bot();
 void AddSC_archmage_bot_pets();
 void AddSC_dreadlord_bot_pets();
 void AddSC_dark_ranger_bot_pets();
 void AddSC_necromancer_bot_pets();
+void AddSC_sea_witch_bot_pets();
 void AddSC_hunter_bot_pets();
 void AddSC_warlock_bot_pets();
 void AddSC_deathknight_bot_pets();
@@ -128,10 +131,12 @@ void AddNpcBotScripts()
     AddSC_spellbreaker_bot();
     AddSC_dark_ranger_bot();
     AddSC_necromancer_bot();
+    AddSC_sea_witch_bot();
     AddSC_archmage_bot_pets();
     AddSC_dreadlord_bot_pets();
     AddSC_dark_ranger_bot_pets();
     AddSC_necromancer_bot_pets();
+    AddSC_sea_witch_bot_pets();
     AddSC_hunter_bot_pets();
     AddSC_warlock_bot_pets();
     AddSC_deathknight_bot_pets();
@@ -227,6 +232,7 @@ void BotMgr::LoadConfig(bool reload)
     _enableclass_spellbreaker       = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.SpellBreaker.Enable", true);
     _enableclass_darkranger         = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.DarkRanger.Enable", true);
     _enableclass_necromancer        = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.Necromancer.Enable", true);
+    _enableclass_seawitch           = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.SeaWitch.Enable", true);
     _botStatLimits                  = sConfigMgr->GetBoolDefault("NpcBot.Stats.Limits.Enable", false);
     _botStatLimits_dodge            = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Dodge", 95.0f);
     _botStatLimits_parry            = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Parry", 95.0f);
@@ -369,6 +375,8 @@ bool BotMgr::IsClassEnabled(uint8 m_class)
             return _enableclass_darkranger;
         case BOT_CLASS_NECROMANCER:
             return _enableclass_necromancer;
+        case BOT_CLASS_SEA_WITCH:
+            return _enableclass_seawitch;
         default:
             return true;
     }
@@ -1107,16 +1115,15 @@ bool BotMgr::RemoveAllBotsFromGroup()
 uint32 BotMgr::GetNpcBotCost(uint8 level, uint8 botclass)
 {
     //assuming default 1000000
-    //level 1: 1000
-    //11 : 1666
-    //15 : 8333
-    //20 : 16666
-    //30 : 33333
-    //40 : 50000
+    //level 1: 500  //5  silver
+    //10 : 10000    //1  gold
+    //20 : 50000    //5  gold
+    //30 : 200000   //20 gold
+    //40 : 500000   //50 gold
     //rest is linear
     //rare / rareelite bots have their cost adjusted
     uint32 cost =
-        level < 10 ? _npcBotsCost / 5000 : //2 silver
+        level < 10 ? _npcBotsCost / 2000 : //5 silver
         level < 20 ? _npcBotsCost / 100 :  //1 gold
         level < 30 ? _npcBotsCost / 20 :   //5 gold
         level < 40 ? _npcBotsCost / 5 :    //20 gold
@@ -1133,6 +1140,7 @@ uint32 BotMgr::GetNpcBotCost(uint8 level, uint8 botclass)
         case BOT_CLASS_SPHYNX:
         case BOT_CLASS_DREADLORD:
         case BOT_CLASS_DARK_RANGER:
+        case BOT_CLASS_SEA_WITCH:
             cost += cost * 4; //500%
             break;
         default:
@@ -1191,7 +1199,9 @@ uint8 BotMgr::BotClassByClassName(std::string const& className)
         { "darkranger", BOT_CLASS_DARK_RANGER },
         { "dark_ranger", BOT_CLASS_DARK_RANGER },
         { "necromancer", BOT_CLASS_NECROMANCER },
-        { "necro", BOT_CLASS_NECROMANCER }
+        { "necro", BOT_CLASS_NECROMANCER },
+        { "seawitch", BOT_CLASS_SEA_WITCH },
+        { "sea_witch", BOT_CLASS_SEA_WITCH }
     };
 
     //std::transform(className.begin(), className.end(), className.begin(), std::tolower);
@@ -1557,6 +1567,11 @@ void BotMgr::ApplyBotEffectMods(Unit const* caster, Unit const* target, SpellInf
 void BotMgr::ApplyBotThreatMods(Unit const* attacker, SpellInfo const* spellInfo, float& threat)
 {
     attacker->ToCreature()->GetBotAI()->ApplyBotThreatMods(spellInfo, threat);
+}
+
+void BotMgr::ApplyBotEffectValueMultiplierMods(Unit const* caster, SpellInfo const* spellInfo, SpellEffIndex effIndex, float& multiplier)
+{
+    caster->ToCreature()->GetBotAI()->ApplyBotEffectValueMultiplierMods(spellInfo, effIndex, multiplier);
 }
 
 float BotMgr::GetBotDamageTakenMod(Creature const* bot, bool magic)

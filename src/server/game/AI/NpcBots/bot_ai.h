@@ -53,6 +53,7 @@ class bot_ai : public CreatureAI
         void ReceiveEmote(Player* player, uint32 emote) override;
         //void EnterEvadeMode(EvadeReason/* why*/ = EVADE_REASON_OTHER) override { }
         //void LeavingWorld() override { }
+        void OnSpellStart(SpellInfo const* spellInfo) override { OnBotSpellStart(spellInfo); }
 
         virtual void OnBotSummon(Creature* /*summon*/) {}
         virtual void OnBotDespawn(Creature* /*summon*/) {}
@@ -125,6 +126,7 @@ class bot_ai : public CreatureAI
         void ApplyBotSpellChanceOfSuccessMods(SpellInfo const* spellInfo, float& chance) const;
         void ApplyBotEffectMods(WorldObject const* wtarget, SpellInfo const* spellInfo, uint8 effIndex, float& value) const;
         void ApplyBotThreatMods(SpellInfo const* spellInfo, float& threat) const;
+        void ApplyBotEffectValueMultiplierMods(SpellInfo const* spellInfo, SpellEffIndex effIndex, float& multiplier) const;
         virtual uint8 GetBotStance() const;
         uint32 GetBotRoles() const { return _roleMask; }
         bool HasRole(uint32 role) const { return _roleMask & role; }
@@ -205,10 +207,12 @@ class bot_ai : public CreatureAI
 
         void CastBotItemCombatSpell(DamageInfo const& damageInfo);
         void CastBotItemCombatSpell(DamageInfo const& damageInfo, Item* item, ItemTemplate const* proto);
+        void OnBotSpellStart(SpellInfo const* spellInfo);
         void OnBotSpellInterrupted(SpellSchoolMask schoolMask, uint32 unTimeMs);
         void OnBotSpellGo(Spell const* spell, bool ok = true);
         void OnBotOwnerSpellGo(Spell const* spell, bool ok = true);
         void OnOwnerVehicleDamagedBy(Unit* attacker);
+        virtual void OnClassSpellStart(SpellInfo const* /*spellInfo*/) {}
         virtual void OnClassSpellGo(SpellInfo const* /*spell*/) {}
 
         static void InitBotCustomSpells();
@@ -258,6 +262,7 @@ class bot_ai : public CreatureAI
 
         Unit* HelpFindStunTarget(float dist = 20) const { return FindStunTarget(dist); }
         Unit* HelpFindCastingTarget(float maxdist = 10, float mindist = 0, uint32 spellId = 0, uint8 minHpPct = 0) const { return FindCastingTarget(maxdist, mindist, spellId, minHpPct); }
+        Unit* HelpFindAOETarget(float dist, WorldObject const* src) const { return FindAOETarget(dist, src); }
         void HelpGetNearbyTargetsList(std::list<Unit*> &targets, float maxdist, uint8 CCoption, WorldObject const* source = nullptr) const { GetNearbyTargetsList(targets, maxdist, CCoption, source); }
 
         bool IsPointedTarget(Unit const* target, uint8 targetFlags) const;
@@ -347,6 +352,7 @@ class bot_ai : public CreatureAI
         bool JumpingFlyingOrFalling() const;
         bool JumpingOrFalling() const;
         bool Jumping() const;
+        bool IsInContactWithWater() const;
 
         float CalcSpellMaxRange(uint32 spellId, bool enemy = true) const;
 
@@ -373,7 +379,7 @@ class bot_ai : public CreatureAI
         Unit* FindUndeadCCTarget(float dist, uint32 spellId, bool unattacked = true) const;
         Unit* FindRootTarget(float dist, uint32 spellId) const;
         Unit* FindCastingTarget(float maxdist = 10, float mindist = 0, uint32 spellId = 0, uint8 minHpPct = 0) const;
-        Unit* FindAOETarget(float dist) const;
+        Unit* FindAOETarget(float dist, WorldObject const* src = nullptr) const;
         Unit* FindSplashTarget(float dist = 5, Unit* To = nullptr, float splashdist = 4) const;
         Unit* FindSplashTarget(float dist, Unit* To, float splashdist, uint8 minTargets) const;
         Unit* FindTranquilTarget(float mindist = 5, float maxdist = 35) const;
@@ -401,6 +407,7 @@ class bot_ai : public CreatureAI
         virtual void ApplyClassSpellChanceOfSuccessMods(SpellInfo const* /*spellInfo*/, float& /*chance*/) const {}
         virtual void ApplyClassEffectMods(WorldObject const* /*wtarget*/, SpellInfo const* /*spellInfo*/, uint8 /*effIndex*/, float& /*value*/) const {}
         virtual void ApplyClassThreatMods(SpellInfo const* /*spellInfo*/, float& /*threat*/) const {}
+        virtual void ApplyClassEffectValueMultiplierMods(SpellInfo const* /*spellInfo*/, SpellEffIndex /*effIndex*/, float& /*multiplier*/) const {}
 
         virtual void InitPowers() {}
         virtual void InitSpells() = 0;

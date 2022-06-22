@@ -46,6 +46,7 @@ class bot_pet_ai : public CreatureAI
         bool HasBotCommandState(uint8 st) const { return (m_botCommandState & st); }
         uint8 GetBotCommandState() const { return m_botCommandState; }
         bool IsInBotParty(Unit const* unit) const;
+        virtual void ApplyBotPetSpellRadiusMods(SpellInfo const* /*spellInfo*/, float& /*radius*/) const {}
         bool IsTank(Unit const* unit) const;
         bool IsOffTank(Unit const* unit) const;
         bool IAmFree() const;
@@ -110,7 +111,7 @@ class bot_pet_ai : public CreatureAI
         void CalculateAttackPos(Unit* target, Position &pos) const;
         void GetInPosition(bool force, Unit* newtarget, Position* pos = nullptr);
         virtual float GetSpellAttackRange(bool longRange) const { return longRange ? 25.f : 15.f; }
-        void CheckAttackState();
+        virtual void CheckAttackState();
         void OnSpellHit(Unit* caster, SpellInfo const* spell);
 
         void CheckAuras(bool force = false);

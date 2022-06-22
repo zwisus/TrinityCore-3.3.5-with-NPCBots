@@ -685,6 +685,7 @@ SpellCastResult bot_ai::CheckBotCast(Unit const* victim, uint32 spellId) const
         case BOT_CLASS_SPELLBREAKER:
         case BOT_CLASS_DARK_RANGER:
         case BOT_CLASS_NECROMANCER:
+        case BOT_CLASS_SEA_WITCH:
             break;
         default:
             TC_LOG_ERROR("entities.player", "CheckBotCast(): Unknown bot class %u", _botclass);
@@ -2131,6 +2132,8 @@ void bot_ai::SetStats(bool force)
         mylevel = std::max<uint8>(mylevel, 40);
     else if (_botclass == BOT_CLASS_NECROMANCER)
         mylevel = std::max<uint8>(mylevel, 20);
+    //else if (_botclass == BOT_CLASS_SEA_WITCH)
+    //    mylevel = std::max<uint8>(mylevel, 10);
 
     //LEVEL
     if (me->GetLevel() != mylevel)
@@ -2178,6 +2181,7 @@ void bot_ai::SetStats(bool force)
         case BOT_CLASS_SPELLBREAKER:
         case BOT_CLASS_DARK_RANGER:
         case BOT_CLASS_NECROMANCER:
+        case BOT_CLASS_SEA_WITCH:
             break;
 
         default:
@@ -2255,6 +2259,8 @@ void bot_ai::SetStats(bool force)
             strmult = 0.f; agimult = 5.f; break;
         case BOT_CLASS_NECROMANCER:
             strmult = 0.f; agimult = 0.f; break;
+        case BOT_CLASS_SEA_WITCH:
+            strmult = 0.f; agimult = 2.f; break;
         default:
             TC_LOG_ERROR("entities.player", "_MeleeDamageUpdate(): NIY myclass %u!", uint32(myclass));
             strmult = 0.f; agimult = 0.f; break;
@@ -2330,6 +2336,13 @@ void bot_ai::SetStats(bool force)
         if (me->GetLevel() >= 60)
             ap_mod *= 1.15f;
     }
+    if (_botclass == BOT_CLASS_SEA_WITCH)
+    {
+        if (me->GetLevel() >= 20)
+            atpower += 2.f * _getTotalBotStat(BOT_STAT_MOD_INTELLECT);
+        else if (me->GetLevel() >= 10)
+            atpower += 1.f * _getTotalBotStat(BOT_STAT_MOD_INTELLECT);
+    }
 
     atpower *= ap_mod;
     me->SetStatFlatModifier(UNIT_MOD_ATTACK_POWER, BASE_VALUE, atpower);
@@ -2337,7 +2350,7 @@ void bot_ai::SetStats(bool force)
     me->UpdateAttackPowerAndDamage();
     if (_botclass == BOT_CLASS_WARRIOR || _botclass == BOT_CLASS_HUNTER || _botclass == BOT_CLASS_ROGUE ||
         _botclass == BOT_CLASS_MAGE || _botclass == BOT_CLASS_PRIEST || _botclass == BOT_CLASS_WARLOCK ||
-        _botclass == BOT_CLASS_DARK_RANGER)
+        _botclass == BOT_CLASS_DARK_RANGER || _botclass == BOT_CLASS_SEA_WITCH)
     {
         atpower += _getTotalBotStat(BOT_STAT_MOD_RANGED_ATTACK_POWER) * ap_mod;
         me->SetStatFlatModifier(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, atpower);
@@ -2426,7 +2439,7 @@ void bot_ai::SetStats(bool force)
             value += mylevel * 5; //total 498 at 83
         if (_botclass == BOT_CLASS_DREADLORD)
             value += mylevel * 3; //total 332 at 83
-        if (_botclass == BOT_CLASS_DARK_RANGER)
+        if (_botclass == BOT_CLASS_DARK_RANGER || _botclass == BOT_CLASS_SEA_WITCH)
             value += mylevel * 2; //total 249 at 83
 
         resistbonus[i-1] = int32(value);
@@ -2533,6 +2546,10 @@ void bot_ai::SetStats(bool force)
     {
         tempval -= 0.2f;
     }
+    if (_botclass == BOT_CLASS_SEA_WITCH)
+    {
+        tempval -= 0.3f;
+    }
 
     dmg_taken_phy = value;
     dmg_taken_mag = tempval;
@@ -2574,7 +2591,7 @@ void bot_ai::SetStats(bool force)
         tempval += (float)ratingBonus;
     }
 
-    value += tempval * ((_botclass == BOT_CLASS_HUNTER || _botclass == BOT_CLASS_DARK_RANGER) ?
+    value += tempval * ((_botclass == BOT_CLASS_HUNTER || _botclass == BOT_CLASS_DARK_RANGER || _botclass == BOT_CLASS_SEA_WITCH) ?
         _getRatingMultiplier(CR_HASTE_RANGED) :
         std::max<float>(_getRatingMultiplier(CR_HASTE_MELEE), _getRatingMultiplier(CR_HASTE_SPELL)));
 
@@ -2901,6 +2918,9 @@ void bot_ai::SetStats(bool force)
         if (_botclass == BOT_CLASS_HUNTER && mylevel >= 20)
             value += 3.f;
 
+        if (_botclass == BOT_CLASS_SEA_WITCH)
+            value += 25.f;
+
         if (BotMgr::IsBotStatsLimitsEnabled())
             parry = std::min<float>(value, BotMgr::GetBotStatLimitParry());
         else
@@ -2947,6 +2967,12 @@ void bot_ai::SetStats(bool force)
         {
             //base dodge 30%
             value += 30.f;
+        }
+
+        if (_botclass == BOT_CLASS_SEA_WITCH && IsInContactWithWater())
+        {
+            //TC_LOG_ERROR("scripts", "BOT_CLASS_SEA_WITCH dodge: %s now in water", me->GetName().c_str());
+            value += 50.f;
         }
 
         if (BotMgr::IsBotStatsLimitsEnabled())
@@ -3118,6 +3144,11 @@ void bot_ai::SetStats(bool force)
         {
             //bonus from intellect
             value += _getTotalBotStat(BOT_STAT_MOD_INTELLECT);
+        }
+        if (_botclass == BOT_CLASS_SEA_WITCH)
+        {
+            //bonus from intellect
+            value += 2.f * _getTotalBotStat(BOT_STAT_MOD_INTELLECT);
         }
 
         spellpower = uint32(value);
@@ -3410,6 +3441,7 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell) const
             case BOT_CLASS_SPELLBREAKER:mainMask = SPELL_SCHOOL_MASK_NONE;                                                                  break;
             case BOT_CLASS_DARK_RANGER: mainMask = SPELL_SCHOOL_MASK_NONE;                                                                  break;
             case BOT_CLASS_NECROMANCER: mainMask = SPELL_SCHOOL_MASK_NONE;                                                                  break;
+            case BOT_CLASS_SEA_WITCH:   mainMask = SPELL_SCHOOL_MASK_NONE;                                                                  break;
             default:                    mainMask = SPELL_SCHOOL_MASK_NORMAL;                                                                break;
         }
     }
@@ -4109,6 +4141,7 @@ bool bot_ai::CheckAttackTarget()
         case BOT_CLASS_DREADLORD:
         case BOT_CLASS_SPELLBREAKER:
         case BOT_CLASS_DARK_RANGER:
+        case BOT_CLASS_SEA_WITCH:
             break;
         default:
             TC_LOG_ERROR("entities.player", "bot_ai: CheckAttackTarget() - unknown bot class %u", _botclass);
@@ -5355,8 +5388,11 @@ Unit* bot_ai::FindCastingTarget(float maxdist, float mindist, uint32 spellId, ui
     return Trinity::Containers::SelectRandomContainerElement(unitList);
 }
 // Returns target for dest AOE spell (blizzard, hurricane, etc.) based on crowd size, movement state and direction
-Unit* bot_ai::FindAOETarget(float dist) const
+Unit* bot_ai::FindAOETarget(float dist, WorldObject const* src) const
 {
+    if (!src)
+        src = me;
+
     std::list<Unit*> unitList;
     GetNearbyTargetsList(unitList, dist, 0);
 
@@ -5379,7 +5415,7 @@ Unit* bot_ai::FindAOETarget(float dist) const
         }
         if (!unit)
         {
-            float destDist = me->GetDistance((*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ());
+            float destDist = src->GetDistance((*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ());
             if (destDist < mydist)
             {
                 mydist = destDist;
@@ -5395,7 +5431,7 @@ Unit* bot_ai::FindAOETarget(float dist) const
                 {
                     if (++count > 2)
                     {
-                        if (me->GetDistance(*it) < me->GetDistance(unit) && unit->HasInArc(float(M_PI)/2, me))
+                        if (src->GetDistance(*it) < src->GetDistance(unit) && unit->HasInArc(float(M_PI)/2, src))
                             unit = *it;
                         break;
                     }
@@ -5894,9 +5930,11 @@ void bot_ai::_OnManaUpdate() const
         m_basemana = BASE_MANA_1_DARK_RANGER + (BASE_MANA_10_DARK_RANGER - BASE_MANA_1_DARK_RANGER) * ((mylevel - 40)/82.f);
     if (_botclass == BOT_CLASS_NECROMANCER)
         m_basemana = BASE_MANA_NECROMANCER;
+    if (_botclass == BOT_CLASS_SEA_WITCH)
+        m_basemana = BASE_MANA_1_SEA_WITCH + (BASE_MANA_10_SEA_WITCH - BASE_MANA_1_SEA_WITCH) * (mylevel/83.f);
     //TC_LOG_ERROR("entities.player", "classinfo base mana = %f", m_basemana);
 
-    me->SetCreateMana(uint32(_classinfo->basemana));
+    me->SetCreateMana(uint32(m_basemana));
 
     float intValue = _getTotalBotStat(BOT_STAT_MOD_INTELLECT);
 
@@ -5974,6 +6012,8 @@ void bot_ai::_OnManaRegenUpdate() const
                 basemana = BASE_MANA_1_DREADLORD;
             else if (_botclass == BOT_CLASS_DARK_RANGER)
                 basemana = BASE_MANA_1_DARK_RANGER;
+            else if (_botclass == BOT_CLASS_SEA_WITCH)
+                basemana = BASE_MANA_1_SEA_WITCH;
             else
                 basemana = 0.f;
 
@@ -6003,6 +6043,7 @@ void bot_ai::_OnManaRegenUpdate() const
         if (IAmFree())
             value += float(mylevel);
     }
+
     //Unrelenting Storm, Dreamstate: 12% of intellect as mana regen always (divided by 5)
     if ((_botclass == BOT_CLASS_SHAMAN && _spec == BOT_SPEC_SHAMAN_ELEMENTAL) ||
         (_botclass == BOT_CLASS_DRUID && _spec == BOT_SPEC_DRUID_BALANCE))
@@ -6399,6 +6440,11 @@ void bot_ai::ApplyBotThreatMods(SpellInfo const* spellInfo, float& threat) const
     //ALL threat mods
     ApplyClassThreatMods(spellInfo, threat);
 }
+void bot_ai::ApplyBotEffectValueMultiplierMods(SpellInfo const* spellInfo, SpellEffIndex effIndex, float& multiplier) const
+{
+    //ALL SPELLMOD_VALUE_MULTIPLIER mods
+    ApplyClassEffectValueMultiplierMods(spellInfo, effIndex, multiplier);
+}
 //Spell Mod Utilities
 float bot_ai::CalcSpellMaxRange(uint32 spellId, bool enemy) const
 {
@@ -6439,6 +6485,8 @@ bool bot_ai::OnGossipHello(Player* player, uint32 /*option*/)
             gossipTextId = GOSSIP_NORMAL_CUSTOM_DREADLORD;
         else if (_botclass == BOT_CLASS_DARK_RANGER)
             gossipTextId = GOSSIP_NORMAL_CUSTOM_DARKRANGER;
+        else if (_botclass == BOT_CLASS_SEA_WITCH)
+            gossipTextId = GOSSIP_NORMAL_CUSTOM_SEAWITCH;
         else
             gossipTextId = GOSSIP_NORMAL_SERVE_MASTER;
     }
@@ -6450,6 +6498,8 @@ bool bot_ai::OnGossipHello(Player* player, uint32 /*option*/)
             gossipTextId = GOSSIP_GREET_CUSTOM_DREADLORD;
         else if (_botclass == BOT_CLASS_DARK_RANGER)
             gossipTextId = GOSSIP_GREET_CUSTOM_DARKRANGER;
+        else if (_botclass == BOT_CLASS_SEA_WITCH)
+            gossipTextId = GOSSIP_GREET_CUSTOM_SEAWITCH;
         else
             gossipTextId = GOSSIP_GREET_NEED_SMTH;
     }
@@ -6501,6 +6551,11 @@ bool bot_ai::OnGossipHello(Player* player, uint32 /*option*/)
             {
                 message1 << LocalizedNpcText(player, BOT_TEXT_HIREWARN_DREADLORD) << me->GetName() << '?';
                 message2 << LocalizedNpcText(player, BOT_TEXT_HIREOPTION_DREADLORD);
+            }
+            else if (_botclass == BOT_CLASS_SEA_WITCH)
+            {
+                message1 << LocalizedNpcText(player, BOT_TEXT_HIREWARN_SEAWITCH);
+                message2 << LocalizedNpcText(player, BOT_TEXT_HIREOPTION_SEAWITCH);
             }
             else
             {
@@ -6706,6 +6761,8 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             gossipTextId = GOSSIP_NORMAL_CUSTOM_DREADLORD;
         else if (_botclass == BOT_CLASS_DARK_RANGER)
             gossipTextId = GOSSIP_NORMAL_CUSTOM_DARKRANGER;
+        else if (_botclass == BOT_CLASS_SEA_WITCH)
+            gossipTextId = GOSSIP_NORMAL_CUSTOM_SEAWITCH;
         else
             gossipTextId = GOSSIP_NORMAL_SERVE_MASTER;
     }
@@ -6717,6 +6774,8 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             gossipTextId = GOSSIP_GREET_CUSTOM_DREADLORD;
         else if (_botclass == BOT_CLASS_DARK_RANGER)
             gossipTextId = GOSSIP_GREET_CUSTOM_DARKRANGER;
+        else if (_botclass == BOT_CLASS_SEA_WITCH)
+            gossipTextId = GOSSIP_GREET_CUSTOM_SEAWITCH;
         else
             gossipTextId = GOSSIP_GREET_NEED_SMTH;
     }
@@ -9052,6 +9111,9 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 case BOT_CLASS_NECROMANCER:
                     gossipTextId = GOSSIP_CLASSDESC_NECROMANCER;
                     break;
+                case BOT_CLASS_SEA_WITCH:
+                    gossipTextId = GOSSIP_CLASSDESC_SEAWITCH;
+                    break;
                 default:
                     break;
             }
@@ -9096,6 +9158,8 @@ bool bot_ai::OnGossipSelectCode(Player* player, Creature* creature/* == me*/, ui
             gossipTextId = GOSSIP_NORMAL_CUSTOM_DREADLORD;
         else if (_botclass == BOT_CLASS_DARK_RANGER)
             gossipTextId = GOSSIP_NORMAL_CUSTOM_DARKRANGER;
+        else if (_botclass == BOT_CLASS_SEA_WITCH)
+            gossipTextId = GOSSIP_NORMAL_CUSTOM_SEAWITCH;
         else
             gossipTextId = GOSSIP_NORMAL_SERVE_MASTER;
     }
@@ -9107,6 +9171,8 @@ bool bot_ai::OnGossipSelectCode(Player* player, Creature* creature/* == me*/, ui
             gossipTextId = GOSSIP_GREET_CUSTOM_DREADLORD;
         else if (_botclass == BOT_CLASS_DARK_RANGER)
             gossipTextId = GOSSIP_GREET_CUSTOM_DARKRANGER;
+        else if (_botclass == BOT_CLASS_SEA_WITCH)
+            gossipTextId = GOSSIP_GREET_CUSTOM_SEAWITCH;
         else
             gossipTextId = GOSSIP_GREET_NEED_SMTH;
     }
@@ -9870,7 +9936,7 @@ bool bot_ai::_canUseRanged() const
     return (_botclass == BOT_CLASS_HUNTER || _botclass == BOT_CLASS_ROGUE ||
         _botclass == BOT_CLASS_WARRIOR || _botclass == BOT_CLASS_PRIEST ||
         _botclass == BOT_CLASS_MAGE || _botclass == BOT_CLASS_WARLOCK ||
-        _botclass == BOT_CLASS_DARK_RANGER);
+        _botclass == BOT_CLASS_DARK_RANGER || _botclass == BOT_CLASS_SEA_WITCH);
 }
 
 bool bot_ai::_canUseRelic() const
@@ -9956,6 +10022,8 @@ bool bot_ai::_canEquip(Item const* newItem, uint8 slot, bool ignoreItemLevel) co
                     case BOT_CLASS_SPHYNX:
                         break;
                     case BOT_CLASS_DARK_RANGER:
+                        break;
+                    case BOT_CLASS_SEA_WITCH:
                         break;
                     default:
                         return false;
@@ -10233,6 +10301,16 @@ bool bot_ai::_canEquip(Item const* newItem, uint8 slot, bool ignoreItemLevel) co
                 switch (newProto->SubClass)
                 {
                     case ITEM_SUBCLASS_WEAPON_SWORD:
+                    case ITEM_SUBCLASS_WEAPON_DAGGER:
+                    case ITEM_SUBCLASS_WEAPON_BOW:
+                        break;
+                    default:
+                        return false;
+                }
+                break;
+            case BOT_CLASS_SEA_WITCH:
+                switch (newProto->SubClass)
+                {
                     case ITEM_SUBCLASS_WEAPON_DAGGER:
                     case ITEM_SUBCLASS_WEAPON_BOW:
                         break;
@@ -11640,9 +11718,9 @@ float bot_ai::_getStatScore(uint8 stat) const
         case BOT_STAT_MOD_RANGED_ATTACK_POWER:
             switch (_botclass)
             {
-                case BOT_CLASS_HUNTER: case BOT_CLASS_DARK_RANGER:                  return 0.43f * dpsMod;
-                case BOT_CLASS_PRIEST: case BOT_CLASS_MAGE: case BOT_CLASS_WARLOCK: return 0.15f * dpsMod;
-                default:                                                            return 0.0f;
+                case BOT_CLASS_HUNTER: case BOT_CLASS_DARK_RANGER: case BOT_CLASS_SEA_WITCH:    return 0.43f * dpsMod;
+                case BOT_CLASS_PRIEST: case BOT_CLASS_MAGE: case BOT_CLASS_WARLOCK:             return 0.15f * dpsMod;
+                default:                                                                        return 0.0f;
             }
         case BOT_STAT_MOD_FERAL_ATTACK_POWER:
             return _spec == BOT_SPEC_DRUID_FERAL ? 0.43f : 0.0f;
@@ -12640,6 +12718,7 @@ bool bot_ai::IsValidSpecForClass(uint8 m_class, uint8 spec)
         case BOT_CLASS_SPELLBREAKER:
         case BOT_CLASS_DARK_RANGER:
         case BOT_CLASS_NECROMANCER:
+        case BOT_CLASS_SEA_WITCH:
             return spec == BOT_SPEC_DEFAULT;
         default:
             break;
@@ -13322,6 +13401,10 @@ void bot_ai::DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damage
 
     if (victim->GetTypeId() == TYPEID_PLAYER)
         ResetChase(victim);
+}
+void bot_ai::OnBotSpellStart(SpellInfo const* spellInfo)
+{
+    OnClassSpellStart(spellInfo);
 }
 //This function is called after Spell::SendSpellCooldown() and Spell::DoAllEffects...() call
 void bot_ai::OnBotSpellGo(Spell const* spell, bool ok)
@@ -15227,7 +15310,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
     {
         if ((me->IsInCombat() && !me->IsSitState() && CanBotAttackOnVehicle()) || !CanSheath())
         {
-            if (_botclass == BOT_CLASS_HUNTER || _botclass == BOT_CLASS_DARK_RANGER)
+            if (_botclass == BOT_CLASS_HUNTER || _botclass == BOT_CLASS_DARK_RANGER || _botclass == BOT_CLASS_SEA_WITCH)
             {
                 if (me->GetSheath() != SHEATH_STATE_RANGED)
                     me->SetSheath(SHEATH_STATE_RANGED);
@@ -16050,6 +16133,13 @@ bool bot_ai::Jumping() const
     return me->HasUnitState(UNIT_STATE_JUMPING);
 }
 
+bool bot_ai::IsInContactWithWater() const
+{
+    return me->IsInWorld() &&
+        (me->GetMap()->GetLiquidStatus(me->GetPhaseMask(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+            MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN) & MAP_LIQUID_STATUS_IN_CONTACT);
+}
+
 bool bot_ai::IsTempBot() const
 {
     return me->GetEntry() == BOT_ENTRY_MIRROR_IMAGE_BM;
@@ -16102,6 +16192,8 @@ uint8 bot_ai::GetPlayerClass() const
                 return BOT_CLASS_HUNTER;
             case BOT_CLASS_NECROMANCER:
                 return BOT_CLASS_WARLOCK;
+            case BOT_CLASS_SEA_WITCH:
+                return BOT_CLASS_MAGE;
             default:
                 TC_LOG_ERROR("entities.unit", "GetPlayerClass: %s has unknown Ex bot class %u!", me->GetName().c_str(), _botclass);
                 return BOT_CLASS_PALADIN;
@@ -16130,6 +16222,8 @@ uint8 bot_ai::GetPlayerRace() const
                 return RACE_BLOODELF;
             case BOT_CLASS_NECROMANCER:
                 return RACE_HUMAN;
+            case BOT_CLASS_SEA_WITCH:
+                return RACE_TROLL;
             default:
                 TC_LOG_ERROR("entities.unit", "GetPlayerRace: %s has unknown Ex bot class %u!", me->GetName().c_str(), _botclass);
                 return RACE_HUMAN;
@@ -16224,7 +16318,8 @@ bool bot_ai::IsCastingClass(uint8 m_class)
     return (m_class == CLASS_PALADIN || m_class == CLASS_PRIEST || m_class == CLASS_SHAMAN ||
         m_class == CLASS_MAGE || m_class == CLASS_WARLOCK || m_class == CLASS_DRUID ||
         m_class == BOT_CLASS_SPHYNX || m_class == BOT_CLASS_ARCHMAGE || m_class == BOT_CLASS_DREADLORD ||
-        m_class == BOT_CLASS_SPELLBREAKER || m_class == BOT_CLASS_DARK_RANGER || m_class == BOT_CLASS_NECROMANCER);
+        m_class == BOT_CLASS_SPELLBREAKER || m_class == BOT_CLASS_DARK_RANGER || m_class == BOT_CLASS_NECROMANCER ||
+        m_class == BOT_CLASS_SEA_WITCH);
 }
 bool bot_ai::IsHealingClass(uint8 m_class)
 {
@@ -16239,8 +16334,8 @@ bool bot_ai::IsHumanoidClass(uint8 m_class)
 }
 bool bot_ai::IsHeroExClass(uint8 m_class)
 {
-    return m_class == BOT_CLASS_BM || m_class == BOT_CLASS_ARCHMAGE ||
-        m_class == BOT_CLASS_DREADLORD || m_class == BOT_CLASS_DARK_RANGER;
+    return m_class == BOT_CLASS_BM || m_class == BOT_CLASS_ARCHMAGE || m_class == BOT_CLASS_DREADLORD ||
+        m_class == BOT_CLASS_DARK_RANGER || m_class == BOT_CLASS_SEA_WITCH;
 }
 bool bot_ai::IsMelee() const
 {
@@ -16273,6 +16368,7 @@ bool bot_ai::CanParry() const
         {
             case BOT_CLASS_SPHYNX:
             case BOT_CLASS_SPELLBREAKER:
+            case BOT_CLASS_SEA_WITCH:
                 return true;
             case BOT_CLASS_WARRIOR:
             case BOT_CLASS_PALADIN:
@@ -16337,7 +16433,8 @@ bool bot_ai::CanMount() const
 bool bot_ai::CanUseAmmo() const
 {
     if ((_botclass == BOT_CLASS_HUNTER || _botclass == BOT_CLASS_ROGUE ||
-        _botclass == BOT_CLASS_WARRIOR || _botclass == BOT_CLASS_DARK_RANGER) &&
+        _botclass == BOT_CLASS_WARRIOR || _botclass == BOT_CLASS_DARK_RANGER ||
+        _botclass == BOT_CLASS_SEA_WITCH) &&
         _equips[BOT_SLOT_RANGED])
     {
         ItemTemplate const* ranged = _equips[BOT_SLOT_RANGED]->GetTemplate();
@@ -16357,7 +16454,9 @@ bool bot_ai::RespectEquipsAttackTime() const
 bool bot_ai::CanChangeEquip(uint8 slot) const
 {
     return (_botclass != BOT_CLASS_BM && _botclass != BOT_CLASS_ARCHMAGE &&
-        _botclass != BOT_CLASS_DREADLORD && _botclass != BOT_CLASS_SPELLBREAKER && _botclass != BOT_CLASS_DARK_RANGER) ||
+        _botclass != BOT_CLASS_DREADLORD && _botclass != BOT_CLASS_SPELLBREAKER &&
+        _botclass != BOT_CLASS_DARK_RANGER && _botclass != BOT_CLASS_NECROMANCER &&
+        _botclass != BOT_CLASS_SEA_WITCH) ||
         slot > BOT_SLOT_RANGED;
 }
 
@@ -16460,6 +16559,15 @@ void bot_ai::InitBotCustomSpells()
     BotCustomSpells.insert(SPELL_CRIPPLE);//32
     BotCustomSpells.insert(SPELL_CORPSE_EXPLOSION);//33
     //BotCustomSpells.insert(SPELL_BLOOD_CURSE);//34 //NIY
+    //BotCustomSpells.insert(SPELL_FORKED_LIGHTNING);//35
+    //BotCustomSpells.insert(SPELL_FORKED_LIGHTNING_EFFECT);//36
+    //BotCustomSpells.insert(SPELL_FROST_ARROW);//37
+    //BotCustomSpells.insert(SPELL_FROST_ARROW_EFFECT);//38 //exclusive
+    //BotCustomSpells.insert(SPELL_MANA_SHIELD);//39
+    //BotCustomSpells.insert(SPELL_TORNADO);//40
+    //BotCustomSpells.insert(SPELL_TORNADO_EFFECT);//41
+    //BotCustomSpells.insert(SPELL_TORNADO_EFFECT2);//42
+    ////BotCustomSpells.insert(SPELL_TORNADO_EFFECT3);//43 //exclusive
 
     uint32 trig;
     SpellInfo* trigInfo;
@@ -17447,6 +17555,346 @@ void bot_ai::InitBotCustomSpells()
     sinfo->_effects[0].BasePoints = 1;
     sinfo->_effects[1].Effect = SPELL_EFFECT_NONE;
     //33) END CORPSE EXPLOSION
+
+    //35) FORKED LIGHTNING
+    spellId = SPELL_FORKED_LIGHTNING; //63541
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+    sinfo->SchoolMask = SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_ARCANE;
+    sinfo->PreventionType = SPELL_PREVENTION_TYPE_SILENCE;
+    sinfo->InterruptFlags = 0x9;
+    sinfo->SpellLevel = 3;
+    sinfo->BaseLevel = 3;
+    sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(4); //1000ms
+    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(5); //40 yds
+    sinfo->RecoveryTime = 11000;
+    sinfo->StartRecoveryCategory = 133;
+    sinfo->StartRecoveryTime = 1500;
+    sinfo->ManaCost = 110 * 5;
+    sinfo->MaxAffectedTargets = 2;
+    sinfo->Speed = 150.f;
+    sinfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+    sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+    sinfo->AttributesEx5 |= SPELL_ATTR5_DONT_TURN_DURING_CAST;
+    sinfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_24);
+    //sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_24);
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50_YARDS);
+    sinfo->_effects[0].BasePoints = 1;
+    sinfo->_effects[0].DieSides = 49;
+    sinfo->_effects[0].BonusMultiplier = 3.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 20.f;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
+    //35) END FORKED LIGHTNING
+
+    //36) FORKED LIGHTNING EFFECT
+    spellId = SPELL_FORKED_LIGHTNING_EFFECT; //50900
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+    sinfo->SchoolMask = SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_ARCANE;
+    sinfo->Dispel = DISPEL_MAGIC;
+    sinfo->Mechanic = MECHANIC_STUN;
+    sinfo->DurationEntry = sSpellDurationStore.LookupEntry(39); //2000ms
+    sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1); //instant
+    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(5); //40 yds
+    sinfo->ManaCost = 0;
+    sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+    sinfo->AttributesEx5 |= SPELL_ATTR5_DONT_TURN_DURING_CAST;
+    sinfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+
+    sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[0].ApplyAuraName = SPELL_AURA_MOD_STUN;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[0].RadiusEntry = nullptr;
+    //36) END FORKED LIGHTNING EFFECT
+
+    //37) FROST ARROW
+    spellId = SPELL_FROST_ARROW; //38942
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+    //sinfo->SpellFamilyFlags[0] = 0x0;
+    sinfo->SpellFamilyFlags[1] = 0x4; //custom, not present in db
+    //sinfo->SpellFamilyFlags[2] = 0x0;
+    sinfo->DmgClass = SPELL_DAMAGE_CLASS_RANGED;
+    sinfo->SchoolMask = SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_ARCANE;
+    sinfo->PreventionType = SPELL_PREVENTION_TYPE_PACIFY;
+    sinfo->Dispel = DISPEL_NONE;
+    sinfo->Mechanic = MECHANIC_NONE;
+    sinfo->SpellLevel = 3;
+    sinfo->BaseLevel = 3;
+    sinfo->MaxTargetLevel = 0;
+    //sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(3); //500ms
+    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(35); //0-35 yds
+    sinfo->DurationEntry = nullptr;
+    sinfo->RecoveryTime = 0;
+    sinfo->StartRecoveryCategory = 133;
+    sinfo->StartRecoveryTime = 500;
+    sinfo->PowerType = POWER_MANA;
+    sinfo->ManaCost = 5 * 5;
+    sinfo->MaxAffectedTargets = 1;
+    sinfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_CHANGE_MAP;
+    sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
+    sinfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
+    //sinfo->Attributes &= ~(SPELL_ATTR0_REQ_AMMO);
+    sinfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED;
+    sinfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS/* | SPELL_ATTR2_CANT_CRIT*/;
+    sinfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+    sinfo->AttributesEx4 &= ~(SPELL_ATTR4_INHERIT_CRIT_FROM_AURA);
+
+    sinfo->_effects[0].Effect = SPELL_EFFECT_WEAPON_DAMAGE;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[0].BasePoints = 20;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].BonusMultiplier = 0.5f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 2.f;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].RadiusEntry = nullptr;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_NONE;
+    //37) END FROST ARROW
+
+    //38) FROST ARROW EFFECT
+    spellId = SPELL_FROST_ARROW_EFFECT; //56095
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_GENERIC;
+    //sinfo->SpellFamilyFlags[0] = 0x0;
+    sinfo->SpellFamilyFlags[1] = 0x4; //custom, not present in db
+    //sinfo->SpellFamilyFlags[2] = 0x0;
+    sinfo->SchoolMask = SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_ARCANE;
+    sinfo->Dispel = DISPEL_MAGIC;
+    sinfo->Mechanic = MECHANIC_SNARE;
+    sinfo->Attributes &= ~(SPELL_ATTR0_CAST_TRACK_TARGET);
+    sinfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED;
+    sinfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+
+    sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[0].ApplyAuraName = SPELL_AURA_MOD_SPEED_SLOW_ALL;
+    sinfo->_effects[0].Mechanic = MECHANIC_SLOW_ATTACK;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[0].BasePoints = -30;
+    sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].BonusMultiplier = 1.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 0.f;
+    sinfo->_effects[0].ValueMultiplier = 1.f;
+    sinfo->_effects[0].RadiusEntry = nullptr;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_MOD_DECREASE_SPEED;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    sinfo->_effects[1].BasePoints = -30;
+    sinfo->_effects[1].DieSides = 0;
+    sinfo->_effects[1].BonusMultiplier = 1.f;
+    sinfo->_effects[1].DamageMultiplier = 1.f;
+    sinfo->_effects[1].RealPointsPerLevel = 0.f;
+    sinfo->_effects[1].ValueMultiplier = 1.f;
+    sinfo->_effects[1].RadiusEntry = nullptr;
+    //38) END FROST ARROW EFFECT
+
+    //39) MANA SHIELD
+    spellId = SPELL_MANA_SHIELD; //35064
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->Dispel = DISPEL_NONE;
+    sinfo->PreventionType = SPELL_PREVENTION_TYPE_NONE;
+    sinfo->SpellLevel = 0;
+    sinfo->BaseLevel = 0;
+    sinfo->MaxTargetLevel = 0;
+    sinfo->DurationEntry = sSpellDurationStore.LookupEntry(21); //-1
+    sinfo->RecoveryTime = 10000;
+    sinfo->StartRecoveryCategory = 133;
+    sinfo->StartRecoveryTime = 1500;
+    sinfo->Attributes |= SPELL_ATTR0_ABILITY | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR0_DISABLED_WHILE_ACTIVE;
+    sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT | SPELL_ATTR3_NO_DONE_BONUS;
+    sinfo->AttributesEx4 |= SPELL_ATTR4_NOT_STEALABLE;
+
+    sinfo->_effects[0].BasePoints = 1000000000;
+    sinfo->_effects[0].ValueMultiplier = 0.5f;
+    //39) END MANA SHIELD
+
+    //40) TORNADO
+    spellId = SPELL_TORNADO; //34695
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+    sinfo->SchoolMask = SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_ARCANE;
+    sinfo->InterruptFlags = 0x9;
+    sinfo->SpellLevel = 60;
+    sinfo->BaseLevel = 60;
+    sinfo->MaxTargetLevel = 0;
+    sinfo->DurationEntry = nullptr;
+    sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(15); //4000ms
+    //sinfo->RangeEntry = sSpellRangeStore.LookupEntry(5); //40 yds
+    sinfo->RecoveryTime = 120000;
+    sinfo->StartRecoveryCategory = 133;
+    sinfo->StartRecoveryTime = 1500;
+    sinfo->ManaCost = 250 * 5;
+    sinfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+    sinfo->Attributes |= SPELL_ATTR0_ABILITY | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR0_OUTDOORS_ONLY;
+    sinfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT | SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+    sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT | SPELL_ATTR3_NO_DONE_BONUS;
+    sinfo->AttributesEx3 &= ~(SPELL_ATTR3_ONLY_TARGET_PLAYERS);
+    sinfo->AttributesEx4 = 0;
+
+    sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+    sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(0);
+    sinfo->_effects[0].RadiusEntry = nullptr;
+    sinfo->_effects[0].BasePoints = 1;
+    sinfo->_effects[0].TriggerSpell = 0;
+    sinfo->_effects[0].Amplitude = 0;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_NONE;
+    //40) END TORNADO
+
+    //41) TORNADO EFFECT
+    spellId = SPELL_TORNADO_EFFECT; //21990
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+    //sinfo->SpellFamilyFlags[0] = 0x0;
+    sinfo->SpellFamilyFlags[1] = 0x4; //custom, not present in db
+    //sinfo->SpellFamilyFlags[2] = 0x0;
+    sinfo->SchoolMask = SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_ARCANE;
+    sinfo->Dispel = DISPEL_MAGIC;
+    sinfo->Mechanic = MECHANIC_NONE; //MECHANIC_KNOCKOUT
+    sinfo->InterruptFlags = 0x0;
+    sinfo->SpellLevel = 60;
+    sinfo->BaseLevel = 60;
+    sinfo->MaxTargetLevel = 0;
+    sinfo->DurationEntry = sSpellDurationStore.LookupEntry(29); //12000ms
+    sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1); //0ms
+    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(2); //5 yds
+    sinfo->RecoveryTime = 3000;
+    //sinfo->StartRecoveryCategory = 133;
+    //sinfo->StartRecoveryTime = 1500;
+    //sinfo->ManaCost = 250 * 5;
+    sinfo->MaxAffectedTargets = 1;
+    sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
+    sinfo->Attributes |= SPELL_ATTR0_ABILITY | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR0_OUTDOORS_ONLY;
+    sinfo->Attributes &= ~(SPELL_ATTR0_HEARTBEAT_RESIST_CHECK);
+    sinfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT | SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+    sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT | SPELL_ATTR3_NO_DONE_BONUS;
+    sinfo->AttributesEx3 &= ~(SPELL_ATTR3_ONLY_TARGET_PLAYERS);
+    sinfo->AttributesEx4 = 0;
+    sinfo->AttributesEx5 = 0;
+
+    //sinfo->_effects[0].Effect = SPELL_EFFECT_DUMMY;
+    //sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    //sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(0);
+    //sinfo->_effects[0].RadiusEntry = nullptr;
+    //sinfo->_effects[0].BasePoints = 1;
+    //sinfo->_effects[0].TriggerSpell = 0;
+    //sinfo->_effects[0].Amplitude = 0;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_MOD_RESISTANCE_PCT;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[1].TargetB = SpellImplicitTargetInfo(0);
+    sinfo->_effects[1].BasePoints = -100;
+    sinfo->_effects[1].MiscValue = SPELL_SCHOOL_MASK_ALL;
+    sinfo->_effects[2].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[2].ApplyAuraName = SPELL_AURA_PERIODIC_DAMAGE;
+    sinfo->_effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[2].TargetB = SpellImplicitTargetInfo(0);
+    sinfo->_effects[2].BasePoints = 212;
+    sinfo->_effects[2].DieSides = 183;
+    sinfo->_effects[2].RealPointsPerLevel = 35.f;
+    sinfo->_effects[2].BonusMultiplier = 0.25f;
+    sinfo->_effects[2].Amplitude = 1500;
+    //41) END TORNADO EFFECT
+
+    //42) TORNADO EFFECT2
+    spellId = SPELL_TORNADO_EFFECT2; //34683
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+    //sinfo->SpellFamilyFlags[0] = 0x0;
+    //sinfo->SpellFamilyFlags[1] = 0x4; //custom, not present in db
+    //sinfo->SpellFamilyFlags[2] = 0x0;
+    sinfo->SchoolMask = SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_ARCANE;
+    //sinfo->Dispel = DISPEL_MAGIC;
+    //sinfo->Mechanic = MECHANIC_DISORIENTED;
+    sinfo->ProcFlags = 0;
+    sinfo->InterruptFlags = 0x0;
+    sinfo->SpellLevel = 60;
+    sinfo->BaseLevel = 60;
+    sinfo->MaxTargetLevel = 0;
+    sinfo->DurationEntry = nullptr;
+    //sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1); //0ms
+    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(7); //10 yds
+    sinfo->RecoveryTime = 4500;
+    //sinfo->StartRecoveryCategory = 133;
+    //sinfo->StartRecoveryTime = 1500;
+    //sinfo->ManaCost = 250 * 5;
+    sinfo->MaxAffectedTargets = 1;
+    sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
+    sinfo->Attributes |= SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR0_OUTDOORS_ONLY;
+    sinfo->Attributes &= ~(SPELL_ATTR0_UNK11);
+    sinfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+    sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+    sinfo->AttributesEx4 = 0;
+    sinfo->AttributesEx5 = 0;
+
+    sinfo->_effects[0].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(0);
+    //sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+    sinfo->_effects[0].BasePoints = 541;
+    sinfo->_effects[0].DieSides = 215;
+    sinfo->_effects[0].RealPointsPerLevel = 40.f;
+    sinfo->_effects[0].BonusMultiplier = 0.5f;
+    //42) END TORNADO EFFECT2
+
+    //43) TORNADO EFFECT3
+    spellId = SPELL_TORNADO_EFFECT3; //39261
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+    //sinfo->SpellFamilyFlags[0] = 0x0;
+    //sinfo->SpellFamilyFlags[1] = 0x4; //custom, not present in db
+    //sinfo->SpellFamilyFlags[2] = 0x0;
+    sinfo->SchoolMask = SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_ARCANE;
+    //sinfo->Dispel = DISPEL_NONE;
+    //sinfo->Mechanic = MECHANIC_DISORIENTED;
+    //sinfo->ProcFlags = 0;
+    //sinfo->InterruptFlags = 0x0;
+    sinfo->SpellLevel = 0;
+    sinfo->BaseLevel = 0;
+    //sinfo->MaxTargetLevel = 0;
+    sinfo->DurationEntry = sSpellDurationStore.LookupEntry(21); //-1
+    //sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1); //0ms
+    //sinfo->RangeEntry = sSpellRangeStore.LookupEntry(1); //self
+    //sinfo->RecoveryTime = 4500;
+    //sinfo->StartRecoveryCategory = 133;
+    //sinfo->StartRecoveryTime = 1500;
+    //sinfo->ManaCost = 250 * 5;
+    //sinfo->MaxAffectedTargets = 1;
+    //sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
+    sinfo->Attributes |= SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR0_OUTDOORS_ONLY;
+    sinfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+    sinfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+    sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+    sinfo->AttributesEx4 = 0;
+    sinfo->AttributesEx5 = 0;
+
+    sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AREA_AURA_ENEMY;
+    //sinfo->_effects[0].ApplyAuraName = SPELL_AURA_MOD_DECREASE_SPEED;
+    //sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+    //sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+    //sinfo->_effects[0].BasePoints = -50;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AREA_AURA_ENEMY;
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_MOD_DECREASE_SPEED;
+    sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+    sinfo->_effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+    sinfo->_effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+    sinfo->_effects[1].BasePoints = -60;
+    //sinfo->AttributesCu &= ~(SPELL_ATTR0_CU_NEGATIVE_EFF1);
+    //43) END TORNADO EFFECT3
 
     TC_LOG_INFO("server.loading", "Re-Loading Spell Proc conditions...");
     sSpellMgr->LoadSpellProcs();

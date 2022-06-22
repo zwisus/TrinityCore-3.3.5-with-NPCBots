@@ -1282,6 +1282,7 @@ public:
                 case BOT_CLASS_SPELLBREAKER:
                 case BOT_CLASS_DARK_RANGER:
                 case BOT_CLASS_NECROMANCER:
+                case BOT_CLASS_SEA_WITCH:
                     if (BLESSING_OF_KINGS && !kings && doCast(target, BLESSING_OF_KINGS))
                         return true;
                     else if (BLESSING_OF_MIGHT && !might && doCast(target, BLESSING_OF_MIGHT))

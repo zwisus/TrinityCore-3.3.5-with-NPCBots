@@ -952,6 +952,7 @@ public:
             handler->PSendSysMessage("BOT_CLASS_SPELLBREAKER = %u", uint32(BOT_CLASS_SPELLBREAKER));
             handler->PSendSysMessage("BOT_CLASS_DARK_RANGER = %u", uint32(BOT_CLASS_DARK_RANGER));
             handler->PSendSysMessage("BOT_CLASS_NECROMANCER = %u", uint32(BOT_CLASS_NECROMANCER));
+            handler->PSendSysMessage("BOT_CLASS_SEA_WITCH = %u", uint32(BOT_CLASS_SEA_WITCH));
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -1308,6 +1309,7 @@ public:
                     case BOT_CLASS_SPELLBREAKER:bot_color_str = "ffcf3c1f"; bot_class_str = "Spellbreaker";       break;
                     case BOT_CLASS_DARK_RANGER: bot_color_str = "ff3e255e"; bot_class_str = "Dark Ranger";        break;
                     case BOT_CLASS_NECROMANCER: bot_color_str = "ff9900cc"; bot_class_str = "Necromancer";        break;
+                    case BOT_CLASS_SEA_WITCH:   bot_color_str = "ff40d7a9"; bot_class_str = "Sea Witch";          break;
                     default:                    bot_color_str = "ffffffff"; bot_class_str = "Unknown";            break;
                 }
 
@@ -1397,6 +1399,7 @@ public:
                 case BOT_CLASS_SPELLBREAKER:    bclass = "Spell Breakers";  break;
                 case BOT_CLASS_DARK_RANGER:     bclass = "Dark Rangers";    break;
                 case BOT_CLASS_NECROMANCER:     bclass = "Necromancers";    break;
+                case BOT_CLASS_SEA_WITCH:       bclass = "Sea Witches";     break;
                 default:                        bclass = "Unknown Class";   break;
             }
             handler->PSendSysMessage("%s: %u (alive: %u)", bclass, count, alivecount);

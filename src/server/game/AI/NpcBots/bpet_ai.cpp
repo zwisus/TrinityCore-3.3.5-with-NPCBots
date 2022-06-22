@@ -453,6 +453,8 @@ void bot_pet_ai::SetPetStats(bool force)
         case BOT_PET_DARK_MINION_ELITE:
         //necromancer
         case BOT_PET_NECROSKELETON:
+        //sea witch
+        case BOT_PET_TORNADO:
             break;
         default:
             TC_LOG_ERROR("entities.player", "bot_pet_ai::SetPetStats(): unk pet type %u, aborting", myType);
@@ -469,6 +471,7 @@ void bot_pet_ai::SetPetStats(bool force)
         case BOT_PET_DARK_MINION:
         case BOT_PET_DARK_MINION_ELITE:
         case BOT_PET_NECROSKELETON:
+        case BOT_PET_TORNADO:
             if (force == false)
                 return;
             break;
@@ -492,6 +495,7 @@ void bot_pet_ai::SetPetStats(bool force)
         case BOT_CLASS_DRUID:
         case BOT_CLASS_ARCHMAGE:
         case BOT_CLASS_DREADLORD:
+        case BOT_CLASS_SEA_WITCH:
             spdtotal = petOwner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC);
             break;
         default:
@@ -665,6 +669,9 @@ void bot_pet_ai::SetPetStats(bool force)
     //Resist  x0.25 -- resistances
     //Stamina x0.8  -- stamina
     //rest is same as warlock
+    // SEA WITCH
+    //Spd     x1.0  -- spd
+    //rest is same as warlock
 
     //attack power
     if (force)
@@ -705,7 +712,7 @@ void bot_pet_ai::SetPetStats(bool force)
             me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(level + (level / 4)));
         }
     }
-    float atpower = /*IAmFree() ? 1000.f :*/ 0; //+1000/+0 base pet ap
+    float atpower = /*IAmFree() ? 1000.f :*/ 0.f; //+1000/+0 base pet ap
     switch (myType)
     {
         case BOT_PET_IMP:
@@ -874,6 +881,7 @@ void bot_pet_ai::SetPetStats(bool force)
                     amount += 9;
                 break;
             case BOT_CLASS_ARCHMAGE:
+            case BOT_CLASS_SEA_WITCH:
                 amount += petOwner->GetCreatureCritChance();
                 break;
             default:
@@ -995,6 +1003,9 @@ void bot_pet_ai::SetPetStats(bool force)
                 amount += int32(spdtotal * 1.0f);
                 break;
             case BOT_CLASS_DREADLORD:
+                amount += int32(spdtotal * 1.0f);
+                break;
+            case BOT_CLASS_SEA_WITCH:
                 amount += int32(spdtotal * 1.0f);
                 break;
             default:
@@ -1541,6 +1552,7 @@ bool bot_pet_ai::_canRegenerate() const
         case BOT_PET_DARK_MINION:
         case BOT_PET_DARK_MINION_ELITE:
         case BOT_PET_NECROSKELETON:
+        case BOT_PET_TORNADO:
             return false;
         default:
             return true;
@@ -2272,7 +2284,14 @@ bool bot_pet_ai::GlobalUpdate(uint32 diff)
             }
             else
             {
-                me->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                switch (me->GetEntry())
+                {
+                    case BOT_PET_TORNADO:
+                        break;
+                    default:
+                        me->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                    break;
+                }
                 me->GetTransport()->RemovePassenger(me);
             }
         }
@@ -2331,7 +2350,7 @@ bool bot_pet_ai::GlobalUpdate(uint32 diff)
         checkAurasTimer += uint32(__rand + __rand + (IAmFree() ? 1000 : 40 * (1 + petOwner->GetBotOwner()->GetNpcBotsCount())));
 
         if (!HasBotCommandState(BOT_COMMAND_MASK_UNCHASE) && victim && !CCed(me, true) &&
-            !me->isMoving() && !IsCasting())
+            !me->isMoving() && !IsCasting() && me->GetEntry() != BOT_PET_TORNADO)
         {
             if (!IAmFree() && petOwner->GetBotOwner()->GetBotMgr()->GetBotAttackRangeMode() == BOT_ATTACK_RANGE_EXACT &&
                 petOwner->GetBotOwner()->GetBotMgr()->GetBotExactAttackRange() == 0)

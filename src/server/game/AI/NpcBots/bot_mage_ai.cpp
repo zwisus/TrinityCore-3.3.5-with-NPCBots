@@ -767,7 +767,8 @@ public:
                                 if (!cre || !cre->IsInWorld() || cre == me || !cre->IsAlive() ||
                                     cre->GetPowerType() != POWER_MANA || cre->GetBotAI()->HasRole(BOT_ROLE_TANK) ||
                                     cre->GetBotClass() == BOT_CLASS_BM || cre->GetBotClass() == BOT_CLASS_HUNTER ||
-                                    cre->GetBotClass() == BOT_CLASS_SPELLBREAKER || cre->GetBotClass() == BOT_CLASS_DARK_RANGER)
+                                    cre->GetBotClass() == BOT_CLASS_SPELLBREAKER || cre->GetBotClass() == BOT_CLASS_DARK_RANGER ||
+                                    cre->GetBotClass() == BOT_CLASS_SEA_WITCH)
                                     continue;
                                 if (cre->GetBotAI()->HasRole(BOT_ROLE_DPS) && me->GetExactDist(cre) < 30 &&
                                     !cre->HasAura(FOCUSMAGIC))
@@ -793,7 +794,8 @@ public:
                                 if (!cre || !cre->IsInWorld() || cre == me || !cre->IsAlive() ||
                                     cre->GetPowerType() != POWER_MANA || cre->GetBotAI()->HasRole(BOT_ROLE_TANK) ||
                                     cre->GetBotClass() == BOT_CLASS_BM || cre->GetBotClass() == BOT_CLASS_HUNTER ||
-                                    cre->GetBotClass() == BOT_CLASS_SPELLBREAKER || cre->GetBotClass() == BOT_CLASS_DARK_RANGER)
+                                    cre->GetBotClass() == BOT_CLASS_SPELLBREAKER || cre->GetBotClass() == BOT_CLASS_DARK_RANGER ||
+                                    cre->GetBotClass() == BOT_CLASS_SEA_WITCH)
                                     continue;
                                 if (me->GetExactDist(cre) < 30 &&
                                     !cre->HasAura(FOCUSMAGIC))

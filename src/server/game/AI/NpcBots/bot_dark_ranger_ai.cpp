@@ -68,22 +68,6 @@ public:
 
     struct dark_ranger_botAI : public bot_ai
     {
-/*
-        bool GossipHello(Player* player) override
-        {
-            return OnGossipHello(player, 0);
-        }
-
-        bool GossipSelect(Player* player, uint32 sender, uint32 action) override
-        {
-            return OnGossipSelect(player, me, sender, action);
-        }
-
-        bool GossipSelectCode(Player* player, uint32 sender, uint32 action, char const* code) override
-        {
-            return OnGossipSelectCode(player, me, sender, action, code);
-        }
-*/
         dark_ranger_botAI(Creature* creature) : bot_ai(creature)
         {
             _botclass = BOT_CLASS_DARK_RANGER;

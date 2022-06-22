@@ -1982,6 +1982,10 @@ void Unit::HandleEmoteCommand(Emote emoteId)
         if (float manaMultiplier = absorbAurEff->GetSpellEffectInfo().CalcValueMultiplier(absorbAurEff->GetCaster()))
             manaReduction = int32(float(manaReduction) * manaMultiplier);
 
+        //npcbot: fix absorption with 'manaMultiplier' < 1.0 (Mana Shield 35064)
+        manaReduction = std::max<decltype(manaReduction)>(manaReduction, 1);
+        //end npcbot
+
         int32 manaTaken = -damageInfo.GetVictim()->ModifyPower(POWER_MANA, -manaReduction);
 
         // take case when mana has ended up into account
