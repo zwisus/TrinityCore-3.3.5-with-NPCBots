@@ -6020,6 +6020,9 @@ void bot_ai::_OnManaRegenUpdate() const
             value = basemana * 0.0087f + 0.08f * GetTotalBotStat(BOT_STAT_MOD_INTELLECT);
             value += 0.2f * (me->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) + _getTotalBotStat(BOT_STAT_MOD_MANA_REGENERATION));
             value *= me->GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_MANA);
+
+            //if (_botclass == BOT_CLASS_SEA_WITCH && me->HasAuraType(SPELL_AURA_MANA_SHIELD))
+            //    modManaRegenInterrupt *= 0.25f;
         }
         else if (_botclass == BOT_CLASS_SPHYNX)
         {

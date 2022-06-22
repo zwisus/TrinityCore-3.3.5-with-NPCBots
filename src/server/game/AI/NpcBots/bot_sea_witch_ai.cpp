@@ -34,7 +34,6 @@ enum SeaWitchBaseSpells
 };
 enum SeaWitchPassives
 {
-    TORNADO_PASSIVE                     = 45869 //Periodic lightning
 };
 enum SeaWitchSpecial
 {
@@ -47,7 +46,9 @@ enum SeaWitchSpecial
     FORKED_LIGHTNING_EFFECT             = SPELL_FORKED_LIGHTNING_EFFECT,
     FROST_ARROW_EFFECT                  = SPELL_FROST_ARROW_EFFECT,
 
-    NAGA_SWIM_PASSIVE                   = 40513
+    NAGA_SWIM_PASSIVE                   = 40513,
+
+    SPELL_PARALYTIC_POISON              = 35201
 };
 
 static const uint32 Seawitch_spells_damage_arr[] =
@@ -94,6 +95,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_HORROR, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_TURN, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SLEEP, true);
+            //Sea Witch is immune to poisons
+            me->ApplySpellImmune(0, IMMUNITY_DISPEL, DISPEL_POISON, true);
         }
 
         bool doCast(Unit* victim, uint32 spellId)
@@ -284,7 +287,8 @@ public:
 
         bool CheckForkedLightning(uint32 diff)
         {
-            if (!IsSpellReady(FORKED_LIGHTNING_1, diff, false) || me->GetPower(POWER_MANA) < FORKEDLIGHTNING_COST || Rand() > 90)
+            if (!IsSpellReady(FORKED_LIGHTNING_1, diff, false) || me->GetPower(POWER_MANA) < FORKEDLIGHTNING_COST ||
+                Rand() > 90 || !me->HasInArc(M_PI, opponent))
                 return false;
 
             std::list<Unit*> targets;
@@ -475,6 +479,20 @@ public:
                     arro->SetMaxDuration(dur);
                 }
             }
+            if (baseId == SPELL_PARALYTIC_POISON)
+            {
+                if (Aura* para = target->GetAura(SPELL_PARALYTIC_POISON, me->GetGUID()))
+                {
+                    static constexpr int32 duration_threshold = 6000;
+                    if (para->GetMaxDuration() > duration_threshold)
+                    {
+                        para->SetDuration(duration_threshold);
+                        para->SetMaxDuration(duration_threshold);
+                    }
+                    else
+                        para->RefreshDuration();
+                }
+            }
 
             OnSpellHitTarget(target, spell);
         }
@@ -486,6 +504,25 @@ public:
                 return;
 
             OnSpellHit(caster, spell);
+        }
+
+        void OnBotDamageDealt(Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType /*damagetype*/, SpellInfo const* /*spellInfo*/) override
+        {
+            if (damage && victim && (cleanDamage->attackType == BASE_ATTACK || cleanDamage->attackType == OFF_ATTACK) &&
+                victim->IsWithinCombatRange(me, ATTACK_DISTANCE))
+            {
+                if (urand(0, 100) < 5)
+                {
+                    int32 baseAmount = 1;
+                    if (AuraEffect* pois = victim->GetAuraEffect(SPELL_PARALYTIC_POISON, EFFECT_0, me->GetGUID()))
+                        baseAmount = pois->GetAmount() * 2;
+                    else
+                        baseAmount = int32(me->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) + 1;
+                    CastSpellExtraArgs args(true);
+                    args.AddSpellBP0(baseAmount);
+                    me->CastSpell(victim, SPELL_PARALYTIC_POISON, args);
+                }
+            }
         }
 
         void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType) override
@@ -619,17 +656,17 @@ public:
         {
         }
 
-        bool CanUseManually(uint32 basespell) const override
-        {
-            switch (basespell)
-            {
-                case FORKED_LIGHTNING_1:
-                case TORNADO_1:
-                    return true;
-                default:
-                    return false;
-            }
-        }
+        //bool CanUseManually(uint32 basespell) const override
+        //{
+        //    switch (basespell)
+        //    {
+        //        case FORKED_LIGHTNING_1:
+        //        case TORNADO_1:
+        //            return true;
+        //        default:
+        //            return false;
+        //    }
+        //}
 
         std::vector<uint32> const* GetDamagingSpellsList() const override
         {
