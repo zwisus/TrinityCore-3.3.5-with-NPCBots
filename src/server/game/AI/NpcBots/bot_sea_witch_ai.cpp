@@ -20,8 +20,7 @@ absorbs 2 to 10 damage per point of mana (depending on hero level)
 4) Tornado. Summons a fierce tornado that damages and slows nearby enemy units, sometimes incapacitating them completely.
 Tornado grows over time oudoors, increasing damage dealt and area of effect, but shrinks indoors, dissipating quickly
 5ex) Auto Shot. A hunter auto shot ability since dark ranger is purely ranged and only uses bows.
-6ex) Naga (passive). Swim speed increased by 200%
-7ex) Power of the Deeps. Damage and dodge chance are greatly increased while in water
+6ex) Naga (passive). Swim speed increased by 200%. Damage and dodge chance are greatly increased while in water
 Complete - 100%
 */
 
