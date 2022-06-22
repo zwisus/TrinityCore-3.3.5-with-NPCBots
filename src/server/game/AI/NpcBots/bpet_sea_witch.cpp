@@ -10,7 +10,7 @@
 #include "TemporarySummon.h"
 /*
 Sea Witch NpcBot Pets (by Trickerer onlysuffering@gmail.com)
-Complete - 0%
+Complete - 100%
 TODO:
 */
 
@@ -139,7 +139,7 @@ public:
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
             //SpellSchool school = GetFirstSchoolInMask(spellInfo->GetSchoolMask());
-            uint8 lvl = me->GetLevel();
+            //uint8 lvl = me->GetLevel();
             float flatbonus = 0.0f;
             float pctbonus = 0.0f;
 

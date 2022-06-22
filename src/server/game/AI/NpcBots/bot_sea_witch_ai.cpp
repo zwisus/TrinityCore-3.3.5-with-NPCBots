@@ -22,7 +22,7 @@ Tornado grows over time oudoors, increasing damage dealt and area of effect, but
 5ex) Auto Shot. A hunter auto shot ability since dark ranger is purely ranged and only uses bows.
 6ex) Naga (passive). Swim speed increased by 200%
 7ex) Power of the Deeps. Damage and dodge chance are greatly increased while in water
-Complete - 90%
+Complete - 100%
 */
 
 enum SeaWitchBaseSpells
@@ -59,7 +59,6 @@ static const uint32 Seawitch_spells_cc_arr[] =
 
 static const uint32 Seawitch_spells_support_arr[] =
 { MANA_SHIELD_1 };
-
 
 static const std::vector<uint32> Seawitch_spells_damage(FROM_ARRAY(Seawitch_spells_damage_arr));
 static const std::vector<uint32> Seawitch_spells_cc(FROM_ARRAY(Seawitch_spells_cc_arr));
@@ -301,7 +300,7 @@ public:
             return false;
         }
 
-        void ApplyClassDamageMultiplierMelee(uint32& damage, CalcDamageInfo& /*damageinfo*/) const
+        void ApplyClassDamageMultiplierMelee(uint32& damage, CalcDamageInfo& /*damageinfo*/) const override
         {
             if (IsInContactWithWater())
             {
@@ -514,7 +513,7 @@ public:
             OnOwnerDamagedBy(u);
         }
 
-        uint8 GetPetPositionNumber(Creature const* summon) const override
+        uint8 GetPetPositionNumber(Creature const* /*summon*/) const override
         {
             return 0;
         }
@@ -578,7 +577,7 @@ public:
             switch (data)
             {
                 case BOTAI_MISC_PET_TYPE:
-                    return 0;
+                    return BOT_PET_TORNADO;
                 default:
                     return 0;
             }
