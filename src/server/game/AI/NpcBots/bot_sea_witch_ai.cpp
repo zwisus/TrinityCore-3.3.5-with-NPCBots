@@ -456,7 +456,7 @@ public:
                 return;
 
             uint32 baseId = spell->GetFirstRankSpell()->Id;
-            uint8 lvl = me->GetLevel();
+            //uint8 lvl = me->GetLevel();
 
             if (baseId == FORKED_LIGHTNING_1)
             {
