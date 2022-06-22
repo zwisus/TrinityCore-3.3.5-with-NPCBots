@@ -288,7 +288,7 @@ public:
         bool CheckForkedLightning(uint32 diff)
         {
             if (!IsSpellReady(FORKED_LIGHTNING_1, diff, false) || me->GetPower(POWER_MANA) < FORKEDLIGHTNING_COST ||
-                Rand() > 90 || !me->HasInArc(M_PI, opponent))
+                Rand() > 90 || !me->HasInArc(float(M_PI), opponent))
                 return false;
 
             std::list<Unit*> targets;
