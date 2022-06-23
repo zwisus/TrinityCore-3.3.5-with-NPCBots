@@ -143,7 +143,7 @@ class BotMgr
         void OnOwnerSetGameMaster(bool on);
         void ReviveAllBots();
         void SendBotCommandState(uint8 state);
-        void RecallAllBots();
+        void RecallAllBots(bool teleport = false);
         void RecallBot(Creature* bot);
         void KillAllBots();
         void KillBot(Creature* bot);
@@ -187,13 +187,13 @@ class BotMgr
 
         //TELEPORT BETWEEN MAPS
         //CONFIRMEND UNSAFE (charmer,owner)
-        static void TeleportBot(Creature* bot, Map* newMap, Position* pos);
+        static void TeleportBot(Creature* bot, Map* newMap, Position* pos, bool quick = false);
 
         AoeSpotsVec const& GetAoeSpots() const { return _aoespots; }
         AoeSpotsVec& GetAoeSpots() { return _aoespots; }
 
     private:
-        static void _teleportBot(Creature* bot, Map* newMap, float x, float y, float z, float ori = 0.f);
+        static void _teleportBot(Creature* bot, Map* newMap, float x, float y, float z, float ori = 0.f, bool quick = false);
         static void _reviveBot(Creature* bot, WorldLocation* dest = nullptr);
         void _addBotToRemoveList(ObjectGuid guid);
         void _setBotExactAttackRange(uint8 exactRange) { _exactAttackRange = exactRange; }
@@ -211,6 +211,7 @@ class BotMgr
         uint32 _npcBotEngageDelayHeal;
 
         bool _botsHidden;
+        bool _quickrecall;
 
         AoeSpotsVec _aoespots;
 };

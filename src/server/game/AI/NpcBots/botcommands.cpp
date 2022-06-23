@@ -116,6 +116,12 @@ public:
             { "write",      HandleNpcBotDumpWriteCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_DUMP_WRITE,         Console::Yes },
         };
 
+        static ChatCommandTable npcbotRecallCommandTable =
+        {
+            { "",           HandleNpcBotRecallCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_RECALL,             Console::No  },
+            { "teleport",   HandleNpcBotRecallTeleportCommand,      rbac::RBAC_PERM_COMMAND_NPCBOT_RECALL,             Console::No  },
+        };
+
         static ChatCommandTable npcbotCommandTable =
         {
             //{ "debug",      npcbotDebugCommandTable                                                                                 },
@@ -135,7 +141,7 @@ public:
             { "hide",       HandleNpcBotHideCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_HIDE,               Console::No  },
             { "unhide",     HandleNpcBotUnhideCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_UNHIDE,             Console::No  },
             { "show",       HandleNpcBotUnhideCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_UNHIDE,             Console::No  },
-            { "recall",     HandleNpcBotRecallCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_RECALL,             Console::No  },
+            { "recall",     npcbotRecallCommandTable                                                                                },
             { "kill",       HandleNpcBotKillCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_KILL,               Console::No  },
             { "suicide",    HandleNpcBotKillCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_KILL,               Console::No  },
             { "distance",   npcbotDistanceCommandTable                                                                              },
@@ -746,6 +752,34 @@ public:
         handler->SendSysMessage("You must select one of your bots or yourself");
         handler->SetSentErrorMessage(true);
         return false;
+    }
+
+    static bool HandleNpcBotRecallTeleportCommand(ChatHandler* handler)
+    {
+        Player* owner = handler->GetSession()->GetPlayer();
+
+        if (!owner->HaveBot())
+        {
+            handler->SendSysMessage(".npcbot recall teleport");
+            handler->SendSysMessage("Forces all your npcbots to teleport to your position");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        if (!owner->IsAlive())
+        {
+            handler->GetSession()->SendNotification("You are dead");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        if (owner->GetBotMgr()->IsPartyInCombat() && (owner->IsPvP() || owner->IsFFAPvP()))
+        {
+            handler->GetSession()->SendNotification("You can't do that while in PvP combat");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        owner->GetBotMgr()->RecallAllBots(true);
+        return true;
     }
 
     static bool HandleNpcBotToggleFlagsCommand(ChatHandler* handler, Optional<uint32> flag)

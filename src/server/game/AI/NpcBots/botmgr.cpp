@@ -159,6 +159,7 @@ BotMgr::BotMgr(Player* const master) : _owner(master), _dpstracker(new DPSTracke
     _npcBotEngageDelayHeal = _npcBotEngageDelayHeal_default;
 
     _botsHidden = false;
+    _quickrecall = false;
 
     _dpstracker->SetOwner(master->GetGUID().GetCounter());
     master->SetBotMgr(this);
@@ -544,13 +545,19 @@ void BotMgr::Update(uint32 diff)
             (!bot->GetBotAI()->HasBotCommandState(BOT_COMMAND_STAY) && _owner->GetDistance(bot) > SIZE_OF_GRIDS)))
         {
             //_owner->m_Controlled.erase(bot);
-            TeleportBot(bot, _owner->GetMap(), _owner);
+            TeleportBot(bot, _owner->GetMap(), _owner, _quickrecall);
             continue;
         }
 
         ai->canUpdate = true;
         bot->Update(diff);
         ai->canUpdate = false;
+    }
+
+    if (_quickrecall)
+    {
+        _quickrecall = false;
+        _botsHidden = false;
     }
 }
 
@@ -763,7 +770,7 @@ void BotMgr::OnTeleportFar(uint32 mapId, float x, float y, float z, float ori)
     }
 }
 
-void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z, float ori)
+void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z, float ori, bool quick)
 {
     ASSERT(bot->GetBotAI());
     bot->GetBotAI()->AbortTeleport();
@@ -823,14 +830,14 @@ void BotMgr::_teleportBot(Creature* bot, Map* newMap, float x, float y, float z,
             gr->SendUpdate();
 
     TeleportFinishEvent* finishEvent = new TeleportFinishEvent(bot->GetBotAI());
-    std::chrono::milliseconds delay(urand(5000, 8000));
+    std::chrono::milliseconds delay(quick ? urand(500, 1500) : urand(5000, 8000));
     bot->GetBotAI()->GetEvents()->AddEvent(finishEvent, bot->GetBotAI()->GetEvents()->CalculateTime(delay));
     bot->GetBotAI()->SetTeleportFinishEvent(finishEvent);
 }
 
-void BotMgr::TeleportBot(Creature* bot, Map* newMap, Position* pos)
+void BotMgr::TeleportBot(Creature* bot, Map* newMap, Position* pos, bool quick)
 {
-    _teleportBot(bot, newMap, pos->GetPositionX(), pos->GetPositionY(), pos->GetPositionZ(), pos->GetOrientation());
+    _teleportBot(bot, newMap, pos->GetPositionX(), pos->GetPositionY(), pos->GetPositionZ(), pos->GetOrientation(), quick);
 }
 
 void BotMgr::CleanupsBeforeBotDelete(ObjectGuid guid, uint8 /*removetype*/)
@@ -1224,11 +1231,19 @@ void BotMgr::SendBotCommandState(uint8 state)
         itr->second->GetBotAI()->SetBotCommandState(state, true);
 }
 
-void BotMgr::RecallAllBots()
+void BotMgr::RecallAllBots(bool teleport)
 {
-    for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
-        if (itr->second->IsInWorld() && itr->second->IsAlive() && !bot_ai::CCed(itr->second, true))
-            itr->second->GetMotionMaster()->MovePoint(_owner->GetMapId(), *_owner, false);
+    if (teleport)
+    {
+        _botsHidden = true;
+        _quickrecall = true;
+    }
+    else
+    {
+        for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
+            if (itr->second->IsInWorld() && itr->second->IsAlive() && !bot_ai::CCed(itr->second, true))
+                itr->second->GetMotionMaster()->MovePoint(_owner->GetMapId(), *_owner, false);
+    }
 }
 
 void BotMgr::RecallBot(Creature* bot)
