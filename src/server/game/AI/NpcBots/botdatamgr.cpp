@@ -186,19 +186,20 @@ void BotDataMgr::LoadNpcBots(bool spawn)
         Map* map = sMapMgr->CreateBaseMap(mapId);
         map->LoadGrid(pos_x, pos_y);
 
-        typedef std::unordered_multimap<uint32, Creature*>::iterator SpawnIter;
-        std::pair<SpawnIter, SpawnIter> creBounds = map->GetCreatureBySpawnIdStore().equal_range(tableGuid);
-        if (creBounds.first == map->GetCreatureBySpawnIdStore().end())
-        {
-            TC_LOG_ERROR("server.loading", "bot %u is not in spawns list, consider re-spawning it!", entry);
-            continue;
-        }
-
         ObjectGuid Guid(HighGuid::Unit, entry, tableGuid);
         TC_LOG_DEBUG("server.loading", "bot %u: spawnId %u, full %s", entry, tableGuid, Guid.ToString().c_str());
         Creature* bot = map->GetCreature(Guid);
         if (!bot) //not in map, use storage
+        {
+            typedef std::unordered_multimap<uint32, Creature*>::const_iterator SpawnIter;
+            std::pair<SpawnIter, SpawnIter> creBounds = map->GetCreatureBySpawnIdStore().equal_range(tableGuid);
+            if (creBounds.first == map->GetCreatureBySpawnIdStore().cend())
+            {
+                TC_LOG_ERROR("server.loading", "bot %u is not in spawns list, consider re-spawning it!", entry);
+                continue;
+            }
             bot = creBounds.first->second;
+        }
         ASSERT(bot);
         if (!bot->FindMap())
             TC_LOG_ERROR("server.loading", "bot %u is not in map!", entry);
