@@ -691,7 +691,7 @@ public:
         ObjectGuid guid = owner->GetTarget();
         if (!guid || !owner->HaveBot())
         {
-            handler->SendSysMessage(".npcbot recall");
+            handler->SendSysMessage(".npcbot kill | suicide");
             handler->SendSysMessage("Makes your npcbot just drop dead. If you select yourself ALL your bots will die");
             handler->SetSentErrorMessage(true);
             return false;
