@@ -47,6 +47,7 @@ enum SeaWitchSpecial
     FROST_ARROW_EFFECT                  = SPELL_FROST_ARROW_EFFECT,
 
     NAGA_SWIM_PASSIVE                   = 40513,
+    SPELL_THREAT_MOD                    = 31745, //Salvation
 
     SPELL_PARALYTIC_POISON              = 35201
 };
@@ -628,8 +629,12 @@ public:
             DefaultInit();
 
             //swim mod
-            if (Aura* threat = me->AddAura(NAGA_SWIM_PASSIVE, me))
-                threat->GetEffect(0)->ChangeAmount(200);
+            if (Aura* swim = me->AddAura(NAGA_SWIM_PASSIVE, me))
+                swim->GetEffect(0)->ChangeAmount(200);
+
+            //threat mod
+            if (Aura* threat = me->AddAura(SPELL_THREAT_MOD, me))
+                threat->GetEffect(0)->ChangeAmount(-50);
         }
 
         void ReduceCD(uint32 /*diff*/) override
