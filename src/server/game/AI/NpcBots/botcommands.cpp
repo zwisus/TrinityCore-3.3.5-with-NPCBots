@@ -672,9 +672,9 @@ public:
             handler->SetSentErrorMessage(true);
             return false;
         }
-        if (owner->GetBotMgr()->IsPartyInCombat())
+        if (owner->GetBotMgr()->IsPartyInCombat() && (owner->IsPvP() || owner->IsFFAPvP()))
         {
-            handler->GetSession()->SendNotification(LANG_YOU_IN_COMBAT);
+            handler->GetSession()->SendNotification("You can't do that while in PvP combat");
             handler->SetSentErrorMessage(true);
             return false;
         }
