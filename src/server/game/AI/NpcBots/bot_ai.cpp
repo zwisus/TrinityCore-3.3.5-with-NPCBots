@@ -9581,7 +9581,7 @@ bool bot_ai::_canLootCreatureForPlayer(Player* player, Creature* creature, uint3
         {
             slot++;
 
-            if (i->is_blocked || i->is_looted)
+            if (i->is_looted)
             {
                 //TC_LOG_ERROR("scripts", "item %u is blocked", i->itemid);
                 continue;
@@ -9799,7 +9799,7 @@ void bot_ai::_autoLootCreatureItems(Player* receiver, Creature* creature, uint32
     {
         slot++;
 
-        if (i->is_blocked || i->is_looted)
+        if (i->is_looted)
         {
             //TC_LOG_ERROR("scripts", "item %u is blocked", i->itemid);
             continue;
@@ -9816,6 +9816,9 @@ void bot_ai::_autoLootCreatureItems(Player* receiver, Creature* creature, uint32
         if (itemProto->Quality >= lootThreshold)
             continue;
         if (!((1 << itemProto->Quality) & lootQualityMask))
+            continue;
+
+        if (!receiver->HasQuestForItem(i->itemid))
             continue;
 
         if (_canLootItemForPlayer(receiver, creature, slot - 1) && i->AllowedForPlayer(receiver))
