@@ -145,6 +145,7 @@ public:
 
                 if (spell && spell->GetTimer() > int32(sSpellMgr->GetSpellInfo(GetSpell(FORKED_LIGHTNING_1))->CalcCastTime() + 250))
                 {
+                    me->SetFacingTo(me->GetAbsoluteAngle(target));
                     if (doCast(target, GetSpell(FORKED_LIGHTNING_1)))
                         return;
                 }
@@ -165,6 +166,9 @@ public:
                 uint32 const baseId = spell->GetSpellInfo()->GetFirstRankSpell()->Id;
                 //Tornado interrupt
                 if (!me->IsInCombat() && baseId == TORNADO_1)
+                    me->InterruptSpell(CURRENT_GENERIC_SPELL);
+                else if (baseId == FORKED_LIGHTNING_1 &&
+                    (!me->GetTarget() || me->GetTarget() != spell->m_targets.GetObjectTargetGUID() || !me->HasInArc(float(M_PI) / 2.f, spell->m_targets.GetUnitTarget())))
                     me->InterruptSpell(CURRENT_GENERIC_SPELL);
                 else if (_spell_preact && spell->GetTimer() < 400)
                 {
