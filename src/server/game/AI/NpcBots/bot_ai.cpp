@@ -17574,14 +17574,14 @@ void bot_ai::InitBotCustomSpells()
     sinfo->InterruptFlags = 0x9;
     sinfo->SpellLevel = 3;
     sinfo->BaseLevel = 3;
-    sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(4); //1000ms
+    sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(110); //750ms
     sinfo->RangeEntry = sSpellRangeStore.LookupEntry(5); //40 yds
     sinfo->RecoveryTime = 11000;
     sinfo->StartRecoveryCategory = 133;
     sinfo->StartRecoveryTime = 1500;
     sinfo->ManaCost = 110 * 5;
     sinfo->MaxAffectedTargets = 2;
-    sinfo->Speed = 150.f;
+    sinfo->Speed = 1000.f;
     sinfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
     sinfo->AttributesEx5 |= SPELL_ATTR5_DONT_TURN_DURING_CAST;
@@ -17589,7 +17589,7 @@ void bot_ai::InitBotCustomSpells()
 
     sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_24);
     //sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_24);
-    sinfo->_effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50_YARDS);
+    sinfo->_effects[0].RadiusEntry = nullptr;//sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50_YARDS);
     sinfo->_effects[0].BasePoints = 1;
     sinfo->_effects[0].DieSides = 49;
     sinfo->_effects[0].BonusMultiplier = 3.f;
@@ -17608,7 +17608,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->Mechanic = MECHANIC_STUN;
     sinfo->DurationEntry = sSpellDurationStore.LookupEntry(39); //2000ms
     sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1); //instant
-    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(5); //40 yds
+    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(6); //100 yds
     sinfo->ManaCost = 0;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
     sinfo->AttributesEx5 |= SPELL_ATTR5_DONT_TURN_DURING_CAST;
@@ -17636,19 +17636,19 @@ void bot_ai::InitBotCustomSpells()
     sinfo->SpellLevel = 3;
     sinfo->BaseLevel = 3;
     sinfo->MaxTargetLevel = 0;
-    //sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(3); //500ms
+    sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(110); //750ms
     sinfo->RangeEntry = sSpellRangeStore.LookupEntry(35); //0-35 yds
     sinfo->DurationEntry = nullptr;
     sinfo->RecoveryTime = 0;
     sinfo->StartRecoveryCategory = 133;
     sinfo->StartRecoveryTime = 500;
     sinfo->PowerType = POWER_MANA;
-    sinfo->ManaCost = 5 * 5;
+    sinfo->ManaCost = 10 * 5;
     sinfo->MaxAffectedTargets = 1;
     sinfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_CHANGE_MAP;
     sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
     sinfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
-    //sinfo->Attributes &= ~(SPELL_ATTR0_REQ_AMMO);
+    sinfo->Attributes &= ~(SPELL_ATTR0_REQ_AMMO);
     sinfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED;
     sinfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS/* | SPELL_ATTR2_CANT_CRIT*/;
     sinfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
@@ -17722,7 +17722,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx4 |= SPELL_ATTR4_NOT_STEALABLE;
 
     sinfo->_effects[0].BasePoints = 1000000000;
-    sinfo->_effects[0].ValueMultiplier = 0.5f;
+    sinfo->_effects[0].ValueMultiplier = 10.f;
     //39) END MANA SHIELD
 
     //40) TORNADO

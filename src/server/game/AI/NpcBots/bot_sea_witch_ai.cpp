@@ -40,7 +40,7 @@ enum SeaWitchSpecial
     MH_ATTACK_ANIM                      = SPELL_ATTACK_MELEE_1H,
 
     FORKEDLIGHTNING_COST                = 110 * 5,
-    FROSTARROW_COST                     = 5 * 5,
+    FROSTARROW_COST                     = 10 * 5,
     TORNADO_COST                        = 250 * 5,
 
     FORKED_LIGHTNING_EFFECT             = SPELL_FORKED_LIGHTNING_EFFECT,
@@ -396,25 +396,13 @@ public:
         void ApplyClassEffectValueMultiplierMods(SpellInfo const* spellInfo, SpellEffIndex effIndex, float& multiplier) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
-            uint8 lvl = me->GetLevel();
+            //uint8 lvl = me->GetLevel();
             float pctbonus = 1.0f;
 
             //Mana Shield absorption modifier
-            //Base is 0.5f
+            //Base is 10.f
             if (baseId == MANA_SHIELD_1 && effIndex == EFFECT_0)
-            {
-                switch (lvl / 10)
-                {
-                    case 8: pctbonus = 0.20f; break;
-                    case 7: pctbonus = 0.25f; break;
-                    case 6: pctbonus = 0.29f; break;
-                    case 5: pctbonus = 0.33f; break;
-                    case 4: pctbonus = 0.40f; break;
-                    case 3: pctbonus = 0.50f; break;
-                    case 2: pctbonus = 0.67f; break;
-                    default:                  break;
-                }
-            }
+                pctbonus *= _manaPerDamageMult();
 
             multiplier = multiplier * pctbonus;
         }
@@ -698,6 +686,22 @@ public:
         Summons _minions;
 
         bool _spell_preact;
+
+        float _manaPerDamageMult() const
+        {
+            switch (me->GetLevel() / 10)
+            {
+                case 8: return 1.f / 100.00f;
+                case 7: return 1.f /  50.00f;
+                case 6: return 1.f /  20.00f;
+                case 5: return 1.f /  10.00f;
+                case 4: return 1.f /   4.00f;
+                case 3: return 1.f /   2.50f;
+                case 2: return 1.f /   1.67f;
+                case 1: return 1.f /   1.25f;
+                default:return 1.f /   1.00f;
+            }
+        }
     };
 };
 
