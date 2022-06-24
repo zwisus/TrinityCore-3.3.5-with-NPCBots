@@ -6353,7 +6353,7 @@ bool bot_ai::Wait()
     if (IAmFree())
         waitTimer = me->IsInCombat() ? 500 : urand(750, 1250);
     else if (!master->GetMap()->IsRaid())
-        waitTimer = std::min<uint32>(uint32(50 * (master->GetNpcBotsCount() - 1) + __rand + __rand), 500);
+        waitTimer = std::min<uint32>(uint32(50 * (master->GetNpcBotsCount() - 1) + __rand), 500);
     else
         waitTimer = __rand;
 
@@ -15302,19 +15302,17 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         else if (!IsCasting(mover) && (!IsShootingWand(mover) || Rand() < 10))
         {
             _calculatePos(movepos);
-            float maxdist = std::max<float>(master->GetBotMgr()->GetBotFollowDist() * (master->isMoving() ? 0.02f : 0.35f), 4.f);
-            if (!me->isMoving())
-            {
-                if (me->GetExactDist(&movepos) > maxdist)
-                    SetBotCommandState(BOT_COMMAND_FOLLOW, true, &movepos);
-            }
-            else
-            {
-                Position destPos;
+            float maxdist = std::max<float>(master->GetBotMgr()->GetBotFollowDist() * (master->isMoving() ? 0.02f : 0.25f), 4.f);
+            Position destPos;
+            if (me->isMoving())
                 me->GetMotionMaster()->GetDestination(destPos.m_positionX, destPos.m_positionY, destPos.m_positionZ);
-                if (destPos.GetExactDist(&movepos) > maxdist)
-                    SetBotCommandState(BOT_COMMAND_FOLLOW, true, &movepos);
-            }
+            else
+                destPos = me->GetPosition();
+
+            if ((me->isMoving() != master->isMoving()) ||
+                (master->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_FORWARD) ||
+                destPos.GetExactDist(&movepos) > maxdist)
+                SetBotCommandState(BOT_COMMAND_FOLLOW, true, &movepos);
         }
     }
     if (!IsCasting() && !IsShootingWand())
