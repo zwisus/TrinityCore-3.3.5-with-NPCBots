@@ -74,6 +74,8 @@ public:
         {
             _botclass = BOT_CLASS_SPELLBREAKER;
 
+            InitUnitFlags();
+
             //spellbreaker immunities
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_POSSESS, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);

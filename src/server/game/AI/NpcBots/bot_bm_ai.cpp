@@ -187,6 +187,9 @@ public:
         blademaster_botAI(Creature* creature) : bot_ai(creature)
         {
             _botclass = BOT_CLASS_BM;
+
+            InitUnitFlags();
+
             //Blademaster cannot be disarmed
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
         }

@@ -1231,6 +1231,12 @@ void BotMgr::SendBotCommandState(uint8 state)
         itr->second->GetBotAI()->SetBotCommandState(state, true);
 }
 
+void BotMgr::SendBotCommandStateRemove(uint8 state)
+{
+    for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
+        itr->second->GetBotAI()->RemoveBotCommandState(state);
+}
+
 void BotMgr::RecallAllBots(bool teleport)
 {
     if (teleport)

@@ -143,6 +143,7 @@ class BotMgr
         void OnOwnerSetGameMaster(bool on);
         void ReviveAllBots();
         void SendBotCommandState(uint8 state);
+        void SendBotCommandStateRemove(uint8 state);
         void RecallAllBots(bool teleport = false);
         void RecallBot(Creature* bot);
         void KillAllBots();

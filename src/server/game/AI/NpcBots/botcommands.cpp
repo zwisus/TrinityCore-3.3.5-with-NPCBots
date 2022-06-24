@@ -85,6 +85,7 @@ public:
             { "standstill", HandleNpcBotCommandStandstillCommand,   rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_STANDSTILL, Console::No  },
             { "stopfully",  HandleNpcBotCommandStopfullyCommand,    rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_STOPFULLY,  Console::No  },
             { "follow",     HandleNpcBotCommandFollowCommand,       rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_FOLLOW,     Console::No  },
+            { "walk",       HandleNpcBotCommandWalkCommand,         rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_WALK,       Console::No  },
         };
 
         static ChatCommandTable npcbotAttackDistanceCommandTable =
@@ -1522,6 +1523,35 @@ public:
         {
             owner->GetBotMgr()->SendBotCommandState(BOT_COMMAND_FOLLOW);
             msg = "Bots' command state set to 'FOLLOW'";
+        }
+
+        handler->SendSysMessage(msg.c_str());
+        return true;
+    }
+
+    static bool HandleNpcBotCommandWalkCommand(ChatHandler* handler)
+    {
+        Player* owner = handler->GetSession()->GetPlayer();
+
+        if (!owner->HaveBot())
+        {
+            handler->SendSysMessage(".npcbot command walk");
+            handler->SendSysMessage("Toggles walk mode for your npcbots");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        std::string msg;
+        bool isWalking = owner->GetBotMgr()->GetBotMap()->begin()->second->GetBotAI()->HasBotCommandState(BOT_COMMAND_WALK);
+        if (!isWalking)
+        {
+            owner->GetBotMgr()->SendBotCommandState(BOT_COMMAND_WALK);
+            msg = "Bots' movement mode is set to 'WALK'";
+        }
+        else
+        {
+            owner->GetBotMgr()->SendBotCommandStateRemove(BOT_COMMAND_WALK);
+            msg = "Bots' movement mode is set to 'RUN'";
         }
 
         handler->SendSysMessage(msg.c_str());

@@ -519,6 +519,7 @@ void bot_ai::InitUnitFlags()
         (const_cast<CreatureTemplate*>(me->GetCreatureTemplate()))->unit_flags2 |= UNIT_FLAG2_MIRROR_IMAGE;
         me->ReplaceAllUnitFlags2(UnitFlags2(me->GetCreatureTemplate()->unit_flags2));
     }
+    (const_cast<CreatureMovementData&>(me->GetMovementTemplate())).Chase = CreatureChaseMovementType::CanWalk;
 }
 
 void bot_ai::ResetBotAI(uint8 resetType)
@@ -14802,6 +14803,10 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 shouldEnterVehicle = false;
                 AfterBotOwnerEnterVehicle();
             }
+
+            //walk mode check
+            if (HasBotCommandState(BOT_COMMAND_WALK) != me->IsWalking())
+                me->SetWalk(!me->IsWalking());
         }
     }
 
