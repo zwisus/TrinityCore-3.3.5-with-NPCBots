@@ -12437,6 +12437,11 @@ void Unit::SendPlaySpellImpact(ObjectGuid guid, uint32 id) const
 
 bool Unit::CanApplyResilience() const
 {
+    //npcbot: allow bots' damage to be mitigated by target's resilience
+    if (GetTypeId() == TYPEID_UNIT && ToCreature()->IsNPCBotOrPet())
+        return true;
+    //end npcbot
+
     return !IsVehicle() && GetOwnerGUID().IsPlayer();
 }
 
