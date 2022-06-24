@@ -15547,11 +15547,11 @@ bool bot_ai::FinishTeleport(/*uint32 mapId, uint32 instanceId, float x, float y,
         me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
     }
     else
-        me->Relocate(master);
-
-    Position destpos;
-    _calculatePos(destpos);
-    me->Relocate(destpos);
+    {
+        Position destpos;
+        _calculatePos(destpos);
+        me->Relocate(destpos);
+    }
 
     map->AddToMap(me);
     me->BotStopMovement();
