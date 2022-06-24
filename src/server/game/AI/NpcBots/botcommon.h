@@ -564,7 +564,9 @@ enum BotCommonValues
     BOT_TEXT_HIREOPTION_SEAWITCH        = 70653, //"Seems like you could really use a drink of fresh water."
     BOT_TEXT_CLASS_SEAWITCH_PLU         = 70654, //"Sea Witches"
     BOT_TEXT_CLASS_SEAWITCH             = 70655, //"Sea Witch"
-    //70655-70799 reserved for custom localization strings
+    BOT_TEXT_MANA_PER_DAMAGE            = 70656, //"Mana per damage"
+    BOT_TEXT_DAMAGE_PER_MANA            = 70657, //"Damage per mana"
+    //70658-70799 reserved for custom localization strings
 //VEHICLE CREATURES
     CREATURE_NEXUS_SKYTALON_1           = 32535, // [Q] Aces High
     CREATURE_EOE_SKYTALON_N             = 30161, // Eye of Eternity

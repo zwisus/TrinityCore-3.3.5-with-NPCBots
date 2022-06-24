@@ -3,6 +3,8 @@
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "TemporarySummon.h"
+
+#include "G3D/g3dmath.h"
 /*
 Naga Sea Witch NpcBot (by Trickerer onlysuffering@gmail.com)
 Description:
@@ -167,8 +169,7 @@ public:
                 //Tornado interrupt
                 if (!me->IsInCombat() && baseId == TORNADO_1)
                     me->InterruptSpell(CURRENT_GENERIC_SPELL);
-                else if (baseId == FORKED_LIGHTNING_1 &&
-                    (!me->GetTarget() || me->GetTarget() != spell->m_targets.GetObjectTargetGUID() || !me->HasInArc(float(M_PI) / 2.f, spell->m_targets.GetUnitTarget())))
+                else if (baseId == FORKED_LIGHTNING_1 && (!me->GetVictim() || !me->HasInArc(float(M_PI) / 2.f, me->GetVictim())))
                     me->InterruptSpell(CURRENT_GENERIC_SPELL);
                 else if (_spell_preact && spell->GetTimer() < 400)
                 {
@@ -664,6 +665,26 @@ public:
         //            return false;
         //    }
         //}
+
+        bool HasAbilitiesSpecifics() const override { return true; }
+        void FillAbilitiesSpecifics(Player const* player, std::list<std::string> &specList) override
+        {
+            bool amount_is_mana = true;
+            float amount = sSpellMgr->AssertSpellInfo(MANA_SHIELD_1)->GetEffect(EFFECT_0).CalcValueMultiplier(me); //mana per damage
+            if (G3D::fuzzyLt(amount, 1.0f))
+            {
+                amount_is_mana = false;
+                amount = 1.f / amount;
+            }
+
+            std::ostringstream amount_sstr;
+            amount_sstr.setf(std::ios_base::fixed);
+            amount_sstr.precision(1);
+            amount_sstr << amount;
+            uint32 text_id = amount_is_mana ? BOT_TEXT_MANA_PER_DAMAGE : BOT_TEXT_DAMAGE_PER_MANA;
+
+            specList.push_back(LocalizedNpcText(player, text_id) + ": " + amount_sstr.str());
+        }
 
         std::vector<uint32> const* GetDamagingSpellsList() const override
         {
