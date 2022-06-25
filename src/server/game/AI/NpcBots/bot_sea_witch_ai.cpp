@@ -3,8 +3,6 @@
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "TemporarySummon.h"
-
-#include "G3D/g3dmath.h"
 /*
 Naga Sea Witch NpcBot (by Trickerer onlysuffering@gmail.com)
 Description:
@@ -673,7 +671,7 @@ public:
         {
             bool amount_is_mana = true;
             float amount = sSpellMgr->AssertSpellInfo(MANA_SHIELD_1)->GetEffect(EFFECT_0).CalcValueMultiplier(me); //mana per damage
-            if (G3D::fuzzyLt(amount, 1.0f))
+            if (amount < 1.0f)
             {
                 amount_is_mana = false;
                 amount = 1.f / amount;
