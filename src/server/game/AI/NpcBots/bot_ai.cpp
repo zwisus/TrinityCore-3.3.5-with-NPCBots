@@ -9578,45 +9578,47 @@ bool bot_ai::_canLootCreatureForPlayer(Player* player, Creature* creature, uint3
     }
     if (!canLoot)
     {
-        for (std::vector<LootItem>::const_iterator i = creature->loot.quest_items.begin(); i != creature->loot.quest_items.end(); ++i)
+        NotNormalLootItemMap const& lootPlayerQuestItems = creature->loot.GetPlayerQuestItems();
+        NotNormalLootItemMap::const_iterator q_itr = lootPlayerQuestItems.find(player->GetGUID());
+        if (q_itr != lootPlayerQuestItems.end())
         {
-            slot++;
-
-            if (i->is_looted)
+            NotNormalLootItemList* q_list = q_itr->second;
+            for (NotNormalLootItemList::const_iterator qi = q_list->begin(); qi != q_list->end(); ++qi)
             {
-                //TC_LOG_ERROR("scripts", "item %u is blocked", i->itemid);
-                continue;
-            }
+                LootItem* i = &creature->loot.quest_items[qi->index];
+                if (i->is_looted || qi->is_looted)
+                {
+                    //TC_LOG_ERROR("scripts", "item %u is looted", i->itemid);
+                    continue;
+                }
 
-            if (!i->rollWinnerGUID.IsEmpty() && i->rollWinnerGUID != player->GetGUID())
-            {
-                //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, i->itemid);
-                continue;
-            }
+                if (!i->rollWinnerGUID.IsEmpty() && i->rollWinnerGUID != player->GetGUID())
+                {
+                    //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, i->itemid);
+                    continue;
+                }
 
-            ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(i->itemid);
-            if (!itemProto)
-            {
-                //TC_LOG_ERROR("scripts", "no item proto for itemId %u", i->itemid);
-                return false;
-            }
+                ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(i->itemid);
 
-            if (itemProto->Quality >= lootThreshold)
-            {
-                //TC_LOG_ERROR("scripts", "item %u group quality threshold mismatch", i->itemid);
-                continue;
-            }
+                if (itemProto->Quality >= lootThreshold)
+                {
+                    //TC_LOG_ERROR("scripts", "item %u group quality threshold mismatch", i->itemid);
+                    continue;
+                }
 
-            if (!((1 << itemProto->Quality) & lootQualityMask))
-            {
-                //TC_LOG_ERROR("scripts", "item %u lootQualityMask mismatch", i->itemid);
-                continue;
-            }
+                if (!((1 << itemProto->Quality) & lootQualityMask))
+                {
+                    //TC_LOG_ERROR("scripts", "item %u lootQualityMask mismatch", i->itemid);
+                    continue;
+                }
 
-            if (_canLootItemForPlayer(player, creature, slot - 1) && i->AllowedForPlayer(player))
-            {
-                canLoot = true;
-                break;
+                uint8 qslot = uint8(creature->loot.items.size() + (qi - q_list->begin()));
+
+                if (_canLootItemForPlayer(player, creature, qslot) && i->AllowedForPlayer(player))
+                {
+                    canLoot = true;
+                    break;
+                }
             }
         }
     }
@@ -9796,34 +9798,42 @@ void bot_ai::_autoLootCreatureItems(Player* receiver, Creature* creature, uint32
             receiver->StoreLootItem(slot - 1, &creature->loot);
         }
     }
-    for (std::vector<LootItem>::iterator i = creature->loot.quest_items.begin(); i != creature->loot.quest_items.end(); ++i)
+
+    NotNormalLootItemMap const& lootPlayerQuestItems = creature->loot.GetPlayerQuestItems();
+    NotNormalLootItemMap::const_iterator q_itr = lootPlayerQuestItems.find(receiver->GetGUID());
+    if (q_itr != lootPlayerQuestItems.end())
     {
-        slot++;
-
-        if (i->is_looted)
+        NotNormalLootItemList* q_list = q_itr->second;
+        for (NotNormalLootItemList::const_iterator qi = q_list->begin(); qi != q_list->end(); ++qi)
         {
-            //TC_LOG_ERROR("scripts", "item %u is blocked", i->itemid);
-            continue;
+            LootItem* i = &creature->loot.quest_items[qi->index];
+            if (i->is_looted || qi->is_looted)
+            {
+                //TC_LOG_ERROR("scripts", "item %u is looted", i->itemid);
+                continue;
+            }
+
+            if (!i->rollWinnerGUID.IsEmpty() && i->rollWinnerGUID != receiver->GetGUID())
+            {
+                //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, i->itemid);
+                continue;
+            }
+
+            ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(i->itemid);
+
+            if (itemProto->Quality >= lootThreshold)
+                continue;
+            if (!((1 << itemProto->Quality) & lootQualityMask))
+                continue;
+
+            //if (!receiver->HasQuestForItem(i->itemid))
+            //    continue;
+
+            uint8 qslot = uint8(creature->loot.items.size() + (qi - q_list->begin()));
+
+            if (_canLootItemForPlayer(receiver, creature, qslot) && i->AllowedForPlayer(receiver))
+                receiver->StoreLootItem(qslot, &creature->loot);
         }
-
-        if (!i->rollWinnerGUID.IsEmpty() && i->rollWinnerGUID != receiver->GetGUID())
-        {
-            //TC_LOG_ERROR("scripts", "can't loot item %u (%u), roll won", slot, i->itemid);
-            continue;
-        }
-
-        ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(i->itemid);
-
-        if (itemProto->Quality >= lootThreshold)
-            continue;
-        if (!((1 << itemProto->Quality) & lootQualityMask))
-            continue;
-
-        if (!receiver->HasQuestForItem(i->itemid))
-            continue;
-
-        if (_canLootItemForPlayer(receiver, creature, slot - 1) && i->AllowedForPlayer(receiver))
-            receiver->StoreLootItem(slot - 1, &creature->loot);
     }
     if (creature->loot.isLooted())
     {
