@@ -20,14 +20,15 @@ movement, attack and casting speed by up to 70% (depending on hero level)
 absorbs 2 to 10 damage per point of mana (depending on hero level)
 4) Tornado. Summons a fierce tornado that damages and slows nearby enemy units, sometimes incapacitating them completely.
 Tornado grows over time oudoors, increasing damage dealt and area of effect, but shrinks indoors, dissipating quickly
-5ex) Auto Shot. A hunter auto shot ability since dark ranger is purely ranged and only uses bows.
+5ex) Shot. Normal shoot
 6ex) Naga (passive). Swim speed increased by 200%. Damage and dodge chance are greatly increased while in water
 Complete - 100%
 */
 
 enum SeaWitchBaseSpells
 {
-    AUTO_SHOT_1                         = 75,
+    //AUTO_SHOT_1                         = 75,
+    SHOOT_BOW_1                         = SPELL_SHOOT_BOW,
     FORKED_LIGHTNING_1                  = SPELL_FORKED_LIGHTNING,
     FROST_ARROW_1                       = SPELL_FROST_ARROW,
     MANA_SHIELD_1                       = SPELL_MANA_SHIELD,
@@ -84,7 +85,7 @@ public:
 
             InitUnitFlags();
 
-            //dark ranger immunities
+            //sea witch immunities
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_POSSESS, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SHAPESHIFT, true);
@@ -225,12 +226,12 @@ public:
             float dist = me->GetDistance(opponent);
             static constexpr float maxRangeLong = 35.f;
 
-            bool inpostion = !opponent->HasAuraType(SPELL_AURA_MOD_SPEED_SLOW_ALL) || dist > maxRangeLong - 25.f;
+            //bool inpostion = !opponent->HasAuraType(SPELL_AURA_MOD_SPEED_SLOW_ALL) || dist > maxRangeLong - 20.f;
 
             //Auto Shot
-            Spell const* shot = me->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL);
-            if (shot && shot->GetSpellInfo()->Id == AUTO_SHOT_1 && (shot->m_targets.GetUnitTarget() != opponent || !inpostion))
-                me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            //Spell const* shot = me->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL);
+            //if (shot && shot->GetSpellInfo()->Id == AUTO_SHOT_1 && (shot->m_targets.GetUnitTarget() != opponent || !inpostion))
+            //    me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
 
             if (!HasRole(BOT_ROLE_DPS))
                 return;
@@ -245,26 +246,39 @@ public:
             if (CheckTornado(diff))
                 return;
 
-            //Frost Arrow / Autoshot
-            if (me->GetPower(POWER_MANA) >= FROSTARROW_COST && GetSpell(FROST_ARROW_1))
+            if (/*inpostion && */!me->GetCurrentSpell(CURRENT_GENERIC_SPELL))
             {
-                //if (inpostion)
+                //Frost Arrow / Autoshot
+                if (IsSpellReady(FROST_ARROW_1, diff) && me->GetPower(POWER_MANA) >= FROSTARROW_COST)
                 {
-                    if (shot)
-                        me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                    if (IsSpellReady(FROST_ARROW_1, diff))
-                    {
-                        if (doCast(opponent, GetSpell(FROST_ARROW_1)))
-                            return;
-                    }
+                    if (doCast(opponent, GetSpell(FROST_ARROW_1)))
+                        return;
                 }
-            }
-            else if (!shot || shot->GetSpellInfo()->Id != AUTO_SHOT_1)
-            {
-                if (shot)
-                    me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                if (doCast(opponent, AUTO_SHOT_1))
-                    return;
+                else if (IsSpellReady(SHOOT_BOW_1, diff))
+                {
+                    if (doCast(opponent, SHOOT_BOW_1))
+                        return;
+                }
+                //if (me->GetPower(POWER_MANA) >= FROSTARROW_COST && GetSpell(FROST_ARROW_1))
+                //{
+                //    //if (inpostion)
+                //    {
+                //        //if (shot)
+                //        //    me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+                //        if (IsSpellReady(FROST_ARROW_1, diff))
+                //        {
+                //            if (doCast(opponent, GetSpell(FROST_ARROW_1)))
+                //                return;
+                //        }
+                //    }
+                //}
+                //else if (!shot || shot->GetSpellInfo()->Id != AUTO_SHOT_1)
+                //{
+                //    if (shot)
+                //        me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+                //    if (doCast(opponent, AUTO_SHOT_1))
+                //        return;
+                //}
             }
         }
 
@@ -600,7 +614,7 @@ public:
 
         float GetSpellAttackRange(bool longRange) const override
         {
-            return longRange ? CalcSpellMaxRange(FROST_ARROW_1) - 5.f : 15.f;
+            return longRange ? CalcSpellMaxRange(FROST_ARROW_1) - 5.f : CalcSpellMaxRange(FROST_ARROW_1) - 15.f;
         }
 
         uint32 GetAIMiscValue(uint32 data) const override
@@ -644,7 +658,8 @@ public:
         void InitSpells() override
         {
             //uint8 lvl = me->GetLevel();
-            InitSpellMap(AUTO_SHOT_1);
+            //InitSpellMap(AUTO_SHOT_1);
+            InitSpellMap(SHOOT_BOW_1);
             InitSpellMap(FORKED_LIGHTNING_1);
             InitSpellMap(FROST_ARROW_1);
             InitSpellMap(MANA_SHIELD_1);

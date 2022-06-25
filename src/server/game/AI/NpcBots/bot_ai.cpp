@@ -16584,15 +16584,16 @@ void bot_ai::InitBotCustomSpells()
     BotCustomSpells.insert(SPELL_CRIPPLE);//32
     BotCustomSpells.insert(SPELL_CORPSE_EXPLOSION);//33
     //BotCustomSpells.insert(SPELL_BLOOD_CURSE);//34 //NIY
-    //BotCustomSpells.insert(SPELL_FORKED_LIGHTNING);//35
-    //BotCustomSpells.insert(SPELL_FORKED_LIGHTNING_EFFECT);//36
-    //BotCustomSpells.insert(SPELL_FROST_ARROW);//37
-    //BotCustomSpells.insert(SPELL_FROST_ARROW_EFFECT);//38 //exclusive
-    //BotCustomSpells.insert(SPELL_MANA_SHIELD);//39
-    //BotCustomSpells.insert(SPELL_TORNADO);//40
-    //BotCustomSpells.insert(SPELL_TORNADO_EFFECT);//41
-    //BotCustomSpells.insert(SPELL_TORNADO_EFFECT2);//42
-    ////BotCustomSpells.insert(SPELL_TORNADO_EFFECT3);//43 //exclusive
+    BotCustomSpells.insert(SPELL_FORKED_LIGHTNING);//35
+    BotCustomSpells.insert(SPELL_FORKED_LIGHTNING_EFFECT);//36
+    BotCustomSpells.insert(SPELL_FROST_ARROW);//37
+    BotCustomSpells.insert(SPELL_FROST_ARROW_EFFECT);//38
+    BotCustomSpells.insert(SPELL_MANA_SHIELD);//39
+    BotCustomSpells.insert(SPELL_TORNADO);//40
+    BotCustomSpells.insert(SPELL_TORNADO_EFFECT);//41
+    BotCustomSpells.insert(SPELL_TORNADO_EFFECT2);//42
+    //BotCustomSpells.insert(SPELL_TORNADO_EFFECT3);//43 //exclusive
+    BotCustomSpells.insert(SPELL_SHOOT_BOW);//44
 
     uint32 trig;
     SpellInfo* trigInfo;
@@ -17658,7 +17659,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->DurationEntry = nullptr;
     sinfo->RecoveryTime = 0;
     sinfo->StartRecoveryCategory = 133;
-    sinfo->StartRecoveryTime = 500;
+    sinfo->StartRecoveryTime = 750;
     sinfo->PowerType = POWER_MANA;
     sinfo->ManaCost = 10 * 5;
     sinfo->MaxAffectedTargets = 1;
@@ -17673,7 +17674,7 @@ void bot_ai::InitBotCustomSpells()
 
     sinfo->_effects[0].Effect = SPELL_EFFECT_WEAPON_DAMAGE;
     sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->_effects[0].BasePoints = 20;
+    sinfo->_effects[0].BasePoints = 10;
     sinfo->_effects[0].DieSides = 0;
     sinfo->_effects[0].BonusMultiplier = 0.5f;
     sinfo->_effects[0].DamageMultiplier = 1.f;
@@ -17920,6 +17921,30 @@ void bot_ai::InitBotCustomSpells()
     sinfo->_effects[1].BasePoints = -60;
     //sinfo->AttributesCu &= ~(SPELL_ATTR0_CU_NEGATIVE_EFF1);
     //43) END TORNADO EFFECT3
+
+    //44) SHOOT
+    spellId = SPELL_SHOOT_BOW; //30221
+    sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+
+    sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+    sinfo->CategoryEntry = sSpellCategoryStore.LookupEntry(76);
+    sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(110); //750ms
+    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(35); //0-35 yds
+    sinfo->StartRecoveryCategory = 133;
+    sinfo->StartRecoveryTime = 750;
+    sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
+    sinfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
+    sinfo->Attributes &= ~(SPELL_ATTR0_REQ_AMMO/* | SPELL_ATTR0_ABILITY*/ | SPELL_ATTR0_CAST_TRACK_TARGET);
+    sinfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED;
+    sinfo->AttributesEx &= ~(SPELL_ATTR1_CHANNEL_TRACK_TARGET);
+    sinfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS;
+    sinfo->AttributesEx3 |= SPELL_ATTR3_UNK15;
+
+    sinfo->_effects[0].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
+    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    sinfo->_effects[0].BasePoints = 100;
+    sinfo->_effects[0].BonusMultiplier = 1.f;
+    //44) END SHOOT
 
     TC_LOG_INFO("server.loading", "Re-Loading Spell Proc conditions...");
     sSpellMgr->LoadSpellProcs();
