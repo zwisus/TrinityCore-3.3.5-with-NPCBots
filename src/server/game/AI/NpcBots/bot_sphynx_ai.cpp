@@ -1,6 +1,7 @@
 #include "bot_ai.h"
 #include "bot_GridNotifiers.h"
 #include "botmgr.h"
+#include "botspell.h"
 #include "Creature.h"
 #include "ScriptMgr.h"
 /*

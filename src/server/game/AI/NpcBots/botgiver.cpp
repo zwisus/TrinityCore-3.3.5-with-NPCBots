@@ -1,6 +1,7 @@
 #include "bot_ai.h"
 #include "botcommon.h"
 #include "botdatamgr.h"
+#include "botspell.h"
 #include "botmgr.h"
 #include "Creature.h"
 #include "Log.h"

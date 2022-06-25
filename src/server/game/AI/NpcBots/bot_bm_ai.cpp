@@ -1,5 +1,6 @@
 #include "bot_ai.h"
 #include "botmgr.h"
+#include "botspell.h"
 #include "Log.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"

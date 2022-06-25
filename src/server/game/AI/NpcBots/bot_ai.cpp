@@ -3,6 +3,7 @@
 #include "bot_GridNotifiers.h"
 #include "botmgr.h"
 #include "botdatamgr.h"
+#include "botspell.h"
 #include "bpet_ai.h"
 #include "Bag.h"
 #include "CellImpl.h"

@@ -1,19 +1,20 @@
 #ifndef _BOT_GRIDNOTIFIERS_H
 #define _BOT_GRIDNOTIFIERS_H
 
-#include "DynamicObject.h"
+#include "bot_ai.h"
+#include "botspell.h"
 #include "Corpse.h"
 #include "Creature.h"
 #include "DBCStores.h"
+#include "DynamicObject.h"
 #include "GameObject.h"
 #include "Group.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Spell.h"
 #include "SpellAuras.h"
-#include "Vehicle.h"
 #include "SpellMgr.h"
-#include "bot_ai.h"
+#include "Vehicle.h"
 /*
 Name: bot_GridNotifiers
 %Complete: 99+

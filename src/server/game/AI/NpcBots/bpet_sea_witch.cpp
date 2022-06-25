@@ -1,12 +1,10 @@
 #include "bot_ai.h"
+#include "botspell.h"
 #include "bpet_ai.h"
 #include "MotionMaster.h"
-//#include "ObjectAccessor.h"
 #include "ScriptMgr.h"
-//#include "Spell.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
-//#include "SpellInfo.h"
 #include "TemporarySummon.h"
 /*
 Sea Witch NpcBot Pets (by Trickerer onlysuffering@gmail.com)

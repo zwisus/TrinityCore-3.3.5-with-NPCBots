@@ -1,5 +1,6 @@
 #include "bot_ai.h"
 #include "botmgr.h"
+#include "botspell.h"
 #include "Group.h"
 #include "Log.h"
 #include "Map.h"

@@ -1,5 +1,6 @@
 #include "bot_ai.h"
 #include "botmgr.h"
+#include "botspell.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "Map.h"

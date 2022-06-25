@@ -1,4 +1,5 @@
 #include "bot_ai.h"
+#include "botspell.h"
 #include "MotionMaster.h"
 #include "Player.h"
 #include "ScriptMgr.h"
