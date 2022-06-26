@@ -17593,7 +17593,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->SpellLevel = 3;
     sinfo->BaseLevel = 3;
     sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(110); //750ms
-    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(5); //40 yds
+    sinfo->RangeEntry = sSpellRangeStore.LookupEntry(4); //30 yds
     sinfo->RecoveryTime = 11000;
     sinfo->StartRecoveryCategory = 133;
     sinfo->StartRecoveryTime = 1500;
@@ -17603,7 +17603,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
     sinfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
     sinfo->AttributesEx5 |= SPELL_ATTR5_DONT_TURN_DURING_CAST;
-    sinfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+    //sinfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
 
     sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_24);
     //sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_24);
