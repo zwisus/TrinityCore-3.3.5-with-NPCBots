@@ -249,7 +249,8 @@ public:
             if (/*inpostion && */!me->GetCurrentSpell(CURRENT_GENERIC_SPELL))
             {
                 //Frost Arrow / Autoshot
-                if (IsSpellReady(FROST_ARROW_1, diff) && me->GetPower(POWER_MANA) >= FROSTARROW_COST)
+                if (IsSpellReady(FROST_ARROW_1, diff) && me->GetPower(POWER_MANA) >= FROSTARROW_COST &&
+                    CanAffectVictim(sSpellMgr->GetSpellInfo(FROST_ARROW_1)->GetSchoolMask()))
                 {
                     if (doCast(opponent, GetSpell(FROST_ARROW_1)))
                         return;
@@ -259,26 +260,6 @@ public:
                     if (doCast(opponent, SHOOT_BOW_1))
                         return;
                 }
-                //if (me->GetPower(POWER_MANA) >= FROSTARROW_COST && GetSpell(FROST_ARROW_1))
-                //{
-                //    //if (inpostion)
-                //    {
-                //        //if (shot)
-                //        //    me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                //        if (IsSpellReady(FROST_ARROW_1, diff))
-                //        {
-                //            if (doCast(opponent, GetSpell(FROST_ARROW_1)))
-                //                return;
-                //        }
-                //    }
-                //}
-                //else if (!shot || shot->GetSpellInfo()->Id != AUTO_SHOT_1)
-                //{
-                //    if (shot)
-                //        me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                //    if (doCast(opponent, AUTO_SHOT_1))
-                //        return;
-                //}
             }
         }
 
@@ -614,7 +595,7 @@ public:
 
         float GetSpellAttackRange(bool longRange) const override
         {
-            return longRange ? CalcSpellMaxRange(FROST_ARROW_1) - 5.f : CalcSpellMaxRange(FROST_ARROW_1) - 15.f;
+            return longRange ? CalcSpellMaxRange(FROST_ARROW_1) - 6.f : CalcSpellMaxRange(FROST_ARROW_1) - 15.f;
         }
 
         uint32 GetAIMiscValue(uint32 data) const override
