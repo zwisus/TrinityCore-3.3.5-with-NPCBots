@@ -2293,6 +2293,22 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackTy
     //end npcbot
 
     // if victim is casting or cc'd it can't avoid attacks
+    //npcbot: allow some bot classes to parry while casting
+    if (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->IsNPCBot())
+    {
+        if (victim->HasUnitState(UNIT_STATE_CONTROLLED))
+        {
+            canDodge = false;
+            canParryOrBlock = false;
+        }
+        else if (victim->IsNonMeleeSpellCast(false, false, true))
+        {
+            canDodge = false;
+            canParryOrBlock = BotMgr::CanBotParryWhileCasting(victim->ToCreature());
+        }
+    }
+    else
+    //end npcbot
     if (victim->IsNonMeleeSpellCast(false, false, true) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
     {
         canDodge = false;

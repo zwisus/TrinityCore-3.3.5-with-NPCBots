@@ -130,6 +130,7 @@ class BotMgr
         static uint8 GetNpcBotXpReduction();
         static int32 GetBotInfoPacketsLimit();
         static bool LimitBots(Map const* map);
+        static bool CanBotParryWhileCasting(Creature const* bot);
         bool RestrictBots(Creature const* bot, bool add) const;
         bool IsPartyInCombat() const;
         bool HasBotClass(uint8 botclass) const;

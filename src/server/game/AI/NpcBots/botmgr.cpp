@@ -478,6 +478,17 @@ bool BotMgr::LimitBots(Map const* map)
     return false;
 }
 
+bool BotMgr::CanBotParryWhileCasting(Creature const* bot)
+{
+    switch (bot->GetBotClass())
+    {
+        case BOT_CLASS_SEA_WITCH:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void BotMgr::Update(uint32 diff)
 {
     //remove temp bots from bot map before updating it
