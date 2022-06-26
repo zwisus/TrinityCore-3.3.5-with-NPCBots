@@ -3415,7 +3415,7 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell) const
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
     float spelldist;
-    if (!IAmFree() && (HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED)))
+    if (!IAmFree() && (HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED)) && me->IsWithinLOSInMap(target))
     {
         uint8 rangeMode = master->GetBotMgr()->GetBotAttackRangeMode();
         if (rangeMode == BOT_ATTACK_RANGE_EXACT)
@@ -15230,35 +15230,35 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         }
 
         Unit* mover = me->GetVehicle() ? me->GetVehicleBase() : me;
-        Unit* victim = CanBotAttackOnVehicle() ? me->GetVictim() :
-            mover->GetTarget() ? ObjectAccessor::GetUnit(*mover, mover->GetTarget()) : nullptr;
-
-        if (!HasBotCommandState(BOT_COMMAND_MASK_UNCHASE) && victim && !CCed(mover, true) &&
-            !mover->isMoving() && !IsCasting(mover) && !IsShootingWand(mover))
+        if (!HasBotCommandState(BOT_COMMAND_MASK_UNCHASE) && !CCed(mover, true) &&
+            (!mover->isMoving() || Rand() < 50) && !IsCasting(mover) && !IsShootingWand(mover))
         {
-            //TC_LOG_ERROR("scripts", "GetInPos prepare by %s", me->GetName().c_str());
-            if (!IAmFree() && master->GetBotMgr()->GetBotAttackRangeMode() == BOT_ATTACK_RANGE_EXACT &&
-                master->GetBotMgr()->GetBotExactAttackRange() == 0 && !GetVehicleAttackDistanceOverride() &&
-                !(!IAmFree() && !GetAoeSpots().empty()))
+            if (Unit* victim = CanBotAttackOnVehicle() ? me->GetVictim() : mover->GetTarget() ? ObjectAccessor::GetUnit(*mover, mover->GetTarget()) : nullptr)
             {
-                GetInPosition(true, victim);
-            }
-            else if (!HasRole(BOT_ROLE_RANGED) && !HasVehicleRoleOverride(BOT_ROLE_RANGED) &&
-                !(!IAmFree() && !GetAoeSpots().empty()))
-            {
-                if (me->GetDistance(victim) > 1.5f)
-                    GetInPosition(true, victim);
-            }
-            else
-            {
-                //TC_LOG_ERROR("scripts", "%s calculates attack pos to attack %s", me->GetName().c_str(), victim->GetName().c_str());
-                bool force = false;
-                CalculateAttackPos(victim, attackpos, force);
-                if (force || mover->GetExactDist2d(&attackpos) > 4.f)
+                //TC_LOG_ERROR("scripts", "GetInPos prepare by %s", me->GetName().c_str());
+                if (!IAmFree() && master->GetBotMgr()->GetBotAttackRangeMode() == BOT_ATTACK_RANGE_EXACT &&
+                    master->GetBotMgr()->GetBotExactAttackRange() == 0 && !GetVehicleAttackDistanceOverride() &&
+                    !(!IAmFree() && !GetAoeSpots().empty()))
                 {
-                    //TC_LOG_ERROR("scripts", "%s moving to x %.2f y %.2f z %.2f to attack %s",
-                    //    me->GetName().c_str(), attackpos.m_positionX, attackpos.m_positionY, attackpos.m_positionZ, victim->GetName().c_str());
-                    GetInPosition(true, victim, &attackpos);
+                    GetInPosition(true, victim);
+                }
+                else if (!HasRole(BOT_ROLE_RANGED) && !HasVehicleRoleOverride(BOT_ROLE_RANGED) &&
+                    !(!IAmFree() && !GetAoeSpots().empty()))
+                {
+                    if (me->GetDistance(victim) > 1.5f)
+                        GetInPosition(true, victim);
+                }
+                else
+                {
+                    //TC_LOG_ERROR("scripts", "%s calculates attack pos to attack %s", me->GetName().c_str(), victim->GetName().c_str());
+                    bool force = false;
+                    CalculateAttackPos(victim, attackpos, force);
+                    if (force || mover->GetExactDist2d(&attackpos) > 4.f)
+                    {
+                        //TC_LOG_ERROR("scripts", "%s moving to x %.2f y %.2f z %.2f to attack %s",
+                        //    me->GetName().c_str(), attackpos.m_positionX, attackpos.m_positionY, attackpos.m_positionZ, victim->GetName().c_str());
+                        GetInPosition(true, victim, &attackpos);
+                    }
                 }
             }
         }
