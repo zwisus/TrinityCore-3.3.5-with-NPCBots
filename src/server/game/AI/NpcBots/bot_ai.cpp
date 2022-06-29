@@ -4499,21 +4499,10 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     uint8 rangeMode = IAmFree() ? uint8(BOT_ATTACK_RANGE_LONG) : master->GetBotMgr()->GetBotAttackRangeMode();
     uint8 exactRange = rangeMode != BOT_ATTACK_RANGE_EXACT || IAmFree() ? 255 : master->GetBotMgr()->GetBotExactAttackRange();
     uint8 angleMode = IAmFree() ? uint8(BOT_ATTACK_ANGLE_NORMAL) : master->GetBotMgr()->GetBotAttackAngleMode();
-    Position ppos;
-    float //x(0),y(0),z(0),
-        dist = (rangeMode == BOT_ATTACK_RANGE_EXACT) ? exactRange :
-        followdist >= 40 ? followdist :
-        _botclass == BOT_CLASS_HUNTER ?
-        8 + urand(followdist/2, followdist/2 + 5) :/*23-33 at 40, 18-28 at 30*/
-        5 + urand(followdist/3, followdist/3 + 5)/*18-23 at 40, 15-20 at 30*/,
-        angle = target->GetAbsoluteAngle(me);
-    //bool boss = target->GetTypeId() == TYPEID_UNIT &&
-    //    (target->ToCreature()->isWorldBoss() || target->ToCreature()->IsDungeonBoss() || target->ToCreature()->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS);
-    //most ranged classes have some sort of 20yd spell
-    if (rangeMode != BOT_ATTACK_RANGE_EXACT)
-        dist = std::min<float>(dist, GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG) - 4.f);
-    if ((target->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_FORWARD) && target->HasInArc(float(M_PI)/2, me))
-        dist = std::min<float>(dist + 10, 30);
+    float dist = (rangeMode == BOT_ATTACK_RANGE_EXACT) ? exactRange : GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG) - 4.f;
+    float angle = target->GetAbsoluteAngle(me);
+    if ((target->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_FORWARD) && target->HasInArc(float(M_PI)/1.5f, me))
+        dist = std::min<float>(dist + 10.f, 30.f);
 
     //if ranged try to acquire a position in the back (will be ignored if too far away from master)
     if (angleMode == BOT_ATTACK_ANGLE_AVOID_FRONTAL_AOE)
@@ -4527,6 +4516,8 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     float clockwise = (me->GetEntry() % 2) ? 1.f : -1.f;
     float angleDelta1 = ((IsTank(master) && !IsTank(me)) ? frand(float(M_PI)*0.40f, float(M_PI)*0.60f) : frand(0.0f, float(M_PI)*0.15f)) * clockwise;
     float angleDelta2 = frand(0.0f, float(M_PI)*0.08f) * clockwise;
+
+    Position ppos;
 
     if (me->GetVehicle())
     {
