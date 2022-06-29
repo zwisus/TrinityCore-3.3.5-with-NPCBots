@@ -3414,15 +3414,15 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell) const
 
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
-    float spelldist;
     if (!IAmFree() && (HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED)) && me->IsWithinLOSInMap(target))
     {
+        float spelldist;
         uint8 rangeMode = master->GetBotMgr()->GetBotAttackRangeMode();
         if (rangeMode == BOT_ATTACK_RANGE_EXACT)
             spelldist = master->GetBotMgr()->GetBotExactAttackRange();
         else
             spelldist = GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG);
-        foldist = std::max<float>(foldist, spelldist + 4.f);
+        foldist = std::max<float>(foldist, spelldist * 0.5f + 4.f);
     }
 
     SpellSchoolMask mainMask;
