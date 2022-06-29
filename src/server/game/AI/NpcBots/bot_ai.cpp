@@ -15091,9 +15091,21 @@ bool bot_ai::GlobalUpdate(uint32 diff)
             //TC_LOG_ERROR("spells", "bot_ai:UpdateEx: list is %s", woList.empty() ? "empty" : "not empty");
             if (!woList.empty())
             {
-                WorldObject* wo = Trinity::Containers::SelectRandomContainerElement(woList);
+                WorldObject* wo = nullptr;
+                float minangle = float(M_PI);
+                for (WorldObject* wob : woList)
+                {
+                    float angle = me->GetAbsoluteAngle(wob);
+                    if (me->GetDistance(wob) <= INTERACTION_DISTANCE * 0.5f && angle < minangle)
+                    {
+                        minangle = angle;
+                        wo = wob;
+                    }
+                }
+
+                wo = wo ? wo : Trinity::Containers::SelectRandomContainerElement(woList);
                 //TC_LOG_ERROR("spells", "bot_ai:UpdateEx: processing %s", wo->GetName().c_str());
-                if (me->GetDistance(wo) <= INTERACTION_DISTANCE * 0.5f && me->HasInArc(float(M_PI) * 0.75f, wo))
+                if (me->GetDistance(wo) <= INTERACTION_DISTANCE * 0.5f && me->HasInArc(float(M_PI), wo))
                 {
                     //cosmetic
                     CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
