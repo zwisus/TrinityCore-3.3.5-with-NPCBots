@@ -1063,7 +1063,7 @@ void bot_ai::SetBotCommandState(uint8 st, bool force, Position* newpos)
         {
             if (!me->IsInMap(master)) return;
             if (CCed(mover, true)/* || master->HasUnitState(UNIT_STATE_FLEEING)*/) return;
-            if (mover->isMoving() && Rand() > 10) return;
+            //if (mover->isMoving() && Rand() > 10) return;
             if (!newpos)
                 _calculatePos(movepos);
             else
@@ -15313,19 +15313,19 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         else if (!IsCasting(mover) && (!IsShootingWand(mover) || Rand() < 10))
         {
             _calculatePos(movepos);
-            float maxdist = std::max<float>(master->GetBotMgr()->GetBotFollowDist() * (master->isMoving() ? 0.02f : 0.25f), 4.f);
+            float maxdist = std::max<float>(master->GetBotMgr()->GetBotFollowDist() *
+                ((master->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_FORWARD) ? 0.125f : master->isMoving() ? 0.03125f : 0.25f), 3.f);
             Position destPos;
             if (me->isMoving())
                 me->GetMotionMaster()->GetDestination(destPos.m_positionX, destPos.m_positionY, destPos.m_positionZ);
             else
                 destPos = me->GetPosition();
 
-            if ((me->isMoving() != master->isMoving()) ||
-                (master->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_FORWARD) ||
-                destPos.GetExactDist(&movepos) > maxdist)
+            if (!HasBotCommandState(BOT_COMMAND_FOLLOW) || destPos.GetExactDist(&movepos) > maxdist)
                 SetBotCommandState(BOT_COMMAND_FOLLOW, true, &movepos);
         }
     }
+
     if (!IsCasting() && !IsShootingWand())
     {
         if ((me->IsInCombat() && !me->IsSitState() && CanBotAttackOnVehicle()) || !CanSheath())
