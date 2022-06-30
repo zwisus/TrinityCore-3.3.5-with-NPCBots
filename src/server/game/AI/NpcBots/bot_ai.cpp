@@ -8881,13 +8881,15 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                     {
                         SpellInfo const* info = itr->second->GetSpellInfo();
                         //spells we cannot remove
-                        //1 passive, negative spells, hidden, locked, shapeshift spells (no hook for that)
+                        //1 passive, negative spells, hidden, locked, shapeshift / mount spells (no hook for that)
                         if (info->IsPassive() || !info->IsPositive())
                             continue;
                         if ((info->Attributes & (SPELL_ATTR0_CANT_CANCEL | SPELL_ATTR0_HIDDEN_CLIENTSIDE)) ||
                             (info->AttributesEx & SPELL_ATTR1_DONT_DISPLAY_IN_AURA_BAR))
                             continue;
                         if (info->HasAura(SPELL_AURA_MOD_SHAPESHIFT))
+                            continue;
+                        if (info->HasAura(SPELL_AURA_MOUNTED) && player->HasAura(info->Id))
                             continue;
                         //2 custom list
                         //2.1 Leader of the Pack AOE (supposed to be passive)
