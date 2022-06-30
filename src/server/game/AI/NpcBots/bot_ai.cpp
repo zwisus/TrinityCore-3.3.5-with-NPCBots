@@ -4862,12 +4862,13 @@ void bot_ai::_updateMountedState()
 
     bool aura = me->HasAuraType(SPELL_AURA_MOUNTED);
     bool mounted = me->IsMounted() && (_botclass != BOT_CLASS_ARCHMAGE || aura);
+    bool template_fly = me->GetCreatureTemplate()->Movement.Flight == CreatureFlightMovementType::CanFly;
 
     //allow dismount
     if (!CanMount() && !aura && !mounted)
         return;
 
-    if ((!master->IsMounted() || aura != mounted || (me->IsInCombat() && opponent)) && (aura || mounted))
+    if ((!master->IsMounted() || aura != mounted || (!mounted && template_fly) || (me->IsInCombat() && opponent)) && (aura || mounted || template_fly))
     {
         const_cast<CreatureTemplate*>(me->GetCreatureTemplate())->Movement.Flight = CreatureFlightMovementType::None;
         me->SetCanFly(false);
