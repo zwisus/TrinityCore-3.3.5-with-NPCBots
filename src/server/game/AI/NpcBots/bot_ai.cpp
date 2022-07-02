@@ -4680,6 +4680,8 @@ void bot_ai::GetInPosition(bool force, Unit* newtarget, Position* mypos)
         return;
     if (UpdateImpossibleChase(newtarget))
         return;
+    if (AdjustTankingPosition(newtarget))
+        return;
 
     if (!IAmFree() && master->GetBotMgr()->GetBotAttackRangeMode() == BOT_ATTACK_RANGE_EXACT &&
         master->GetBotMgr()->GetBotExactAttackRange() == 0)
@@ -4736,7 +4738,7 @@ void bot_ai::GetInPosition(bool force, Unit* newtarget, Position* mypos)
 }
 //Bots cannot dodge/parry from behind so try to condense enemies at front
 //opponent is always valid
-void bot_ai::AdjustTankingPosition() const
+bool bot_ai::AdjustTankingPosition(Unit const* mytarget) const
 {
     //problem: chasing unit is constantly moving. Whoever the hell did that
 //    if (/*!IsTank() || */!me->IsInCombat() || me->isMoving() || IsCasting() ||
@@ -4745,27 +4747,42 @@ void bot_ai::AdjustTankingPosition() const
     if (/*!IsTank() || */!me->IsInCombat() || IsCasting() || me->GetVehicle() ||
         JumpingOrFalling() || CCed(me, true) || Rand() > 10 + 20*me->GetMap()->IsDungeon() ||
         HasBotCommandState(BOT_COMMAND_MASK_UNMOVING))
-        return;
+        return false;
 
     Unit::AttackerSet const& myattackers = me->getAttackers();
     if (myattackers.size() < 2)
-        return;
+        return false;
 
-    //TC_LOG_ERROR("entities.player", "AdjustTankingPosition() by %s", me->GetName().c_str());
+    if (IsMelee())
+    {
+        if (!me->IsWithinMeleeRange(mytarget))
+            return false;
+    }
+    else
+    {
+        uint8 rangeMode = IAmFree() ? uint8(BOT_ATTACK_RANGE_LONG) : master->GetBotMgr()->GetBotAttackRangeMode();
+        uint8 exactRange = rangeMode != BOT_ATTACK_RANGE_EXACT || IAmFree() ? 255 : master->GetBotMgr()->GetBotExactAttackRange();
+        float dist = (rangeMode == BOT_ATTACK_RANGE_EXACT) ? exactRange : GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG);
+
+        if (me->GetDistance(mytarget) > dist)
+            return false;
+    }
+
+    //TC_LOG_ERROR("entities.player", "AdjustTankPosition() by %s", me->GetName().c_str());
 
     uint32 bCount = 0;
     for (Unit::AttackerSet::const_iterator itr = myattackers.begin(); itr != myattackers.end(); ++itr)
     {
-        if (/*!CCed(*itr) && */(*itr)->GetDistance(me) < 5 && !me->HasInArc(float(M_PI), *itr))
+        if (/*!CCed(*itr) && */(*itr)->IsWithinMeleeRange(me) && !me->HasInArc(float(M_PI), *itr))
             ++bCount;
             //if (++bCount)
             //    break;
     }
 
     if (bCount == 0)
-        return;
+        return false;
 
-    //TC_LOG_ERROR("entities.player", "AdjustTankingPosition(): atts %u, behind %u", uint32(myattackers.size()), bCount);
+    //TC_LOG_ERROR("entities.player", "AdjustTankPosition(): atts %u, behind %u", uint32(myattackers.size()), bCount);
 
     //calculate new position
     float x = me->GetPositionX();
@@ -4813,6 +4830,7 @@ void bot_ai::AdjustTankingPosition() const
     position.Relocate(x, y, z);
     BotMovement(BOT_MOVE_POINT, &position);
     //me->GetMotionMaster()->MovePoint(me->GetMapId(), x, y, z, false);
+    return true;
 }
 
 void bot_ai::CheckAttackState()
@@ -13312,8 +13330,6 @@ void bot_ai::ResetEngageTimer(uint32 delay)
 
 void bot_ai::OnStartAttack(Unit const* u)
 {
-    AdjustTankingPosition();
-
     if (u->GetGUID() != _lastTargetGuid)
     {
         ResetChase(u);
