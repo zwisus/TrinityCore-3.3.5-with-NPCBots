@@ -13058,7 +13058,7 @@ void bot_ai::_AddItemLink(Player const* forPlayer, Item const* item, std::ostrin
     str << item->GetItemSuffixFactor() << ':';
 
     //reporter level
-    str << me->GetLevel();
+    str << uint32(me->GetLevel());
 
     //name
     _LocalizeItem(forPlayer, name, suffix, item);
