@@ -3415,15 +3415,7 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell) const
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
     if (!IAmFree() && (HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED)) && me->IsWithinLOSInMap(target))
-    {
-        float spelldist;
-        uint8 rangeMode = master->GetBotMgr()->GetBotAttackRangeMode();
-        if (rangeMode == BOT_ATTACK_RANGE_EXACT)
-            spelldist = master->GetBotMgr()->GetBotExactAttackRange();
-        else
-            spelldist = GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG);
-        foldist = std::max<float>(foldist, spelldist * 0.5f + 4.f);
-    }
+        _extendAttackRange(foldist);
 
     SpellSchoolMask mainMask;
     if (!byspell)
@@ -3948,14 +3940,7 @@ Unit* bot_ai::_getTarget(bool byspell, bool ranged, bool &reset) const
     float foldist = _getAttackDistance(float(followdist));
     if (!IAmFree() && (HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED)))
     {
-        float spelldist;
-        uint8 rangeMode = master->GetBotMgr()->GetBotAttackRangeMode();
-        if (rangeMode == BOT_ATTACK_RANGE_EXACT)
-            spelldist = master->GetBotMgr()->GetBotExactAttackRange();
-        else
-            spelldist = GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG);
-        foldist = std::max<float>(foldist, spelldist + 4.f);
-
+        _extendAttackRange(foldist);
         //TC_LOG_ERROR("entities.player", "bot %s ranged foldist %.2f spelldist %.2f", me->GetName().c_str(), foldist, spelldist);
     }
     bool dropTarget = false;
@@ -4491,6 +4476,21 @@ float bot_ai::InitAttackRange(float origRange, bool ranged) const
         origRange *= 1.25f;
 
     return origRange;
+}
+void bot_ai::_extendAttackRange(float& dist) const
+{
+    ASSERT(!IAmFree());
+
+    uint8 rangeMode = master->GetBotMgr()->GetBotAttackRangeMode();
+    if (master->GetBotMgr()->GetBotFollowDist() > 0)
+    {
+        float spelldist;
+        if (rangeMode == BOT_ATTACK_RANGE_EXACT)
+            spelldist = master->GetBotMgr()->GetBotExactAttackRange();
+        else
+            spelldist = GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG);
+        dist = std::max<float>(dist, spelldist * 0.5f + 4.f);
+    }
 }
 //Ranged attack position
 void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const

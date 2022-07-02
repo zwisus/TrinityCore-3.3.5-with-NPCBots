@@ -550,6 +550,7 @@ class bot_ai : public CreatureAI
         void _listAuras(Player const* player, Unit const* unit) const;
         bool _checkImmunities(Unit const* target, SpellInfo const* spellInfo) const;
         static float _getAttackDistance(float distance) { return distance*0.72f; }
+        void _extendAttackRange(float& dist) const;
 
         //for moved
         void GetHomePosition(uint16& mapid, Position* pos) const;
