@@ -64,7 +64,7 @@ class dreadlord_bot : public CreatureScript
 public:
     dreadlord_bot() : CreatureScript("dreadlord_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new dreadlord_botAI(creature);
     }

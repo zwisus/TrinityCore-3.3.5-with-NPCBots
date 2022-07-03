@@ -45,7 +45,7 @@ class spellbreaker_bot : public CreatureScript
 public:
     spellbreaker_bot() : CreatureScript("spellbreaker_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new spellbreaker_botAI(creature);
     }

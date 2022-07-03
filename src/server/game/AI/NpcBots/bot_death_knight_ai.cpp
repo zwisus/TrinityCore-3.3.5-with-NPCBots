@@ -194,7 +194,7 @@ class death_knight_bot : public CreatureScript
 public:
     death_knight_bot() : CreatureScript("death_knight_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new death_knight_botAI(creature);
     }

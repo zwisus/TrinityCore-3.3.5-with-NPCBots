@@ -193,7 +193,7 @@ class hunter_bot : public CreatureScript
 public:
     hunter_bot() : CreatureScript("hunter_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new hunter_botAI(creature);
     }

@@ -30,7 +30,7 @@ class deathknight_pet_bot : public CreatureScript
 public:
     deathknight_pet_bot() : CreatureScript("deathknight_pet_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new deathknight_botpetAI(creature);
     }

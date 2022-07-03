@@ -213,7 +213,7 @@ class druid_bot : public CreatureScript
 public:
     druid_bot() : CreatureScript("druid_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new bot_druid_ai(creature);
     }

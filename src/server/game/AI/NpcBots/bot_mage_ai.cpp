@@ -167,7 +167,7 @@ class mage_bot : public CreatureScript
 public:
     mage_bot() : CreatureScript("mage_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new mage_botAI(creature);
     }

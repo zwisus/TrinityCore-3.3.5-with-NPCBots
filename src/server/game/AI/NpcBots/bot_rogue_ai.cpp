@@ -186,7 +186,7 @@ class rogue_bot : public CreatureScript
 public:
     rogue_bot() : CreatureScript("rogue_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new rogue_botAI(creature);
     }

@@ -149,7 +149,7 @@ class priest_bot : public CreatureScript
 public:
     priest_bot() : CreatureScript("priest_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new priest_botAI(creature);
     }

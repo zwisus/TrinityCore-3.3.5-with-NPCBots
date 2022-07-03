@@ -49,7 +49,7 @@ class blademaster_bot : public CreatureScript
 public:
     blademaster_bot() : CreatureScript("blademaster_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new blademaster_botAI(creature);
     }

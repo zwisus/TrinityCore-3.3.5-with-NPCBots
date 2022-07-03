@@ -64,7 +64,7 @@ class sphynx_bot : public CreatureScript
 public:
     sphynx_bot() : CreatureScript("sphynx_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new sphynx_botAI(creature);
     }

@@ -231,7 +231,7 @@ class paladin_bot : public CreatureScript
 public:
     paladin_bot() : CreatureScript("paladin_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new paladin_botAI(creature);
     }

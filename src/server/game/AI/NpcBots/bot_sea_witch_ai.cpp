@@ -72,7 +72,7 @@ class sea_witch_bot : public CreatureScript
 public:
     sea_witch_bot() : CreatureScript("sea_witch_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new sea_witch_botAI(creature);
     }
@@ -314,7 +314,7 @@ public:
             }
         }
 
-        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* /*spellInfo*/, WeaponAttackType /*attackType*/, bool /*crit*/) const
+        void ApplyClassDamageMultiplierMeleeSpell(int32& damage, SpellNonMeleeDamage& /*damageinfo*/, SpellInfo const* /*spellInfo*/, WeaponAttackType /*attackType*/, bool /*crit*/) const override
         {
             if (IsInContactWithWater())
             {

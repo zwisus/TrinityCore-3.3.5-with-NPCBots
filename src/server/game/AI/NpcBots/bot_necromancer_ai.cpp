@@ -75,7 +75,7 @@ class necromancer_bot : public CreatureScript
 public:
     necromancer_bot() : CreatureScript("necromancer_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new necromancer_botAI(creature);
     }

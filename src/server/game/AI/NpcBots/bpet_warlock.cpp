@@ -57,7 +57,7 @@ class warlock_pet_bot : public CreatureScript
 public:
     warlock_pet_bot() : CreatureScript("warlock_pet_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new warlock_botpetAI(creature);
     }

@@ -52,7 +52,7 @@ class archmage_bot : public CreatureScript
 public:
     archmage_bot() : CreatureScript("archmage_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new archmage_botAI(creature);
     }

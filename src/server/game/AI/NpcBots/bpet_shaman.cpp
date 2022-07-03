@@ -31,7 +31,7 @@ class shaman_pet_bot : public CreatureScript
 public:
     shaman_pet_bot() : CreatureScript("shaman_pet_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new shaman_botpetAI(creature);
     }

@@ -38,7 +38,7 @@ class sea_witch_pet_bot : public CreatureScript
 public:
     sea_witch_pet_bot() : CreatureScript("sea_witch_pet_bot") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new tornado_botpetAI(creature);
     }
