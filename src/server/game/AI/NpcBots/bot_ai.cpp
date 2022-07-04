@@ -8414,6 +8414,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 if (found)
                 {
                     ItemTemplate const* proto = item->GetTemplate();
+                    // Learning (483 / 55884)
                     if (proto->Spells[0].SpellId == 483 || proto->Spells[0].SpellId == 55884)
                         break;
 
@@ -8435,21 +8436,47 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             uint32 counter = 0;
             uint32 maxcounter = BOT_GOSSIP_MAX_ITEMS - 2; //update, back
             Item const* item;
-            ItemTemplate const* proto;
+
+            static const auto is_consumable_item = [](Item const* item, Creature const* bot) {
+                if (ItemTemplate const* proto = item ? item->GetTemplate() : nullptr)
+                {
+                    if (!(proto->Class != ITEM_CLASS_WEAPON && proto->Class != ITEM_CLASS_ARMOR &&
+                        (proto->AllowableClass == 0 || (proto->AllowableClass & (1 << (bot->GetBotClass() - 1)))) &&
+                        proto->RequiredSkill == 0 && proto->RequiredSpell == 0 && bot->GetLevel() >= proto->RequiredLevel))
+                        return false;
+                    bool has_spell = false;
+                    for (auto const& ispell: proto->Spells)
+                    {
+                        if (ispell.SpellId != 0)
+                        {
+                            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(ispell.SpellId))
+                            {
+                                if (spellInfo->IsPassive())
+                                    continue;
+                                bool valid_effect = true;
+                                for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+                                {
+                                    SpellEffectInfo const& effect = spellInfo->GetEffect(SpellEffIndex(i));
+                                    if (!effect.IsEffect())
+                                        continue;
+                                    if (effect.Effect == SPELL_EFFECT_SUMMON || effect.TargetA.GetTarget() != TARGET_UNIT_CASTER || effect.TargetB.GetTarget() != 0)
+                                        valid_effect = false;
+                                }
+                                if (!valid_effect)
+                                    continue;
+                                has_spell = true;
+                            }
+                        }
+                    }
+                    return has_spell;
+                }
+                return false;
+            };
+
             for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
             {
                 item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-                //if (item && item->IsSoulBound()) continue;
-                proto = item ? item->GetTemplate() : nullptr;
-                if (proto && proto->Class == ITEM_CLASS_CONSUMABLE &&
-                    (proto->SubClass == ITEM_SUBCLASS_POTION || proto->SubClass == ITEM_SUBCLASS_ELIXIR ||
-                    proto->SubClass == ITEM_SUBCLASS_FLASK || proto->SubClass == ITEM_SUBCLASS_FOOD ||
-                    proto->SubClass == ITEM_SUBCLASS_POTION || proto->SubClass == ITEM_SUBCLASS_CONSUMABLE ||
-                    proto->SubClass == ITEM_SUBCLASS_CONSUMABLE_OTHER) &&
-                    (proto->AllowableClass & (1<<(_botclass-1))) &&
-                    proto->RequiredSkill == 0 &&
-                    proto->RequiredSpell == 0 &&
-                    me->GetLevel() >= proto->RequiredLevel)
+                if (is_consumable_item(item, me))
                 {
                     std::ostringstream name;
                     _AddItemLink(player, item, name);
@@ -8465,18 +8492,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                     for (uint32 j = 0; j != pBag->GetBagSize() && counter < maxcounter; j++)
                     {
                         item = player->GetItemByPos(i, j);
-                        //if (item && item->IsSoulBound()) continue;
-                        proto = item ? item->GetTemplate() : nullptr;
-                        if (proto && proto->Class == ITEM_CLASS_CONSUMABLE &&
-                            //proto->Spells[0].SpellCategory != SPELL_CATEGORY_FOOD && proto->Spells[0].SpellCategory != SPELL_CATEGORY_DRINK
-                            (proto->SubClass == ITEM_SUBCLASS_POTION || proto->SubClass == ITEM_SUBCLASS_ELIXIR ||
-                            proto->SubClass == ITEM_SUBCLASS_FLASK || proto->SubClass == ITEM_SUBCLASS_FOOD ||
-                            proto->SubClass == ITEM_SUBCLASS_POTION || proto->SubClass == ITEM_SUBCLASS_CONSUMABLE ||
-                            proto->SubClass == ITEM_SUBCLASS_CONSUMABLE_OTHER) &&
-                            (proto->AllowableClass & (1<<(_botclass-1))) &&
-                            proto->RequiredSkill == 0 &&
-                            proto->RequiredSpell == 0 &&
-                            me->GetLevel() >= proto->RequiredLevel)
+                        if (is_consumable_item(item, me))
                         {
                             std::ostringstream name;
                             _AddItemLink(player, item, name);
