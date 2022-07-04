@@ -130,6 +130,7 @@ public:
             { "set",        npcbotSetCommandTable                                                                                   },
             { "add",        HandleNpcBotAddCommand,                 rbac::RBAC_PERM_COMMAND_NPCBOT_ADD,                Console::No  },
             { "remove",     HandleNpcBotRemoveCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_REMOVE,             Console::No  },
+            { "createnew",  HandleNpcBotCreateNewCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_CREATENEW,          Console::Yes },
             { "spawn",      HandleNpcBotSpawnCommand,               rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
             { "move",       HandleNpcBotMoveCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_MOVE,               Console::No  },
             { "delete",     HandleNpcBotDeleteCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_DELETE,             Console::No  },
@@ -1195,6 +1196,181 @@ public:
             BotMgr::TeleportBot(const_cast<Creature*>(bot), player->GetMap(), player);
 
         handler->PSendSysMessage("NpcBot %u (guid %u) was moved", id, lowguid);
+        return true;
+    }
+
+    static bool HandleNpcBotCreateNewCommand(ChatHandler* handler, Optional<std::string_view> name, Optional<uint8> bclass, Optional<uint8> race, Optional<uint8> gender, Optional<uint8> skin, Optional<uint8> face, Optional<uint8> hairstyle, Optional<uint8> haircolor, Optional<uint8> features)
+    {
+        static auto const ret_err = [](ChatHandler* handler) {
+            handler->SendSysMessage(".npcbot createnew");
+            handler->SendSysMessage("Creates a new npcbot creature entry");
+            handler->SendSysMessage("Syntax: .npcbot createnew #name #class ##race ##gender ##skin ##face ##hairstyle ##haircolor ##features");
+            handler->SendSysMessage("In case of class that cannot change appearance all extra arguments must be omitted");
+            handler->SetSentErrorMessage(true);
+            return false;
+        };
+        static auto const ret_err_invalid_arg = [](ChatHandler* handler, char const* argname, Optional<uint8> argval = {}) {
+            handler->PSendSysMessage("Invalid %s%s!", argname, argval ?  (" " + std::to_string(*argval)).c_str() : "");
+            handler->SetSentErrorMessage(true);
+            return false;
+        };
+        static auto const ret_err_invalid_args_for = [](ChatHandler* handler, char const* argname1, char const* argname2) {
+            handler->PSendSysMessage("Invalid arguments for %s '%s'!", argname1, argname2);
+            handler->SetSentErrorMessage(true);
+            return false;
+        };
+
+        if (!bclass || !name)
+            return ret_err(handler);
+
+        bool const can_change_appearance = (*bclass < BOT_CLASS_EX_START || *bclass == BOT_CLASS_ARCHMAGE);
+
+        if (can_change_appearance && (!race || !gender || !skin || !face || !hairstyle || !haircolor || !features))
+            return ret_err(handler);
+        if (!can_change_appearance && (race || gender || skin || face || hairstyle || haircolor || features))
+            return ret_err(handler);
+
+        if (*bclass >= BOT_CLASS_END || (*bclass < BOT_CLASS_EX_START && !((1u << (*bclass - 1)) & CLASSMASK_ALL_PLAYABLE)))
+            return ret_err_invalid_arg(handler, "class", bclass);
+
+        std::string namestr;
+        normalizePlayerName(namestr);
+        if (!consoleToUtf8(*name, namestr))
+            return ret_err_invalid_arg(handler, "name");
+        namestr[0] = std::toupper(namestr[0]);
+
+        if (race && !((1u << (*race - 1)) & RACEMASK_ALL_PLAYABLE))
+            return ret_err_invalid_arg(handler, "race", race);
+
+        if (can_change_appearance && *gender != GENDER_MALE && *gender != GENDER_FEMALE)
+            return ret_err_invalid_arg(handler, "gender", gender);
+
+        // class / race combination check
+        if ((*bclass < BOT_CLASS_EX_START && !sObjectMgr->GetPlayerInfo(*race, *bclass)) ||
+            (*bclass == BOT_CLASS_ARCHMAGE && *race != RACE_HUMAN))
+            return ret_err_invalid_args_for(handler, "class", GetClassName(*bclass, handler->GetSessionDbcLocale()));
+
+#define GENDER_PRED2(male,female) ((male == female || *gender == GENDER_MALE) ? male : female)
+        if (can_change_appearance)
+        {
+            static const auto ret_race_err = [](ChatHandler* handler, uint8 race) {
+                return ret_err_invalid_args_for(handler, "race", GetRaceName(race, handler->GetSessionDbcLocale()));
+            };
+            switch (*race)
+            {
+                case RACE_HUMAN:
+                    if (*skin > 9 || *face > GENDER_PRED2(11, 14) || *hairstyle > GENDER_PRED2(16, 23) || *haircolor > 9 || *features > GENDER_PRED2(8, 6))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_DWARF:
+                    if (*skin > 8 || *face > GENDER_PRED2(9,9) || *hairstyle > GENDER_PRED2(15,18) || *haircolor > 9 || *features > GENDER_PRED2(10,5))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_NIGHTELF:
+                    if (*skin > 8 || *face > GENDER_PRED2(8,8) || *hairstyle > GENDER_PRED2(11,11) || *haircolor > 7 || *features > GENDER_PRED2(5,9))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_GNOME:
+                    if (*skin > 4 || *face > GENDER_PRED2(6,6) || *hairstyle > GENDER_PRED2(11,11) || *haircolor > 8 || *features > GENDER_PRED2(7,6))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_DRAENEI:
+                    if (*skin > 13 || *face > GENDER_PRED2(9,9) || *hairstyle > GENDER_PRED2(13,15) || *haircolor > 6 || *features > GENDER_PRED2(7,6))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_ORC:
+                    if (*skin > 8 || *face > GENDER_PRED2(8,8) || *hairstyle > GENDER_PRED2(11,12) || *haircolor > 7 || *features > GENDER_PRED2(10,6))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_UNDEAD_PLAYER:
+                    if (*skin > 5 || *face > GENDER_PRED2(9,9) || *hairstyle > GENDER_PRED2(14,14) || *haircolor > 9 || *features > GENDER_PRED2(16,7))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_TAUREN:
+                    if (*skin > GENDER_PRED2(18,10) || *face > GENDER_PRED2(4,3) || *hairstyle > GENDER_PRED2(12,11) || *haircolor > 2 || *features > GENDER_PRED2(6,4))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_TROLL:
+                    if (*skin > 5 || *face > GENDER_PRED2(4,5) || *hairstyle > GENDER_PRED2(9,9) || *haircolor > 9 || *features > GENDER_PRED2(10,5))
+                        return ret_race_err(handler, *race);
+                    break;
+                case RACE_BLOODELF:
+                    if (*skin > 9 || *face > GENDER_PRED2(9,9) || *hairstyle > GENDER_PRED2(15,18) || *haircolor > 9 || *features > GENDER_PRED2(9,10))
+                        return ret_race_err(handler, *race);
+                    break;
+                default:
+                    return ret_err_invalid_arg(handler, "race", race);
+            }
+        }
+#undef GENDER_PRED2
+
+        //here we force races for custom classes
+        switch (*bclass)
+        {
+            case BOT_CLASS_BM:
+            case BOT_CLASS_SPHYNX:
+            case BOT_CLASS_DREADLORD:
+            case BOT_CLASS_SPELLBREAKER:
+                race = 15; //RACE_SKELETON
+                break;
+            case BOT_CLASS_NECROMANCER:
+                race = RACE_HUMAN;
+                break;
+            case BOT_CLASS_DARK_RANGER:
+                race = RACE_BLOODELF;
+                break;
+            case BOT_CLASS_SEA_WITCH:
+                race = 13; //RACE_NAGA
+                break;
+        }
+
+        //get normalized modelID
+        uint32 modelId = 0;
+        if (*bclass < BOT_CLASS_EX_START)
+        {
+            PlayerInfo const* info = sObjectMgr->GetPlayerInfo(*race, *bclass);
+            ASSERT(info);
+            switch (*gender)
+            {
+                case GENDER_MALE:   modelId = info->displayId_m; break;
+                case GENDER_FEMALE: modelId = info->displayId_f; break;
+                default:                                         break;
+            }
+        }
+
+        uint32 newentry = 0;
+        QueryResult creres = WorldDatabase.PQuery("SELECT MAX(entry) FROM creature_template WHERE entry >= %u AND entry < %u", BOT_ENTRY_CREATE_BEGIN, BOT_ENTRY_END);
+        if (creres)
+        {
+            Field* field = creres->Fetch();
+            newentry = field[0].GetUInt32() + 1;
+        }
+        if (newentry < BOT_ENTRY_CREATE_BEGIN)
+            newentry = BOT_ENTRY_CREATE_BEGIN;
+
+        if (newentry >= BOT_ENTRY_END)
+        {
+            handler->SendSysMessage("Error: last entry is occupied, assuming no free entries left!");
+            handler->SetSentErrorMessage(true);
+            return false;
+        };
+
+        WorldDatabaseTransaction trans = WorldDatabase.BeginTransaction();
+        trans->Append("DROP TEMPORARY TABLE IF EXISTS creature_template_temp_npcbot_create");
+        trans->PAppend("CREATE TEMPORARY TABLE creature_template_temp_npcbot_create ENGINE=MEMORY SELECT * FROM creature_template WHERE entry = (SELECT entry FROM creature_template_npcbot_extras WHERE class = %u LIMIT 1)", uint32(*bclass));
+        trans->PAppend("UPDATE creature_template_temp_npcbot_create SET entry = %u, name = \"%s\"", newentry, namestr.c_str());
+        if (modelId)
+            trans->PAppend("UPDATE creature_template_temp_npcbot_create SET modelid1 = %u", modelId);
+        trans->Append("INSERT INTO creature_template SELECT * FROM creature_template_temp_npcbot_create");
+        trans->Append("DROP TEMPORARY TABLE creature_template_temp_npcbot_create");
+        trans->PAppend("INSERT INTO creature_template_npcbot_extras VALUES (%u, %u, %u)", newentry, uint32(*bclass), uint32(*race));
+        trans->PAppend("INSERT INTO creature_equip_template SELECT %u, 1, ids.itemID1, ids.itemID2, ids.itemID3, -1 FROM (SELECT itemID1, itemID2, itemID3 FROM creature_equip_template WHERE CreatureID = (SELECT entry FROM creature_template_npcbot_extras WHERE class = %u LIMIT 1)) ids", newentry, uint32(*bclass));
+        if (can_change_appearance)
+            trans->PAppend("INSERT INTO creature_template_npcbot_appearance VALUES (%u, \"%s\", %u, %u, %u, %u, %u, %u)",
+                newentry, namestr.c_str(), uint32(*gender), uint32(*skin), uint32(*face), uint32(*hairstyle), uint32(*haircolor), uint32(*features));
+        WorldDatabase.DirectCommitTransaction(trans);
+
+        handler->PSendSysMessage("New NPCBot %s (class %u) is created with entry %u and will be available for spawning after server restart.", namestr.c_str(), uint32(*bclass), newentry);
         return true;
     }
 
