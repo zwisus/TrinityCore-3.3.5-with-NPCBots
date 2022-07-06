@@ -445,7 +445,7 @@ public:
 
             if (baseId == MAIN_ATTACK_1 || baseId == RAISE_DEAD_1 || baseId == UNHOLY_FRENZY_1 ||
                 baseId == CRIPPLE_1 || baseId == CORPSE_EXPLOSION_1/* || baseId == ATTRACT_1*/)
-                GC_Timer = me->GetAttackTime(BASE_ATTACK);
+                GC_Timer = uint32(me->GetAttackTime(BASE_ATTACK) * me->m_modAttackSpeedPct[BASE_ATTACK]);
 
             if (baseId == MAIN_ATTACK_1 || baseId == RAISE_DEAD_1 || baseId == UNHOLY_FRENZY_1 ||
                 baseId == CRIPPLE_1/* || baseId == CORPSE_EXPLOSION_1*//* || baseId == ATTRACT_1*/)

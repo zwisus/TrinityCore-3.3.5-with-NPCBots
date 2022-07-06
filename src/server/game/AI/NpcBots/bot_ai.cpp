@@ -2623,15 +2623,25 @@ void bot_ai::SetStats(bool force)
         if (mylevel >= 55 && _spec == BOT_SPEC_MAGE_ARCANE)
             value += 6.f;
     }
-    if (_botclass == BOT_CLASS_BM)
+    if (_botclass >= BOT_CLASS_EX_START)
     {
-        //Blademaster haste
-        value += 70.f;
-    }
-    if (_botclass == BOT_CLASS_DREADLORD)
-    {
-        //Dreadlord haste
-        value += 70.f;
+        float haste_per_lvl;
+        switch (_botclass)
+        {
+            case BOT_CLASS_BM:
+            case BOT_CLASS_DREADLORD:
+                haste_per_lvl = 0.875f;
+                break;
+            case BOT_CLASS_ARCHMAGE:
+            case BOT_CLASS_DARK_RANGER:
+            case BOT_CLASS_SEA_WITCH:
+                haste_per_lvl = 0.5f;
+                break;
+            default:
+                haste_per_lvl = 0.25f;
+                break;
+        }
+        value += mylevel * haste_per_lvl;
     }
 
     haste = int32(value);

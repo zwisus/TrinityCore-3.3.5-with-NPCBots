@@ -209,7 +209,7 @@ public:
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
 
             if (baseId == MAIN_ATTACK_1 || baseId == BLIZZARD_1)
-                GC_Timer = me->GetAttackTime(BASE_ATTACK);
+                GC_Timer = uint32(me->GetAttackTime(BASE_ATTACK) * me->m_modAttackSpeedPct[BASE_ATTACK]);
 
             if (baseId == MAIN_ATTACK_1)
                 me->CastSpell(me, MH_ATTACK_ANIM, true);

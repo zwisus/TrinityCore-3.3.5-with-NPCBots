@@ -371,7 +371,7 @@ public:
 
             if (baseId == MAIN_ATTACK_1 || baseId == SPLASH_ATTACK_1 || baseId == DEVOUR_MAGIC_1 ||
                 baseId == DRAIN_MANA_1 || baseId == REPLENISH_MANA_1 || baseId == REPLENISH_HEALTH_1)
-                GC_Timer = me->GetAttackTime(BASE_ATTACK);
+                GC_Timer = uint32(me->GetAttackTime(BASE_ATTACK) * me->m_modAttackSpeedPct[BASE_ATTACK]);
 
             if (baseId == SPLASH_ATTACK_1)
                 me->CastSpell(me, MH_ATTACK_ANIM, true);

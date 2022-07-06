@@ -422,17 +422,28 @@ public:
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
 
-            if (baseId == FROST_ARROW_1)
+            switch (baseId)
             {
-                uint32 castTime = spellInfo->CalcCastTime();
-                GC_Timer = castTime >= me->GetAttackTime(BASE_ATTACK) ? 0 : me->GetAttackTime(BASE_ATTACK) - castTime;
-            }
-
-            if (baseId == FORKED_LIGHTNING_1 || baseId == TORNADO_1)
-            {
-                me->resetAttackTimer();
-                GC_Timer = me->GetAttackTime(BASE_ATTACK);
-                //me->CastSpell(me, MH_ATTACK_ANIM, true);
+                case FROST_ARROW_1:
+                case FORKED_LIGHTNING_1:
+                case TORNADO_1:
+                {
+                    uint32 attackTime = uint32(me->GetAttackTime(RANGED_ATTACK) * me->m_modAttackSpeedPct[RANGED_ATTACK]);
+                    if (baseId == FROST_ARROW_1)
+                    {
+                        uint32 castTime = spellInfo->CalcCastTime();
+                        GC_Timer = castTime >= attackTime ? 0 : attackTime - castTime;
+                    }
+                    if (baseId == FORKED_LIGHTNING_1 || baseId == TORNADO_1)
+                    {
+                        me->resetAttackTimer();
+                        GC_Timer = attackTime;
+                        //me->CastSpell(me, MH_ATTACK_ANIM, true);
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
 
             if (baseId == TORNADO_1)
