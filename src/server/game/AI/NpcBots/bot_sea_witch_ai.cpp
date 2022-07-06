@@ -349,6 +349,32 @@ public:
             damage = int32(fdamage * pctbonus + flat_mod);
         }
 
+        void ApplyClassSpellCastTimeMods(SpellInfo const* spellInfo, int32& casttime) const override
+        {
+            //uint32 spellId = spellInfo->Id;
+            uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
+            //SpellSchool school = GetFirstSchoolInMask(spellInfo->GetSchoolMask());
+            //uint8 lvl = me->GetLevel();
+            int32 timebonus = 0;
+            float pctbonus = 0.0f;
+
+            //100% mods
+            //if ()
+            //    pctbonus += 1.0f;
+
+            //pct mods
+            //Frost Arrow affect by attack speed
+            if (baseId == FROST_ARROW_1)
+                pctbonus += 1.0f - me->m_modAttackSpeedPct[RANGED_ATTACK];
+
+            //flat mods
+            //Starlight Wrath: -0.5 sec cast time for Wrath and Starfire
+            //if (lvl >= 10 && (baseId == WRATH_1 || baseId == STARFIRE_1))
+            //    timebonus += 500;
+
+            casttime = std::max<int32>(int32((float(casttime) * (1.0f - pctbonus)) - timebonus), 0);
+        }
+
         void ApplyClassSpellMaxTargetsMods(SpellInfo const* spellInfo, uint32& targets) const override
         {
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
