@@ -374,7 +374,6 @@ public:
                 return;
 
             //already rockin'
-            //if (HasAuraName(master, BLOODLUST_1) || HasAuraName(me, BLOODLUST_1))
             if (me->GetAuraEffect(SPELL_AURA_MOD_MELEE_RANGED_HASTE, SPELLFAMILY_SHAMAN, 0x0, 0x40, 0x0) ||
                 master->GetAuraEffect(SPELL_AURA_MOD_MELEE_RANGED_HASTE, SPELLFAMILY_SHAMAN, 0x0, 0x40, 0x0))
                 return;
@@ -382,9 +381,9 @@ public:
             //environment conditions
             Unit const* u = me->GetVictim();
             Creature const* cre = u ? u->ToCreature() : nullptr;
-            if (!(u && (u->GetHealth() > me->GetMaxHealth() * 5 || u->GetTypeId() == TYPEID_PLAYER ||
+            if (!(u && (u->GetHealth() > me->GetMaxHealth() * 10 || u->GetTypeId() == TYPEID_PLAYER ||
                 (cre && (cre->IsDungeonBoss() || cre->isWorldBoss())) ||
-                me->getAttackers().size() + master->getAttackers().size() > 4)))
+                me->getAttackers().size() + master->getAttackers().size() >= 8)))
                 return;
 
             //BLOODLUST = GetSpell(BLOODLUST); //not ranked
