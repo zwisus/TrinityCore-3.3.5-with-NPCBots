@@ -17658,7 +17658,7 @@ void bot_ai::InitBotCustomSpells()
     sinfo->_effects[0].RadiusEntry = nullptr;//sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50_YARDS);
     sinfo->_effects[0].BasePoints = 1;
     sinfo->_effects[0].DieSides = 49;
-    sinfo->_effects[0].BonusMultiplier = 3.f;
+    sinfo->_effects[0].BonusMultiplier = 2.f;
     sinfo->_effects[0].DamageMultiplier = 1.f;
     sinfo->_effects[0].RealPointsPerLevel = 20.f;
     sinfo->_effects[0].ValueMultiplier = 1.f;
