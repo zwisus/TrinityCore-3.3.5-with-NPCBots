@@ -775,7 +775,7 @@ public:
 
         bool HOFTarget(Unit* target, uint32 /*diff*/)
         {
-            bool canUnstun = me->GetLevel() >= 35 && _spec == BOT_SPEC_PALADIN_PROTECTION;
+            bool canUnstun = me->GetLevel() >= 35 && _spec == BOT_SPEC_PALADIN_RETRIBUTION;
             if (target->HasAuraType(SPELL_AURA_MECHANIC_IMMUNITY))
             {
                 if (target->HasAuraTypeWithMiscvalue(SPELL_AURA_MECHANIC_IMMUNITY, 11) &&
