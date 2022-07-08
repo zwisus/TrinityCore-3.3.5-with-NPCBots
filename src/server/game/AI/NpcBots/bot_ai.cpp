@@ -6951,7 +6951,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                         LockEntry const* lockInfo;
 
                         //backpack
-                        for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+                        for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
                         {
                             item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                             if (item && item->IsLocked() && item->GetTemplate()->LockID)
@@ -6974,11 +6974,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                             }
                         }
                         //bags
-                        for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+                        for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
                         {
                             if (Bag const* bag = player->GetBagByPos(i))
                             {
-                                for (uint32 j = 0; j != bag->GetBagSize() && count <= maxcounter; j++)
+                                for (uint32 j = 0; j != bag->GetBagSize() && count <= maxcounter; ++j)
                                 {
                                     item = player->GetItemByPos(i, j);
                                     if (item && item->IsLocked() && item->GetTemplate()->LockID)
@@ -7358,7 +7358,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
                             bool found = false;
                             //backpack
-                            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+                            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
                             {
                                 item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                                 if (item && item->GetGUID().GetCounter() == guidLow)
@@ -7372,11 +7372,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                             //bags
                             if (!found)
                             {
-                                for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+                                for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
                                 {
                                     if (Bag const* bag = player->GetBagByPos(i))
                                     {
-                                        for (uint32 j = 0; j != bag->GetBagSize(); j++)
+                                        for (uint32 j = 0; j != bag->GetBagSize(); ++j)
                                         {
                                             item = player->GetItemByPos(i, j);
                                             if (item && item->GetGUID().GetCounter() == guidLow)
@@ -7593,7 +7593,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             //s2.1: build list
             //s2.1.1: backpack
-            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
             {
                 if (Item const* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                 {
@@ -7619,11 +7619,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             }
 
             //s2.1.2: other bags
-            for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+            for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
             {
                 if (Bag const* pBag = player->GetBagByPos(i))
                 {
-                    for (uint32 j = 0; j != pBag->GetBagSize(); j++)
+                    for (uint32 j = 0; j != pBag->GetBagSize(); ++j)
                     {
                         if (Item const* pItem = player->GetItemByPos(i, j))
                         {
@@ -7700,7 +7700,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 for (std::set<uint32>::const_iterator itr = itemList.begin(); itr != itemList.end() && counter < maxcounter; ++itr)
                 {
                     bool found = false;
-                    for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+                    for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
                     {
                         item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                         if (item && item->GetGUID().GetCounter() == (*itr))
@@ -7719,11 +7719,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                     if (found)
                         continue;
 
-                    for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+                    for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
                     {
                         if (Bag const* pBag = player->GetBagByPos(i))
                         {
-                            for (uint32 j = 0; j != pBag->GetBagSize(); j++)
+                            for (uint32 j = 0; j != pBag->GetBagSize(); ++j)
                             {
                                 item = player->GetItemByPos(i, j);
                                 if (item && item->GetGUID().GetCounter() == (*itr))
@@ -7806,7 +7806,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             uint32 guidLow = action - GOSSIP_ACTION_INFO_DEF;
 
             bool found = false;
-            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
             {
                 item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                 if (item && item->GetGUID().GetCounter() == guidLow)
@@ -7818,11 +7818,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             if (!found)
             {
-                for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+                for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
                 {
                     if (Bag const* pBag = player->GetBagByPos(i))
                     {
-                        for (uint32 j = 0; j != pBag->GetBagSize(); j++)
+                        for (uint32 j = 0; j != pBag->GetBagSize(); ++j)
                         {
                             item = player->GetItemByPos(i, j);
                             if (item && item->GetGUID().GetCounter() == guidLow)
@@ -7855,7 +7855,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             //1: build list
             //1.1: backpack
-            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
             {
                 if (Item const* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                 {
@@ -7892,11 +7892,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             }
 
             //1.2: other bags
-            for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+            for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
             {
                 if (Bag const* pBag = player->GetBagByPos(i))
                 {
-                    for (uint32 j = 0; j != pBag->GetBagSize(); j++)
+                    for (uint32 j = 0; j != pBag->GetBagSize(); ++j)
                     {
                         if (Item const* pItem = player->GetItemByPos(i, j))
                         {
@@ -7949,7 +7949,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 for (std::set<uint32>::const_iterator itr = itemList.begin(); itr != itemList.end() && counter < maxcounter; ++itr)
                 {
                     bool found = false;
-                    for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+                    for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
                     {
                         item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                         if (item && item->GetGUID().GetCounter() == (*itr))
@@ -7982,11 +7982,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                     if (found)
                         continue;
 
-                    for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+                    for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
                     {
                         if (Bag const* pBag = player->GetBagByPos(i))
                         {
-                            for (uint32 j = 0; j != pBag->GetBagSize(); j++)
+                            for (uint32 j = 0; j != pBag->GetBagSize(); ++j)
                             {
                                 item = player->GetItemByPos(i, j);
                                 if (item && item->GetGUID().GetCounter() == (*itr))
@@ -8059,7 +8059,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             uint32 guidLow = action - GOSSIP_ACTION_INFO_DEF;
 
             bool found = false;
-            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
             {
                 item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                 if (item && item->GetGUID().GetCounter() == guidLow)
@@ -8071,11 +8071,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             if (!found)
             {
-                for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+                for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
                 {
                     if (Bag const* pBag = player->GetBagByPos(i))
                     {
-                        for (uint32 j = 0; j != pBag->GetBagSize(); j++)
+                        for (uint32 j = 0; j != pBag->GetBagSize(); ++j)
                         {
                             item = player->GetItemByPos(i, j);
                             if (item && item->GetGUID().GetCounter() == guidLow)
@@ -8389,7 +8389,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             {
                 Item const* item = nullptr;
                 bool found = false;
-                for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+                for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
                 {
                     item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                     if (item && item->GetGUID().GetCounter() == guidLow)
@@ -8401,11 +8401,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
                 if (!found)
                 {
-                    for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+                    for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
                     {
                         if (Bag const* pBag = player->GetBagByPos(i))
                         {
-                            for (uint32 j = 0; j != pBag->GetBagSize(); j++)
+                            for (uint32 j = 0; j != pBag->GetBagSize(); ++j)
                             {
                                 item = player->GetItemByPos(i, j);
                                 if (item && item->GetGUID().GetCounter() == guidLow)
@@ -8483,7 +8483,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 return false;
             };
 
-            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; i++)
+            for (uint8 i = INVENTORY_SLOT_ITEM_START; i != INVENTORY_SLOT_ITEM_END; ++i)
             {
                 item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                 if (is_consumable_item(item, me))
@@ -8495,11 +8495,11 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 }
             }
 
-            for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; i++)
+            for (uint8 i = INVENTORY_SLOT_BAG_START; i != INVENTORY_SLOT_BAG_END; ++i)
             {
                 if (Bag const* pBag = player->GetBagByPos(i))
                 {
-                    for (uint32 j = 0; j != pBag->GetBagSize() && counter < maxcounter; j++)
+                    for (uint32 j = 0; j != pBag->GetBagSize() && counter < maxcounter; ++j)
                     {
                         item = player->GetItemByPos(i, j);
                         if (is_consumable_item(item, me))
@@ -9576,7 +9576,7 @@ bool bot_ai::_canLootCreatureForPlayer(Player* player, Creature* creature, uint3
     uint8 slot = 0;
     for (std::vector<LootItem>::const_iterator i = creature->loot.items.begin(); i != creature->loot.items.end(); ++i)
     {
-        slot++;
+        ++slot;
 
         if (i->is_blocked || i->is_looted)
         {
@@ -9809,7 +9809,7 @@ void bot_ai::_autoLootCreatureItems(Player* receiver, Creature* creature, uint32
     uint8 slot = 0;
     for (std::vector<LootItem>::iterator i = creature->loot.items.begin(); i != creature->loot.items.end(); ++i)
     {
-        slot++;
+        ++slot;
 
         if (i->is_blocked || i->is_looted)
         {
@@ -15208,7 +15208,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                     crList.erase(itr++);
                     continue;
                 }
-                itr++;
+                ++itr;
             }
 
             if (!crList.empty())
