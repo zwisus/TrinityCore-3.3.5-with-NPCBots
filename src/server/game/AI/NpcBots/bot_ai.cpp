@@ -4928,6 +4928,48 @@ void bot_ai::_updateMountedState()
             if (me->HasAuraType(SPELL_AURA_MOUNTED))
                 me->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
+            //lookup mount speed based on mount ID, defaulting to 0 so it reverts to old behavior if not found
+            uint32 mountSpeed = 0;
+            Aura *mountSpeedAura = master->GetAura(mount);
+            if (mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_0)->GetAuraType() == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                mountSpeed = mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_0)->GetAmount();
+            else if (mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_1)->GetAuraType() == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                mountSpeed = mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_1)->GetAmount();
+            else if (mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_2)->GetAuraType() == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+                mountSpeed = mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_2)->GetAmount();
+
+            //if not flying mount, and not in AQ40, and speed makes sense, get class specific mounts
+            if (!master->CanFly() && me->GetMapId() != 531 && (mountSpeed < 130 && mountSpeed > 30))
+            {
+                switch (me->GetBotClass())
+                {
+                    case BOT_CLASS_DARK_RANGER:
+                        mount = BOT_DARK_RANGER_MOUNT;
+                        break;
+                    case BOT_CLASS_WARLOCK:
+                        if (mountSpeed<80) { mount = BOT_WARLOCK_MOUNT; }
+                        else { mount = BOT_WARLOCK_FAST_MOUNT; }
+                        break;
+                    case BOT_CLASS_PALADIN:
+                        if (me->GetRace()==RACE_BLOODELF)
+                        {
+                            if (mountSpeed<80) { mount = BOT_BE_PALLY_MOUNT; }
+                            else { mount = BOT_BE_PALLY_FAST_MOUNT; }
+                        }
+                        else
+                        {
+                            if (mountSpeed<80) { mount = BOT_ALLI_PALLY_MOUNT; }
+                            else { mount = BOT_ALLI_PALLY_FAST_MOUNT; }
+                        }
+                        break;
+                    case BOT_CLASS_DEATH_KNIGHT:
+                        mount = BOT_DEATH_KNIGHT_MOUNT;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             //me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
 
             //if (!GetSpell(mount))
