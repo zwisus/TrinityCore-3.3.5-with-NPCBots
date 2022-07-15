@@ -4913,62 +4913,143 @@ void bot_ai::_updateMountedState()
 
     if (master->IsMounted() && !me->IsMounted() && !master->IsInCombat() && !me->IsInCombat() && !me->GetVictim())
     {
-        uint32 mount = 0;
-        Unit::AuraEffectList const &mounts = master->GetAuraEffectsByType(SPELL_AURA_MOUNTED);
-        if (!mounts.empty())
+        Unit::AuraEffectList const& mounts = master->GetAuraEffectsByType(SPELL_AURA_MOUNTED);
+        Aura const* mountAura = nullptr;
+        int32 maxMountSpeed = 0;
+        for (AuraEffect const* meff : mounts)
+        {
+            for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+            {
+                AuraEffect const* maeff = meff->GetBase()->GetEffect(i);
+                if (maeff && (maeff->GetSpellEffectInfo().IsAura(master->CanFly() ? SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED : SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)) &&
+                    maeff->GetAmount() > maxMountSpeed)
+                {
+                    maxMountSpeed = maeff->GetAmount();
+                    mountAura = meff->GetBase();
+                }
+            }
+        }
+
+        uint32 const mountSpellId = mountAura ? mountAura->GetId() : 0;
+        uint32 myMountSpellId = 0;
+        if (maxMountSpeed > 20)
         {
             //Winter Veil addition
             if (sGameEventMgr->IsActiveEvent(GAME_EVENT_WINTER_VEIL))
-                mount = master->CanFly() ? REINDEER_FLY : REINDEER;
-            else
-                mount = mounts.front()->GetId();
+                myMountSpellId = master->CanFly() ? REINDEER_FLY : REINDEER;
+            if (!myMountSpellId && me->GetMapId() == 531) //Ahn'Qiraj
+            {
+                //Select AQ40 mount
+                static const std::array<uint32, 4> QirajiMountSpellIds = { QIRAJI_BATTLE_TANK_1, QIRAJI_BATTLE_TANK_2, QIRAJI_BATTLE_TANK_3, QIRAJI_BATTLE_TANK_4 };
+                //Count Black Qiraji Battle Tank too
+                if (mountSpellId == 26656 || std::find(QirajiMountSpellIds.cbegin(), QirajiMountSpellIds.cend(), mountSpellId) != QirajiMountSpellIds.end())
+                    myMountSpellId = QirajiMountSpellIds[me->GetEntry() % QirajiMountSpellIds.size()];
+            }
+            if (!myMountSpellId)
+            {
+                using MountArray = std::array<uint32, NUM_MOUNTS_PER_SPEED>;
+
+                bool useSlowMount = master->CanFly() ?  (me->GetLevel() < 70 || maxMountSpeed < 220) : (me->GetLevel() < 40 || maxMountSpeed < 80);
+
+                if (!master->CanFly())
+                {
+                    //Select by class
+                    switch (_botclass)
+                    {
+                        case BOT_CLASS_DARK_RANGER:
+                            myMountSpellId = BOT_DARK_RANGER_MOUNT;
+                            break;
+                        case BOT_CLASS_WARLOCK:
+                            myMountSpellId = useSlowMount ? BOT_WARLOCK_MOUNT : BOT_WARLOCK_FAST_MOUNT;
+                            break;
+                        case BOT_CLASS_PALADIN:
+                            if (me->GetRace() == RACE_BLOODELF)
+                                myMountSpellId = useSlowMount ? BOT_BE_PALLY_MOUNT : BOT_BE_PALLY_FAST_MOUNT;
+                            else
+                                myMountSpellId = useSlowMount ? BOT_ALLI_PALLY_MOUNT : BOT_ALLI_PALLY_FAST_MOUNT;
+                            break;
+                        case BOT_CLASS_DEATH_KNIGHT:
+                            myMountSpellId = BOT_DEATH_KNIGHT_MOUNT;
+                            break;
+                        default:
+                            break;
+                    }
+                    //Select by race
+                    if (!myMountSpellId)
+                    {
+                        static const MountArray MOUNTS_60_HUMAN = { BOT_MOUNT_HUMAN_60_1, BOT_MOUNT_HUMAN_60_2, BOT_MOUNT_HUMAN_60_3 };
+                        static const MountArray MOUNTS_60_ORC = { BOT_MOUNT_ORC_60_1, BOT_MOUNT_ORC_60_2, BOT_MOUNT_ORC_60_3 };
+                        static const MountArray MOUNTS_60_DWARF = { BOT_MOUNT_DWARF_60_1, BOT_MOUNT_DWARF_60_2, BOT_MOUNT_DWARF_60_3 };
+                        static const MountArray MOUNTS_60_NIGHTELF = { BOT_MOUNT_NIGHTELF_60_1, BOT_MOUNT_NIGHTELF_60_2, BOT_MOUNT_NIGHTELF_60_3 };
+                        static const MountArray MOUNTS_60_FORSAKEN = { BOT_MOUNT_FORSAKEN_60_1, BOT_MOUNT_FORSAKEN_60_2, BOT_MOUNT_FORSAKEN_60_3 };
+                        static const MountArray MOUNTS_60_TAUREN = { BOT_MOUNT_TAUREN_60_1, BOT_MOUNT_TAUREN_60_2, BOT_MOUNT_TAUREN_60_3 };
+                        static const MountArray MOUNTS_60_GNOME = { BOT_MOUNT_GNOME_60_1, BOT_MOUNT_GNOME_60_2, BOT_MOUNT_GNOME_60_3 };
+                        static const MountArray MOUNTS_60_TROLL = { BOT_MOUNT_TROLL_60_1, BOT_MOUNT_TROLL_60_2, BOT_MOUNT_TROLL_60_3 };
+                        static const MountArray MOUNTS_60_BLOODELF = { BOT_MOUNT_BLOODELF_60_1, BOT_MOUNT_BLOODELF_60_2, BOT_MOUNT_BLOODELF_60_3 };
+                        static const MountArray MOUNTS_60_DRAENEI = { BOT_MOUNT_DRAENEI_60_1, BOT_MOUNT_DRAENEI_60_2, BOT_MOUNT_DRAENEI_60_3 };
+
+                        static const MountArray MOUNTS_100_HUMAN = { BOT_MOUNT_HUMAN_100_1, BOT_MOUNT_HUMAN_100_2, BOT_MOUNT_HUMAN_100_3 };
+                        static const MountArray MOUNTS_100_ORC = { BOT_MOUNT_ORC_100_1, BOT_MOUNT_ORC_100_2, BOT_MOUNT_ORC_100_3 };
+                        static const MountArray MOUNTS_100_DWARF = { BOT_MOUNT_DWARF_100_1, BOT_MOUNT_DWARF_100_2, BOT_MOUNT_DWARF_100_3 };
+                        static const MountArray MOUNTS_100_NIGHTELF = { BOT_MOUNT_NIGHTELF_100_1, BOT_MOUNT_NIGHTELF_100_2, BOT_MOUNT_NIGHTELF_100_3 };
+                        static const MountArray MOUNTS_100_FORSAKEN = { BOT_MOUNT_FORSAKEN_100_1, BOT_MOUNT_FORSAKEN_100_2, BOT_MOUNT_FORSAKEN_100_3 };
+                        static const MountArray MOUNTS_100_TAUREN = { BOT_MOUNT_TAUREN_100_1, BOT_MOUNT_TAUREN_100_2, BOT_MOUNT_TAUREN_100_3 };
+                        static const MountArray MOUNTS_100_GNOME = { BOT_MOUNT_GNOME_100_1, BOT_MOUNT_GNOME_100_2, BOT_MOUNT_GNOME_100_3 };
+                        static const MountArray MOUNTS_100_TROLL = { BOT_MOUNT_TROLL_100_1, BOT_MOUNT_TROLL_100_2, BOT_MOUNT_TROLL_100_3 };
+                        static const MountArray MOUNTS_100_BLOODELF = { BOT_MOUNT_BLOODELF_100_1, BOT_MOUNT_BLOODELF_100_2, BOT_MOUNT_BLOODELF_100_3 };
+                        static const MountArray MOUNTS_100_DRAENEI = { BOT_MOUNT_DRAENEI_100_1, BOT_MOUNT_DRAENEI_100_2, BOT_MOUNT_DRAENEI_100_3 };
+
+                        Optional<MountArray> myMounts;
+                        switch (me->GetRace())
+                        {
+                            case RACE_HUMAN:         myMounts = useSlowMount ? MOUNTS_60_HUMAN : MOUNTS_100_HUMAN;       break;
+                            case RACE_ORC:           myMounts = useSlowMount ? MOUNTS_60_ORC : MOUNTS_100_ORC;           break;
+                            case RACE_DWARF:         myMounts = useSlowMount ? MOUNTS_60_DWARF : MOUNTS_100_DWARF;       break;
+                            case RACE_NIGHTELF:      myMounts = useSlowMount ? MOUNTS_60_NIGHTELF : MOUNTS_100_NIGHTELF; break;
+                            case RACE_UNDEAD_PLAYER: myMounts = useSlowMount ? MOUNTS_60_FORSAKEN : MOUNTS_100_FORSAKEN; break;
+                            case RACE_TAUREN:        myMounts = useSlowMount ? MOUNTS_60_TAUREN : MOUNTS_100_TAUREN;     break;
+                            case RACE_GNOME:         myMounts = useSlowMount ? MOUNTS_60_GNOME : MOUNTS_100_GNOME;       break;
+                            case RACE_TROLL:         myMounts = useSlowMount ? MOUNTS_60_TROLL : MOUNTS_100_TROLL;       break;
+                            case RACE_BLOODELF:      myMounts = useSlowMount ? MOUNTS_60_BLOODELF : MOUNTS_100_BLOODELF; break;
+                            case RACE_DRAENEI:       myMounts = useSlowMount ? MOUNTS_60_DRAENEI : MOUNTS_100_DRAENEI;   break;
+                            default:                                                                                     break;
+                        }
+
+                        if (myMounts)
+                            myMountSpellId = (*myMounts)[me->GetEntry() % myMounts->size()];
+                    }
+                }
+                else //if (master->CanFly())
+                {
+                    static const MountArray MOUNTS_150_ALLIANCE = { BOT_MOUNT_FLY_ALLIANCE_150_1, BOT_MOUNT_FLY_ALLIANCE_150_2, BOT_MOUNT_FLY_ALLIANCE_150_3 };
+                    static const MountArray MOUNTS_150_HORDE = { BOT_MOUNT_FLY_HORDE_150_1, BOT_MOUNT_FLY_HORDE_150_2, BOT_MOUNT_FLY_HORDE_150_3 };
+                    static const MountArray MOUNTS_280_ALLIANCE = { BOT_MOUNT_FLY_ALLIANCE_280_1, BOT_MOUNT_FLY_ALLIANCE_280_2, BOT_MOUNT_FLY_ALLIANCE_280_3 };
+                    static const MountArray MOUNTS_280_HORDE = { BOT_MOUNT_FLY_HORDE_280_1, BOT_MOUNT_FLY_HORDE_280_2, BOT_MOUNT_FLY_HORDE_280_3 };
+
+                    Optional<MountArray> myMounts;
+                    if (me->GetRaceMask() & RACEMASK_ALLIANCE)
+                        myMounts = useSlowMount ? MOUNTS_150_ALLIANCE : MOUNTS_280_ALLIANCE;
+                    else if (me->GetRaceMask() & RACEMASK_HORDE)
+                        myMounts = useSlowMount ? MOUNTS_150_HORDE : MOUNTS_280_HORDE;
+
+                    if (myMounts)
+                        myMountSpellId = (*myMounts)[me->GetEntry() % myMounts->size()];
+                }
+            }
         }
-        if (mount)
+
+        if (!myMountSpellId) // shouldn't happen normally
+        {
+            if (mountSpellId)
+                myMountSpellId = mountSpellId;
+            else if (!mounts.empty())
+                myMountSpellId = mounts.front()->GetId();
+        }
+
+        if (myMountSpellId)
         {
             if (me->HasAuraType(SPELL_AURA_MOUNTED))
                 me->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-            //lookup mount speed based on mount ID, defaulting to 0 so it reverts to old behavior if not found
-            uint32 mountSpeed = 0;
-            Aura *mountSpeedAura = master->GetAura(mount);
-            if (mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_0)->GetAuraType() == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
-                mountSpeed = mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_0)->GetAmount();
-            else if (mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_1)->GetAuraType() == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
-                mountSpeed = mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_1)->GetAmount();
-            else if (mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_2)->GetAuraType() == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
-                mountSpeed = mountSpeedAura->GetEffect(AFLAG_EFF_INDEX_2)->GetAmount();
-
-            //if not flying mount, and not in AQ40, and speed makes sense, get class specific mounts
-            if (!master->CanFly() && me->GetMapId() != 531 && (mountSpeed < 130 && mountSpeed > 30))
-            {
-                switch (me->GetBotClass())
-                {
-                    case BOT_CLASS_DARK_RANGER:
-                        mount = BOT_DARK_RANGER_MOUNT;
-                        break;
-                    case BOT_CLASS_WARLOCK:
-                        if (mountSpeed<80) { mount = BOT_WARLOCK_MOUNT; }
-                        else { mount = BOT_WARLOCK_FAST_MOUNT; }
-                        break;
-                    case BOT_CLASS_PALADIN:
-                        if (me->GetRace()==RACE_BLOODELF)
-                        {
-                            if (mountSpeed<80) { mount = BOT_BE_PALLY_MOUNT; }
-                            else { mount = BOT_BE_PALLY_FAST_MOUNT; }
-                        }
-                        else
-                        {
-                            if (mountSpeed<80) { mount = BOT_ALLI_PALLY_MOUNT; }
-                            else { mount = BOT_ALLI_PALLY_FAST_MOUNT; }
-                        }
-                        break;
-                    case BOT_CLASS_DEATH_KNIGHT:
-                        mount = BOT_DEATH_KNIGHT_MOUNT;
-                        break;
-                    default:
-                        break;
-                }
-            }
 
             //me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
 
@@ -4978,7 +5059,7 @@ void bot_ai::_updateMountedState()
             me->BotStopMovement();
             if (_botclass == BOT_CLASS_DRUID && me->GetShapeshiftForm() != FORM_NONE)
                 removeShapeshiftForm();
-            if (doCast(me, mount))
+            if (doCast(me, myMountSpellId))
             { }
 
             //RemoveSpell(mount);

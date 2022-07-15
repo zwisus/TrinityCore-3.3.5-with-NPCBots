@@ -48,9 +48,6 @@ enum BotSpells : uint32
     RACIAL_GIFT_OF_NAARU_DEATHKNIGHT    = 59545,
     RACIAL_GIFT_OF_NAARU_SHAMAN         = 59547,
     RACIAL_GIFT_OF_NAARU_MAGE           = 59548,
-//COMMON MOUNTS SPELLS
-    REINDEER                            = 25859,
-    REINDEER_FLY                        = 44827,
 //ADVANCED
     //HONORLESS_TARGET                    = 2479,
     COSMETIC_TELEPORT_EFFECT            = 52096,//visual instant cast omni
@@ -150,5 +147,101 @@ enum BotSpells : uint32
   //unmodify
     SPELL_TORNADO_LIGHTNING_VISUAL      = 45869, //periodic, 1 sec
 };
+
+enum BotMountSpells : uint32
+{
+    //By game events
+    REINDEER                            = 25859,
+    REINDEER_FLY                        = 44827,
+    //AQ40
+    QIRAJI_BATTLE_TANK_1                = 25953,
+    QIRAJI_BATTLE_TANK_2                = 26054,
+    QIRAJI_BATTLE_TANK_3                = 26055,
+    QIRAJI_BATTLE_TANK_4                = 26056,
+    //By class
+    BOT_DARK_RANGER_MOUNT               = 17481, // Deathcharger's Reins
+    BOT_BE_PALLY_FAST_MOUNT             = 34767,
+    BOT_BE_PALLY_MOUNT                  = 34769,
+    BOT_ALLI_PALLY_FAST_MOUNT           = 23214,
+    BOT_ALLI_PALLY_MOUNT                = 13819,
+    BOT_DEATH_KNIGHT_MOUNT              = 48778,
+    BOT_WARLOCK_FAST_MOUNT              = 23161,
+    BOT_WARLOCK_MOUNT                   = 5784,
+    //By race
+    BOT_MOUNT_HUMAN_60_1                = 458,
+    BOT_MOUNT_HUMAN_60_2                = 468,
+    BOT_MOUNT_HUMAN_60_3                = 470,
+    BOT_MOUNT_ORC_60_1                  = 459,
+    BOT_MOUNT_ORC_60_2                  = 578,
+    BOT_MOUNT_ORC_60_3                  = 579,
+    BOT_MOUNT_DWARF_60_1                = 6777,
+    BOT_MOUNT_DWARF_60_2                = 6896,
+    BOT_MOUNT_DWARF_60_3                = 6897,
+    BOT_MOUNT_NIGHTELF_60_1             = 8394,
+    BOT_MOUNT_NIGHTELF_60_2             = 10787,
+    BOT_MOUNT_NIGHTELF_60_3             = 10789,
+    BOT_MOUNT_FORSAKEN_60_1             = 8980,
+    BOT_MOUNT_FORSAKEN_60_2             = 17462,
+    BOT_MOUNT_FORSAKEN_60_3             = 17463,
+    BOT_MOUNT_TAUREN_60_1               = 18363,
+    BOT_MOUNT_TAUREN_60_2               = 18989,
+    BOT_MOUNT_TAUREN_60_3               = 18990,
+    BOT_MOUNT_GNOME_60_1                = 10873,
+    BOT_MOUNT_GNOME_60_2                = 10969,
+    BOT_MOUNT_GNOME_60_3                = 15780,
+    BOT_MOUNT_TROLL_60_1                = 8395,
+    BOT_MOUNT_TROLL_60_2                = 10795,
+    BOT_MOUNT_TROLL_60_3                = 10796,
+    BOT_MOUNT_BLOODELF_60_1             = 34795,
+    BOT_MOUNT_BLOODELF_60_2             = 35018,
+    BOT_MOUNT_BLOODELF_60_3             = 35020,
+    BOT_MOUNT_DRAENEI_60_1              = 34406,
+    BOT_MOUNT_DRAENEI_60_2              = 35710,
+    BOT_MOUNT_DRAENEI_60_3              = 35711,
+    BOT_MOUNT_HUMAN_100_1               = 23227,
+    BOT_MOUNT_HUMAN_100_2               = 23228,
+    BOT_MOUNT_HUMAN_100_3               = 23229,
+    BOT_MOUNT_ORC_100_1                 = 23250,
+    BOT_MOUNT_ORC_100_2                 = 23251,
+    BOT_MOUNT_ORC_100_3                 = 23252,
+    BOT_MOUNT_DWARF_100_1               = 23238,
+    BOT_MOUNT_DWARF_100_2               = 23239,
+    BOT_MOUNT_DWARF_100_3               = 23240,
+    BOT_MOUNT_NIGHTELF_100_1            = 23219,
+    BOT_MOUNT_NIGHTELF_100_2            = 23220,
+    BOT_MOUNT_NIGHTELF_100_3            = 23221,
+    BOT_MOUNT_FORSAKEN_100_1            = 17465,
+    BOT_MOUNT_FORSAKEN_100_2            = 22722,
+    BOT_MOUNT_FORSAKEN_100_3            = 23246,
+    BOT_MOUNT_TAUREN_100_1              = 23247,
+    BOT_MOUNT_TAUREN_100_2              = 23248,
+    BOT_MOUNT_TAUREN_100_3              = 23249,
+    BOT_MOUNT_GNOME_100_1               = 23222,
+    BOT_MOUNT_GNOME_100_2               = 23223,
+    BOT_MOUNT_GNOME_100_3               = 23225,
+    BOT_MOUNT_TROLL_100_1               = 23241,
+    BOT_MOUNT_TROLL_100_2               = 23242,
+    BOT_MOUNT_TROLL_100_3               = 23243,
+    BOT_MOUNT_BLOODELF_100_1            = 35025,
+    BOT_MOUNT_BLOODELF_100_2            = 35027,
+    BOT_MOUNT_BLOODELF_100_3            = 46628,
+    BOT_MOUNT_DRAENEI_100_1             = 35712,
+    BOT_MOUNT_DRAENEI_100_2             = 35713,
+    BOT_MOUNT_DRAENEI_100_3             = 35714,
+    //By Team (flyers)
+    BOT_MOUNT_FLY_ALLIANCE_150_1        = 32235,
+    BOT_MOUNT_FLY_ALLIANCE_150_2        = 32239,
+    BOT_MOUNT_FLY_ALLIANCE_150_3        = 32240,
+    BOT_MOUNT_FLY_HORDE_150_1           = 32243,
+    BOT_MOUNT_FLY_HORDE_150_2           = 32244,
+    BOT_MOUNT_FLY_HORDE_150_3           = 32245,
+    BOT_MOUNT_FLY_ALLIANCE_280_1        = 32242,
+    BOT_MOUNT_FLY_ALLIANCE_280_2        = 32289,
+    BOT_MOUNT_FLY_ALLIANCE_280_3        = 32290,
+    BOT_MOUNT_FLY_HORDE_280_1           = 32246,
+    BOT_MOUNT_FLY_HORDE_280_2           = 32295,
+    BOT_MOUNT_FLY_HORDE_280_3           = 32296
+};
+constexpr std::size_t NUM_MOUNTS_PER_SPEED = 3;
 
 #endif //_BOTSPELL_H
