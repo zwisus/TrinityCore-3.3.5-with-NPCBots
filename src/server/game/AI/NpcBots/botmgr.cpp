@@ -69,6 +69,7 @@ bool _enableclass_spellbreaker;
 bool _enableclass_darkranger;
 bool _enableclass_necromancer;
 bool _enableclass_seawitch;
+bool _enrageOnDismiss;
 bool _botStatLimits;
 float _botStatLimits_dodge;
 float _botStatLimits_parry;
@@ -235,6 +236,7 @@ void BotMgr::LoadConfig(bool reload)
     _enableclass_darkranger         = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.DarkRanger.Enable", true);
     _enableclass_necromancer        = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.Necromancer.Enable", true);
     _enableclass_seawitch           = sConfigMgr->GetBoolDefault("NpcBot.NewClasses.SeaWitch.Enable", true);
+    _enrageOnDismiss                = sConfigMgr->GetBoolDefault("NpcBot.EnrageOnDismiss", true);
     _botStatLimits                  = sConfigMgr->GetBoolDefault("NpcBot.Stats.Limits.Enable", false);
     _botStatLimits_dodge            = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Dodge", 95.0f);
     _botStatLimits_parry            = sConfigMgr->GetFloatDefault("NpcBot.Stats.Limits.Parry", 95.0f);
@@ -384,6 +386,10 @@ bool BotMgr::IsClassEnabled(uint8 m_class)
     }
 }
 
+bool BotMgr::IsEnrageOnDimissEnabled()
+{
+    return _enrageOnDismiss;
+}
 bool BotMgr::IsBotStatsLimitsEnabled()
 {
     return _botStatLimits;

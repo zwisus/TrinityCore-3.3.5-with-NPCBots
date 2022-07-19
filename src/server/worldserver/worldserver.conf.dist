@@ -4423,4 +4423,12 @@ NpcBot.InfoPacketsLimit = -1
 NpcBot.OwnershipExpireTime = 0
 
 #
+#    NpcBot.EnrageOnDismiss
+#        Description: Enable Berserk buff when bot is dismissed and related hostile reaction.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+NpcBot.EnrageOnDismiss = 1
+
+#
 ###################################################################################################

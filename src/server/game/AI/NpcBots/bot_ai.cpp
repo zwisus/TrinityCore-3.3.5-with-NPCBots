@@ -8806,11 +8806,14 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 break;
 
             mgr->RemoveBot(me->GetGUID(), BOT_REMOVE_DISMISS);
-            if (Aura* bers = me->AddAura(BERSERK, me))
+            if (BotMgr::IsEnrageOnDimissEnabled())
             {
-                uint32 dur = 5 * MINUTE * IN_MILLISECONDS;
-                bers->SetDuration(dur);
-                bers->SetMaxDuration(dur);
+                if (Aura* bers = me->AddAura(BERSERK, me))
+                {
+                    uint32 dur = 5 * MINUTE * IN_MILLISECONDS;
+                    bers->SetDuration(dur);
+                    bers->SetMaxDuration(dur);
+                }
             }
             //if (urand(1,100) <= 25)
             //{
