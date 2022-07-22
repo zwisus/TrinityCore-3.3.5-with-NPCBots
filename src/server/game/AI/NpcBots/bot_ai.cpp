@@ -2426,6 +2426,9 @@ void bot_ai::SetStats(bool force)
     }
 
     value *= armor_mod;
+    //Druid armor mods should not affect armor from weapons
+    if (_botclass == BOT_CLASS_DRUID && _stats[BOT_SLOT_MAINHAND][BOT_STAT_MOD_ARMOR] != 0 && armor_mod > 1.f)
+        value -= _stats[BOT_SLOT_MAINHAND][BOT_STAT_MOD_ARMOR] * (armor_mod - 1.f);
     me->SetStatFlatModifier(UNIT_MOD_ARMOR, BASE_VALUE, value);
     me->UpdateArmor(); //buffs will be processed here
 
