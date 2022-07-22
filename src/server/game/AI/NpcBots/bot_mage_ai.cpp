@@ -596,7 +596,8 @@ public:
                 if (doCast(opponent, GetSpell(ARCANE_BLAST_1)))
                     return;
             }
-            if (IsSpellReady(FROSTFIREBOLT, diff) && (_spec == BOT_SPEC_MAGE_FIRE || !GetSpell(ARCANE_BLAST_1)) &&
+            if (IsSpellReady(FROSTFIREBOLT, diff) && (_spec == BOT_SPEC_MAGE_FIRE ||
+                (_spec == BOT_SPEC_MAGE_FROST && (FROSTFIREBOLT == FROSTFIRE_BOLT_1 || !GetSpell(FROSTBOLT_1)))) &&
                 dist < CalcSpellMaxRange(FROSTFIREBOLT))
             {
                 if (doCast(opponent, GetSpell(FROSTFIREBOLT)))
