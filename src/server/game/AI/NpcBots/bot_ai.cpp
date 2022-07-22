@@ -4798,8 +4798,8 @@ bool bot_ai::AdjustTankingPosition(Unit const* mytarget) const
     float x = me->GetPositionX();
     float y = me->GetPositionY();
     float z = me->GetPositionZ();
-    float ori = CCed(opponent, true) ? me->GetOrientation() + 0.75f * M_PI : me->GetOrientation();
-    float const moveDist = -1.f * std::max<float>(opponent->GetCombatReach(), 3.f);
+    float ori = CCed(mytarget, true) ? me->GetOrientation() + 0.75f * M_PI : me->GetOrientation();
+    float const moveDist = -1.f * std::max<float>(mytarget->GetCombatReach(), 3.f);
     float moveX;
     float moveY;
     //bool move = false;
@@ -4833,7 +4833,7 @@ bool bot_ai::AdjustTankingPosition(Unit const* mytarget) const
     if (me->GetPositionZ() < z)
         z += 0.75f; //prevent going underground
 
-    //if (CCed(opponent, true))
+    //if (CCed(mytarget, true))
     //    me->AttackStop();
     //me->SetOrientation(ori);
     Position position;
