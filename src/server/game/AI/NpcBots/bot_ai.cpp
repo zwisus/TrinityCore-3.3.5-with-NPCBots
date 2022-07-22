@@ -8592,8 +8592,20 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                                     SpellEffectInfo const& effect = spellInfo->GetEffect(SpellEffIndex(i));
                                     if (!effect.IsEffect())
                                         continue;
-                                    if (effect.Effect == SPELL_EFFECT_SUMMON || effect.TargetA.GetTarget() != TARGET_UNIT_CASTER || effect.TargetB.GetTarget() != 0)
+                                    if (effect.TargetA.GetTarget() != TARGET_UNIT_CASTER || effect.TargetB.GetTarget() != 0)
                                         valid_effect = false;
+                                    else
+                                    {
+                                        switch (effect.Effect)
+                                        {
+                                            case SPELL_EFFECT_SUMMON:
+                                            case SPELL_EFFECT_CREATE_ITEM:
+                                                valid_effect = false;
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
                                 }
                                 if (!valid_effect)
                                     continue;
