@@ -51,10 +51,10 @@ enum SeaWitchSpecial
     NAGA_SWIM_PASSIVE                   = 40513,
     SPELL_THREAT_MOD                    = 31745, //Salvation
 
-    SPELL_PARALYTIC_POISON              = 35201,
-
-    TORNADO_MIN_TARGETS                 = 4
+    SPELL_PARALYTIC_POISON              = 35201
 };
+
+static constexpr size_t TORNADO_MIN_TARGETS = 4u;
 
 static const uint32 Seawitch_spells_damage_arr[] =
 { FORKED_LIGHTNING_1, FROST_ARROW_1, TORNADO_1 };
