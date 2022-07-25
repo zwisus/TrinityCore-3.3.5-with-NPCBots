@@ -17454,7 +17454,7 @@ void bot_ai::InitBotCustomSpells()
 
     sinfo->SpellFamilyName = SPELLFAMILY_PALADIN;
     sinfo->RangeEntry = sSpellRangeStore.LookupEntry(34); //25 yds
-    sinfo->RecoveryTime = 3000;
+    sinfo->RecoveryTime = 2000;
     sinfo->ManaCost = 75 * 5;
     sinfo->ManaCostPercentage = 0;
     sinfo->ManaCostPerlevel = 0;
