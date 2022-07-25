@@ -32,7 +32,8 @@ enum SpellbreakerSpecial
     FEEDBACK_EFFECT         = SPELL_FEEDBACK,
 
     MH_ATTACK_VISUAL        = SPELL_ATTACK_MELEE_1H,
-    SPELLSTEAL_VISUAL       = 34396 //Zap selfcast
+    SPELLSTEAL_VISUAL       = 34396,// Zap selfcast
+    ENERGY_SYPHON_ENERGIZE  = 27287 // Only for combat log spell message
 };
 
 static const uint32 Spellbreaker_spells_support_arr[] =
@@ -238,18 +239,26 @@ public:
         void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType) override
         {
             //Feedback
-            if (damage && victim != me && damageType == DIRECT_DAMAGE && victim->GetPowerType() == POWER_MANA)
+            if (damage && victim != me && damageType == DIRECT_DAMAGE)
             {
-                if (uint32 burned = std::min<uint32>(victim->GetPower(POWER_MANA), damage + me->GetLevel() * 2))
+                if (victim->GetPowerType() == POWER_MANA && victim->GetMaxPower(POWER_MANA) > 1)
                 {
-                    int32 basepoints = int32(burned);
-                    //reduce amount againts ex bots
-                    if (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->GetBotClass() >= BOT_CLASS_EX_START)
-                        basepoints /= 10;
+                    if (uint32 burned = std::min<uint32>(victim->GetPower(POWER_MANA), damage + me->GetLevel() * 2))
+                    {
+                        int32 basepoints = int32(burned);
+                        //reduce amount againts ex bots
+                        if (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->GetBotClass() >= BOT_CLASS_EX_START)
+                            basepoints /= 10;
 
-                    CastSpellExtraArgs args(true);
-                    args.AddSpellBP0(basepoints);
-                    me->CastSpell(victim, FEEDBACK_EFFECT, args);
+                        CastSpellExtraArgs args(true);
+                        args.AddSpellBP0(basepoints);
+                        me->CastSpell(victim, FEEDBACK_EFFECT, args);
+                    }
+                }
+                else
+                {
+                    me->EnergizeBySpell(me, ENERGY_SYPHON_ENERGIZE, int32(damage / 4), POWER_MANA);
+                    me->SendPlaySpellVisual(524); //mana gain visual
                 }
             }
 
