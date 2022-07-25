@@ -2258,7 +2258,7 @@ void bot_ai::SetStats(bool force)
         case BOT_CLASS_SPELLBREAKER:
             strmult = 5.f; agimult = 0.f; break;
         case BOT_CLASS_DARK_RANGER:
-            strmult = 0.f; agimult = 5.f; break;
+            strmult = 0.f; agimult = 4.f; break;
         case BOT_CLASS_NECROMANCER:
             strmult = 0.f; agimult = 0.f; break;
         case BOT_CLASS_SEA_WITCH:
