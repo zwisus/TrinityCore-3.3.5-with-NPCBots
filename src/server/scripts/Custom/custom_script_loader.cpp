@@ -19,6 +19,12 @@
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
+void AddSC_skip_StarterArea();
+void AddSC_AutoBalance();
+
 void AddCustomScripts()
 {
+    AddSC_skip_StarterArea();
+    // VAS AutoBalance
+    AddSC_AutoBalance();
 }
