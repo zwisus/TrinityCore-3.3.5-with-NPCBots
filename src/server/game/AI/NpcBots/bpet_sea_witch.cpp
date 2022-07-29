@@ -59,7 +59,7 @@ public:
             if (IsSpellReady(ENVELOP_1, diff, false))
             {
                 std::list<Unit*> targets;
-                petOwner->GetBotAI()->HelpGetNearbyTargetsList(targets, 5.f, 1, me);
+                petOwner->GetBotAI()->HelpGetNearbyTargetsList(targets, 10.f, 1, me);
                 if (targets.size() > 2)
                     Trinity::Containers::RandomResize(targets, 2);
                 for (Unit* u : targets)
@@ -70,7 +70,7 @@ public:
             if (IsSpellReady(LIGHTNING_1, diff, false))
             {
                 std::list<Unit*> targets;
-                petOwner->GetBotAI()->HelpGetNearbyTargetsList(targets, 10.f, 0, me);
+                petOwner->GetBotAI()->HelpGetNearbyTargetsList(targets, 15.f, 0, me);
                 if (!targets.empty())
                     me->CastSpell(me, CAMERA_SHAKE_VISUAL, true);
                 for (Unit* u : targets)
