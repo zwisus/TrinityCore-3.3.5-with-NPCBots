@@ -475,7 +475,7 @@ void bot_ai::CheckOwnerExpiry()
                 uint32 itemGuidLow = fields2[11].GetUInt32();
                 uint32 itemId = fields2[12].GetUInt32();
                 Item* item = new Item;
-                ASSERT(item->LoadFromDB(itemGuidLow, ObjectGuid::Empty, fields2, itemId));
+                ASSERT(item->LoadFromDB(itemGuidLow, ownerGuid, fields2, itemId));
                 items.push_back(item);
 
             } while (iiresult->NextRow());
@@ -2258,7 +2258,7 @@ void bot_ai::SetStats(bool force)
         case BOT_CLASS_SPELLBREAKER:
             strmult = 5.f; agimult = 0.f; break;
         case BOT_CLASS_DARK_RANGER:
-            strmult = 0.f; agimult = 5.f; break;
+            strmult = 0.f; agimult = 4.f; break;
         case BOT_CLASS_NECROMANCER:
             strmult = 0.f; agimult = 0.f; break;
         case BOT_CLASS_SEA_WITCH:
@@ -10917,7 +10917,7 @@ bool bot_ai::_equip(uint8 slot, Item* newItem, ObjectGuid::LowType receiver)
 
         master->MoveItemFromInventory(newItem->GetBagSlot(), newItem->GetSlot(), true);
         //Item is removed from inventory table in _updateEquips(slot, newItem);
-        newItem->SetOwnerGUID(ObjectGuid::Empty); //needed to prevent some logs to be sent to master, restored at unequip
+        //newItem->SetOwnerGUID(ObjectGuid::Empty); //needed to prevent some logs to be sent to master, restored at unequip
     }
 
     if (slot <= BOT_SLOT_RANGED)
@@ -17454,7 +17454,7 @@ void bot_ai::InitBotCustomSpells()
 
     sinfo->SpellFamilyName = SPELLFAMILY_PALADIN;
     sinfo->RangeEntry = sSpellRangeStore.LookupEntry(34); //25 yds
-    sinfo->RecoveryTime = 3000;
+    sinfo->RecoveryTime = 2000;
     sinfo->ManaCost = 75 * 5;
     sinfo->ManaCostPercentage = 0;
     sinfo->ManaCostPerlevel = 0;

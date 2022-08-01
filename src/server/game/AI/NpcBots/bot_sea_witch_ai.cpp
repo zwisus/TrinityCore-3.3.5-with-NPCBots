@@ -54,6 +54,8 @@ enum SeaWitchSpecial
     SPELL_PARALYTIC_POISON              = 35201
 };
 
+static constexpr size_t TORNADO_MIN_TARGETS = 4u;
+
 static const uint32 Seawitch_spells_damage_arr[] =
 { FORKED_LIGHTNING_1, FROST_ARROW_1, TORNADO_1 };
 
@@ -250,7 +252,7 @@ public:
             {
                 //Frost Arrow / Autoshot
                 if (IsSpellReady(FROST_ARROW_1, diff) && me->GetPower(POWER_MANA) >= FROSTARROW_COST &&
-                    CanAffectVictim(sSpellMgr->GetSpellInfo(FROST_ARROW_1)->GetSchoolMask()))
+                    !opponent->IsImmunedToDamage(sSpellMgr->GetSpellInfo(FROST_ARROW_1)))
                 {
                     if (doCast(opponent, GetSpell(FROST_ARROW_1)))
                         return;
@@ -268,12 +270,10 @@ public:
             if (!IsSpellReady(TORNADO_1, diff, false) || me->GetPower(POWER_MANA) < TORNADO_COST || Rand() > 50)
                 return false;
 
-            static constexpr size_t TORNADO_MIN_TARGETS = 4u;
-
             std::list<Unit*> targets;
             GetNearbyTargetsList(targets, 40.f, 0);
-            targets.erase(std::remove_if(targets.begin(), targets.end(), [this](Unit const* u) {
-                return u->GetHealth() < me->GetMaxHealth() / 4 * 3;
+            targets.erase(std::remove_if(targets.begin(), targets.end(), [healthThreshold = uint32(me->GetMaxHealth() / 4 * 3)](Unit const* u) {
+                return u->GetHealth() < healthThreshold;
             }), targets.end());
 
             size_t targets_count = (IAmFree() || !master->GetGroup()) ? TORNADO_MIN_TARGETS : std::max<size_t>(master->GetGroup()->GetMemberSlots().size() / 3, TORNADO_MIN_TARGETS);
