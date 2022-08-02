@@ -142,7 +142,7 @@ enum BotSpells : uint32
     SPELL_TORNADO_EFFECT                = 21990, // stun, -resistances
     SPELL_TORNADO_EFFECT2               = 34683, // aoe damage
     SPELL_TORNADO_EFFECT3               = 39261,
-    SPELL_SHOOT_BOW                     = 30221,
+    SPELL_SHOOT_BOW                     = 41188,
   //unmodify
     SPELL_TORNADO_LIGHTNING_VISUAL      = 45869, //periodic, 1 sec
 };

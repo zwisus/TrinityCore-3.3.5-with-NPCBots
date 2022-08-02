@@ -18199,26 +18199,33 @@ void bot_ai::InitBotCustomSpells()
         //43) END TORNADO EFFECT3
 
         //44) SHOOT
-        spellId = SPELL_SHOOT_BOW; //30221
+        spellId = SPELL_SHOOT_BOW; //41188
         sinfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
 
         sinfo->SpellFamilyName = SPELLFAMILY_MAGE;
+        sinfo->DmgClass = SPELL_DAMAGE_CLASS_RANGED;
+        sinfo->PreventionType = SPELL_PREVENTION_TYPE_PACIFY;
+        sinfo->SpellLevel = 1;
+        sinfo->BaseLevel = 1;
         sinfo->CategoryEntry = sSpellCategoryStore.LookupEntry(76);
         sinfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(110); //750ms
         sinfo->RangeEntry = sSpellRangeStore.LookupEntry(35); //0-35 yds
         sinfo->StartRecoveryCategory = 133;
         sinfo->StartRecoveryTime = 750;
         sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
-        sinfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
-        sinfo->Attributes &= ~(SPELL_ATTR0_REQ_AMMO/* | SPELL_ATTR0_ABILITY*/ | SPELL_ATTR0_CAST_TRACK_TARGET);
+        sinfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK/* | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE*/;
+        sinfo->Attributes &= ~(SPELL_ATTR0_REQ_AMMO/* | SPELL_ATTR0_ABILITY*/ | SPELL_ATTR0_CAST_TRACK_TARGET | SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION | SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY);
         sinfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED;
-        sinfo->AttributesEx &= ~(SPELL_ATTR1_CHANNEL_TRACK_TARGET);
+        sinfo->AttributesEx &= ~(SPELL_ATTR1_CHANNEL_TRACK_TARGET | SPELL_ATTR1_NO_THREAT);
         sinfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS;
+        sinfo->AttributesEx2 &= ~(SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS);
         sinfo->AttributesEx3 |= SPELL_ATTR3_UNK15;
 
         sinfo->_effects[0].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
         sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+        sinfo->_effects[0].TargetB = SpellImplicitTargetInfo(0);
         sinfo->_effects[0].BasePoints = 100;
+        sinfo->_effects[0].DieSides = 0;
         sinfo->_effects[0].BonusMultiplier = 1.f;
         //44) END SHOOT
     }
