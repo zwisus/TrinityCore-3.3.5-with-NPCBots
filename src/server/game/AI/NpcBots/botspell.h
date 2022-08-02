@@ -141,7 +141,6 @@ enum BotSpells : uint32
     SPELL_TORNADO                       = 34695,
     SPELL_TORNADO_EFFECT                = 21990, // stun, -resistances
     SPELL_TORNADO_EFFECT2               = 34683, // aoe damage
-    //SPELL_TORNADO_EFFECT3               = 61572, // used by Frostworg 29358 (Sons of Hodir)
     SPELL_TORNADO_EFFECT3               = 39261,
     SPELL_SHOOT_BOW                     = 30221,
   //unmodify
