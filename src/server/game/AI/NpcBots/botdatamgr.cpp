@@ -191,9 +191,10 @@ void BotDataMgr::LoadNpcBots(bool spawn)
         Creature* bot = map->GetCreature(Guid);
         if (!bot) //not in map, use storage
         {
-            typedef std::unordered_multimap<uint32, Creature*>::const_iterator SpawnIter;
+            //TC_LOG_DEBUG("server.loading", "bot %u: spawnId %u, is not in map on load", entry, tableGuid);
+            typedef Map::CreatureBySpawnIdContainer::const_iterator SpawnIter;
             std::pair<SpawnIter, SpawnIter> creBounds = map->GetCreatureBySpawnIdStore().equal_range(tableGuid);
-            if (creBounds.first == map->GetCreatureBySpawnIdStore().cend())
+            if (creBounds.first == creBounds.second)
             {
                 TC_LOG_ERROR("server.loading", "bot %u is not in spawns list, consider re-spawning it!", entry);
                 continue;

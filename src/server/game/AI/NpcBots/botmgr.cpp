@@ -179,7 +179,6 @@ void BotMgr::Initialize()
         return;
 
     BotDataMgr::LoadNpcBots();
-    bot_ai::InitBotCustomSpells();
 }
 
 void BotMgr::ReloadConfig()
@@ -259,6 +258,8 @@ void BotMgr::LoadConfig(bool reload)
         TC_LOG_ERROR("scripts", "BotMgr::LoadConfig: _noDpsTargetIconFlags intersects with targets flags 0x%02X! Removed, new mask: 0x%02X",
             uint32(interFlags), uint32(_noDpsTargetIconFlags));
     }
+
+    bot_ai::InitBotCustomSpells();
 }
 
 uint8 BotMgr::GetNpcBotsCount() const
